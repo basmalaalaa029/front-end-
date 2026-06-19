@@ -477,7 +477,7 @@ export default function JobAgentPage() {
 
   useEffect(() => {
     if (resultsQuery.data?.jobs) {
-      const mapped = resultsQuery.data.jobs.map(toCardJob);
+      const mapped = resultsQuery.data.jobs.slice(0, 10).map(toCardJob);
       setJobs(mapped);
       if (mapped.length && !selected) setSelected(mapped[0]);
     }

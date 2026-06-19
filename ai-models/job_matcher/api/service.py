@@ -13,6 +13,8 @@ from job_matcher.api.session import MatchSession, get_match_session_manager
 
 log = logging.getLogger(__name__)
 
+JOB_MATCH_TOP_N = 10
+
 
 def _why_summary(score: int, title: str, company: str,
                   matched_skills: List[str], missing_skills: List[str]) -> str:
@@ -95,12 +97,12 @@ def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJo
 
     try:
         explainer = RAGExplainer()
-        explainer.explain_batch(profile, ranked, top_n=20)
+        explainer.explain_batch(profile, ranked, top_n=JOB_MATCH_TOP_N)
     except Exception as exc:
         log.warning("RAG explanations failed (%s)", exc)
 
     results: List[MatchedJob] = []
-    for r in ranked:
+    for r in ranked[:JOB_MATCH_TOP_N]:
         score = int(r.get("score", 0))
         title = r.get("title", "")
         company = r.get("company", "")
