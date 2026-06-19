@@ -133,9 +133,11 @@ def build_ats_signals(
     lines.append(f"- Links: {_link_signals(structured, facts)}")
 
     if missing_keywords:
-        lines.append(
-            f"- JD keywords not found in CV text: {', '.join(missing_keywords[:12])} "
-            "(flag only if genuinely absent after checking FULL CV TEXT)"
-        )
+        verified = [k for k in missing_keywords[:12] if k.strip()]
+        if verified:
+            lines.append(
+                f"- JD terms to verify in FULL CV TEXT (heuristic): {', '.join(verified)} "
+                "(only flag if genuinely absent or too weak to find)"
+            )
 
     return "\n".join(lines)

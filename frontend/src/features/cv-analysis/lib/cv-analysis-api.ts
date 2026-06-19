@@ -75,6 +75,10 @@ export async function startAnalysisJob(
     form.append("cv_text", req.cvText);
   }
   form.append("jd_text", req.jobDescription ?? "");
+  const role = req.targetRole?.trim();
+  if (role) {
+    form.append("target_role", role);
+  }
   return cvAgentFetch<AnalysisStartResponse>("/cv-analysis/analyze", {
     method: "POST",
     body: form,
@@ -115,6 +119,7 @@ async function pollUntilComplete(
           targetRole: opts.targetRole,
           company: opts.company,
           jobDescription: opts.jobDescription,
+          cvText: opts.cvText,
         });
       }
       if (status.status === "failed") {

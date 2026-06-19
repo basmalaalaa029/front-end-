@@ -69,13 +69,13 @@ export interface CvAnalysisResult {
   improvement_suggestions: string[];
   rewrite_suggestions: string[];
   issues?: AnalysisIssue[];
-  keyword_coverage: KeywordCoverage[];
+  keyword_coverage?: KeywordCoverage[];
   section_critiques: SectionCritique[];
-  jd_keywords: string[];
+  jd_keywords?: string[];
   missing_keywords?: string[];
   extraction_word_count?: number;
   sections_detected?: string[];
-  latency_ms: number;
+  latency_ms?: number;
   analysis_mode: "ensemble";
 }
 

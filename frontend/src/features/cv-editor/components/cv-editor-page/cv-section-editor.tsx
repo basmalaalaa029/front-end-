@@ -23,7 +23,21 @@ function SkillsEditor({ data, setData }: { data: CvData; setData: Dispatch<SetSt
   };
 
   const removeSkill = (idx: number) =>
-    setData((d) => ({ ...d, skills: d.skills.filter((_, i) => i !== idx) }));
+    setData((d) => {
+      const removed = d.skills[idx];
+      const skills = d.skills.filter((_, i) => i !== idx);
+      let skillsByCategory = d.skillsByCategory;
+      if (skillsByCategory && removed) {
+        const needle = removed.toLowerCase();
+        const next: Record<string, string[]> = {};
+        for (const [key, items] of Object.entries(skillsByCategory)) {
+          const filtered = items.filter((s) => s.toLowerCase() !== needle);
+          if (filtered.length) next[key] = filtered;
+        }
+        skillsByCategory = Object.keys(next).length ? next : undefined;
+      }
+      return { ...d, skills, skillsByCategory };
+    });
 
   const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {

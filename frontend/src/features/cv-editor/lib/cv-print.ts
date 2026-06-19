@@ -188,34 +188,83 @@ function buildEducation(d: CvData): string {
   return `<div class="section"><div class="section-title">Education</div>${rows.join("")}</div>`;
 }
 
+function formatSkillCategoryLabel(key: string): string {
+  const labels: Record<string, string> = {
+    frontend: "Frontend",
+    backend: "Backend",
+    databases: "Databases",
+    tools: "Tools",
+    cloud: "Cloud",
+    soft_skills: "Soft Skills",
+  };
+  if (labels[key]) return labels[key];
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+const SKILL_CATEGORY_ORDER = [
+  "frontend",
+  "backend",
+  "databases",
+  "tools",
+  "cloud",
+  "soft_skills",
+];
+
+function sortSkillCategories(entries: [string, string[]][]): [string, string[]][] {
+  return [...entries].sort(([a], [b]) => {
+    const ia = SKILL_CATEGORY_ORDER.indexOf(a);
+    const ib = SKILL_CATEGORY_ORDER.indexOf(b);
+    if (ia === -1 && ib === -1) return a.localeCompare(b);
+    if (ia === -1) return 1;
+    if (ib === -1) return -1;
+    return ia - ib;
+  });
+}
+
 function buildSkills(d: CvData): string {
   const categories = d.skillsByCategory;
+  const shown = new Set<string>();
+  const rows: string[] = [];
+
   if (categories && Object.keys(categories).length) {
-    const labels: Record<string, string> = {
-      frontend: "Frontend",
-      backend: "Backend",
-      databases: "Databases",
-      tools: "Tools",
-      cloud: "Cloud",
-    };
-    const rows = Object.entries(labels)
-      .map(([key, label]) => {
-        const items = (categories[key] ?? []).filter((s) => s.trim());
-        if (!items.length) return "";
-        return `<div class="skill-category" style="margin-bottom:6px;font-size:10pt;line-height:1.5;">
-          <span style="font-weight:600;">${e(label)}:</span> ${items.map((s) => e(s)).join(", ")}
-        </div>`;
-      })
-      .filter(Boolean)
-      .join("");
-    if (!rows) return "";
-    return `<div class="section"><div class="section-title">Skills</div>${rows}</div>`;
+    const entries = sortSkillCategories(
+      Object.entries(categories).filter(
+        ([, items]) => Array.isArray(items) && items.some((s) => s.trim()),
+      ),
+    );
+
+    for (const [key, items] of entries) {
+      const cleaned = items.map((s) => s.trim()).filter(Boolean);
+      if (!cleaned.length) continue;
+      cleaned.forEach((s) => shown.add(s.toLowerCase()));
+      const label = formatSkillCategoryLabel(key);
+      rows.push(
+        `<div class="skill-category" style="margin-bottom:6px;font-size:10pt;line-height:1.5;">
+          <span style="font-weight:600;">${e(label)}:</span> ${cleaned.map((s) => e(s)).join(", ")}
+        </div>`,
+      );
+    }
   }
 
-  const skills = d.skills.filter((s) => s.trim());
-  if (!skills.length) return "";
-  const tags = skills.map((s) => `<span class="skill-tag">${e(s)}</span>`).join("");
-  return `<div class="section"><div class="section-title">Skills</div><div class="skills-list">${tags}</div></div>`;
+  const uncategorized = d.skills
+    .map((s) => s.trim())
+    .filter((s) => s && !shown.has(s.toLowerCase()));
+
+  if (uncategorized.length) {
+    const tags = uncategorized.map((s) => `<span class="skill-tag">${e(s)}</span>`).join("");
+    rows.push(`<div class="skills-list" style="margin-top:6px;">${tags}</div>`);
+  }
+
+  if (!rows.length) {
+    const skills = d.skills.filter((s) => s.trim());
+    if (!skills.length) return "";
+    const tags = skills.map((s) => `<span class="skill-tag">${e(s)}</span>`).join("");
+    return `<div class="section"><div class="section-title">Skills</div><div class="skills-list">${tags}</div></div>`;
+  }
+
+  return `<div class="section"><div class="section-title">Skills</div>${rows.join("")}</div>`;
 }
 
 function buildProjects(d: CvData): string {

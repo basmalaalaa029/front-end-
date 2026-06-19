@@ -86,11 +86,24 @@ def _parse_json_response(text: str) -> dict:
 
 
 def _build_user_message(user_input: dict) -> str:
+    has_exp = user_input.get("has_experience", True)
+    experience_note = (
+        "Candidate HAS work experience — extract skills from roles and projects."
+        if has_exp
+        else (
+            "Candidate has NO work experience — build a strong skills section from "
+            "their degree, projects, certifications, and target job. Include a "
+            "soft_skills category (communication, teamwork, problem solving, etc.) "
+            "to make the CV engaging for recruiters."
+        )
+    )
     return f"""
 Create a complete professional ATS-optimized CV from
 this candidate information:
 
 Target Job Title: {user_input.get("target_job", "Not specified")}
+Has work experience: {has_exp}
+{experience_note}
 
 PERSONAL INFO:
 Name: {user_input.get("full_name")}
@@ -107,9 +120,6 @@ EDUCATION:
 EXPERIENCE:
 {json.dumps(user_input.get("experience", []), indent=2)}
 
-SKILLS (if empty, extract from experience):
-{json.dumps(user_input.get("skills", []), indent=2)}
-
 PROJECTS:
 {json.dumps(user_input.get("projects", []), indent=2)}
 
@@ -123,10 +133,13 @@ EXISTING SUMMARY NOTES (rewrite professionally):
 {user_input.get("summary_notes", "")}
 
 INSTRUCTIONS:
-- If skills list is empty → extract from experience and projects
+- ENHANCE the candidate's content — do not discard their input.
+- Preserve personal_info exactly from the candidate (name, email, phone, links).
+- Keep every education / experience / project row; only improve bullet wording.
+- YOU write the full skills section (technical categories + soft_skills).
 - Write a professional summary targeting:
   {user_input.get("target_job", "a general tech role")}
-- Optimize all content for ATS keyword matching
+- Optimize wording for ATS keyword matching
 - Return complete CV as JSON
 """.strip()
 

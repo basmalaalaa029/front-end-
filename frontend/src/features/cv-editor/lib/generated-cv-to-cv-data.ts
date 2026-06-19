@@ -1,5 +1,5 @@
 import type { CvData } from "@/features/cv-editor/data/cv-types";
-import type { GeneratedCv } from "@/features/cv-editor/components/cv-wizard/types";
+import type { GeneratedCv, WizardStep1Data } from "@/features/cv-editor/components/cv-wizard/types";
 
 const trim = (v: string | undefined): string => (v ?? "").trim();
 
@@ -78,5 +78,71 @@ export function generatedCvToCvData(cv: GeneratedCv, targetJob: string): CvData 
       };
     }),
     certifications: (cv.certifications ?? []).map((c) => trim(String(c))).filter(Boolean),
+  };
+}
+
+/** Prefer wizard facts when the model omits or blanks a field. */
+export function mergeWizardWithGeneratedCv(
+  wizard: WizardStep1Data,
+  cv: GeneratedCv,
+): CvData {
+  const mapped = generatedCvToCvData(
+    { ...cv, target_title: cv.target_title || wizard.target_job },
+    wizard.target_job,
+  );
+
+  const wizardEducation = wizard.education
+    .filter((e) => e.degree.trim() || e.university.trim())
+    .map((e) => ({
+      degree: e.degree.trim(),
+      university: e.university.trim(),
+      startDate: "",
+      endDate: e.year.trim(),
+      gpa: e.gpa.trim(),
+    }));
+
+  const wizardExperience = wizard.has_experience
+    ? wizard.experience
+        .filter((e) => e.job_title.trim() || e.company.trim())
+        .map((e) => ({
+          title: e.job_title.trim(),
+          company: e.company.trim(),
+          location: "",
+          dates: [e.start_date.trim(), e.end_date.trim()].filter(Boolean).join(" — "),
+          bullets: e.description.trim()
+            ? e.description
+                .split("\n")
+                .map((ln) => ln.trim())
+                .filter(Boolean)
+            : [],
+        }))
+    : [];
+
+  const wizardProjects = wizard.projects
+    .filter((p) => p.name.trim() || p.description.trim())
+    .map((p) => ({
+      title: p.name.trim(),
+      description: p.description.trim(),
+      bullets: undefined as string[] | undefined,
+    }));
+
+  const wizardCerts = wizard.certifications.map((c) => c.trim()).filter(Boolean);
+  const linkedin = wizard.linkedin.trim();
+  const github = wizard.github.trim();
+
+  return {
+    ...mapped,
+    name: mapped.name || wizard.full_name.trim(),
+    role: mapped.role || wizard.target_job.trim(),
+    email: mapped.email || wizard.email.trim(),
+    phone: mapped.phone || wizard.phone.trim(),
+    address: mapped.address || wizard.location.trim(),
+    url: mapped.url || linkedin || github,
+    education: mapped.education.length ? mapped.education : wizardEducation,
+    experience: mapped.experience.length ? mapped.experience : wizardExperience,
+    projects: mapped.projects.length ? mapped.projects : wizardProjects,
+    certifications: mapped.certifications.length
+      ? [...new Set([...wizardCerts, ...mapped.certifications])]
+      : wizardCerts,
   };
 }

@@ -14,6 +14,7 @@ from cv_generator.pdf_export import export_pdf_bytes
 from cv_generator.services.cv_generator import build_template_result, run_enhancement_sync
 from cv_generator.services.gemini_service import generate_cv_from_info
 from cv_generator.services.template_service import fill_template
+from cv_generator.validation import merge_enhancement
 from starlette.requests import Request
 
 if TYPE_CHECKING:
@@ -110,10 +111,10 @@ def register_cv_routes(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="full_name and target_job are required.",
             )
-        if not cv_data.education and not cv_data.experience:
+        if not cv_data.education and not cv_data.experience and not cv_data.projects:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="Provide at least education or experience.",
+                detail="Provide at least education, experience, or projects.",
             )
 
         req_cfg = PipelineConfig()
@@ -130,9 +131,8 @@ def register_cv_routes(
                 status_code=status.HTTP_502_BAD_GATEWAY,
                 detail=result.get("message", "CV generation failed"),
             )
-        cv_json = result.get("cv") or {}
-        cv_json["target_title"] = cv_data.target_role
-        return {"status": "success", "cv": cv_json}
+        merged = merge_enhancement(cv_data, result.get("cv") or {})
+        return {"status": "success", "cv": merged.to_generated_cv_json()}
 
     @app.get("/status/{session_id}", response_model=StatusResponse, tags=["cv"])
     async def get_status(session_id: str) -> StatusResponse:

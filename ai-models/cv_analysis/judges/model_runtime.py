@@ -19,9 +19,8 @@ from cv_analysis.config import CVAnalysisConfig, get_cv_analysis_config
 class LlamaCppClient:
     """HTTP client for llama-server /v1/chat/completions."""
 
-    def __init__(self, base_url: str, timeout_s: float = 120.0) -> None:
+    def __init__(self, base_url: str) -> None:
         self.base_url = base_url.rstrip("/")
-        self.timeout_s = timeout_s
 
     def chat(
         self,
@@ -41,7 +40,7 @@ class LlamaCppClient:
         }
         url = f"{self.base_url}/v1/chat/completions"
         t0 = time.perf_counter()
-        with httpx.Client(timeout=self.timeout_s) as client:
+        with httpx.Client(timeout=None) as client:
             resp = client.post(url, json=payload)
             resp.raise_for_status()
             data = resp.json()
@@ -159,7 +158,7 @@ class LlamaServerProcess:
                 cwd=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
             )
             if self._wait_for_health(base_url, timeout_s=180):
-                self._client = LlamaCppClient(base_url, timeout_s=float(cfg.request_timeout_seconds))
+                self._client = LlamaCppClient(base_url)
                 self._ready = True
                 logger.info("[cv_analysis] Judge server ready at %s", base_url)
             else:

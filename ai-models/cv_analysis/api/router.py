@@ -30,6 +30,7 @@ def register_cv_analysis_routes(
         file: Optional[UploadFile] = File(None),
         jd_text: str = Form(""),
         cv_text: str = Form(""),
+        target_role: str = Form("Target role"),
     ) -> AnalysisStartResponse:
         await check_rate_limit(http_request)
 
@@ -45,7 +46,11 @@ def register_cv_analysis_routes(
             return await loop.run_in_executor(
                 pipeline_executor,
                 lambda: start_analysis_job(
-                    file_bytes=body, filename=filename, jd_text=jd_text, cfg=analysis_cfg,
+                    file_bytes=body,
+                    filename=filename,
+                    jd_text=jd_text,
+                    target_role=target_role,
+                    cfg=analysis_cfg,
                 ),
             )
 
@@ -55,7 +60,9 @@ def register_cv_analysis_routes(
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
             pipeline_executor,
-            lambda: start_analysis_job(cv_text=cv_text, jd_text=jd_text, cfg=analysis_cfg),
+            lambda: start_analysis_job(
+                cv_text=cv_text, jd_text=jd_text, target_role=target_role, cfg=analysis_cfg,
+            ),
         )
 
     @app.get("/cv-analysis/analyze/{job_id}", response_model=AnalysisJobResponse, tags=["cv_analysis"])

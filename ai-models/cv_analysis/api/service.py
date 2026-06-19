@@ -20,6 +20,7 @@ def _run_job_background(
     file_bytes: Optional[bytes] = None,
     filename: str = "resume.pdf",
     jd_text: str = "",
+    target_role: str = "Target role",
     cfg: Optional[CVAnalysisConfig] = None,
 ) -> None:
     store = get_job_store(cfg)
@@ -33,6 +34,7 @@ def _run_job_background(
             file_bytes=file_bytes,
             filename=filename,
             job_description=jd_text,
+            target_role=target_role,
             cfg=cfg,
             on_stage=on_stage,
         )
@@ -61,6 +63,7 @@ def start_analysis_job(
     file_bytes: Optional[bytes] = None,
     filename: str = "resume.pdf",
     jd_text: str = "",
+    target_role: str = "Target role",
     cfg: Optional[CVAnalysisConfig] = None,
 ) -> AnalysisStartResponse:
     cfg = cfg or get_cv_analysis_config()
@@ -73,6 +76,7 @@ def start_analysis_job(
             "file_bytes": file_bytes,
             "filename": filename,
             "jd_text": jd_text,
+            "target_role": target_role,
             "cfg": cfg,
         },
         daemon=True,

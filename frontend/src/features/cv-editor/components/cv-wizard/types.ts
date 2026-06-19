@@ -13,6 +13,12 @@ export type WizardExperience = {
   description: string;
 };
 
+export type WizardProject = {
+  name: string;
+  tech_used: string;
+  description: string;
+};
+
 export type WizardStep1Data = {
   full_name: string;
   target_job: string;
@@ -24,6 +30,8 @@ export type WizardStep1Data = {
   education: WizardEducation[];
   experience: WizardExperience[];
   has_experience: boolean;
+  projects: WizardProject[];
+  certifications: string[];
 };
 
 export type GeneratedCvPersonalInfo = {
@@ -94,5 +102,7 @@ export function createEmptyWizardStep1(): WizardStep1Data {
       },
     ],
     has_experience: true,
+    projects: [],
+    certifications: [],
   };
 }

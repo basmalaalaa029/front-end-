@@ -100,6 +100,54 @@ export function Step1BasicInfo({ onNext }: Props) {
     });
   };
 
+  const updateProject =
+    (index: number, field: keyof WizardStep1Data["projects"][number]) =>
+    (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setData((prev) => {
+        const updated = [...prev.projects];
+        updated[index] = { ...updated[index], [field]: e.target.value };
+        return { ...prev, projects: updated };
+      });
+    };
+
+  const updateCertification =
+    (index: number) =>
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setData((prev) => {
+        const updated = [...prev.certifications];
+        updated[index] = e.target.value;
+        return { ...prev, certifications: updated };
+      });
+    };
+
+  const addProject = () => {
+    setData((prev) => ({
+      ...prev,
+      projects: [...prev.projects, { name: "", tech_used: "", description: "" }],
+    }));
+  };
+
+  const removeProject = (index: number) => {
+    setData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index),
+    }));
+  };
+
+  const addCertification = () => {
+    setData((prev) => ({
+      ...prev,
+      certifications: [...prev.certifications, ""],
+    }));
+  };
+
+  const removeCertification = (index: number) => {
+    setData((prev) => ({
+      ...prev,
+      certifications: prev.certifications.filter((_, i) => i !== index),
+    }));
+  };
+
   const canContinue =
     data.full_name.trim() &&
     data.target_job.trim() &&
@@ -278,6 +326,79 @@ export function Step1BasicInfo({ onNext }: Props) {
         ) : (
           <p className="hint-text">{t("cvEditor.wizard.noExperienceHint")}</p>
         )}
+      </section>
+
+      <section className="form-section">
+        <h3>
+          <HubIcon name="folder-open" size={16} stroke={2} />
+          {t("cvEditor.sections.projects")}
+        </h3>
+        <p className="hint-text">{t("cvEditor.wizard.projectsOptional")}</p>
+        {data.projects.map((proj, i) => (
+          <div className="repeatable-block" key={i}>
+            <div className="form-row">
+              <input
+                placeholder={t("cvEditor.placeholders.projectTitle")}
+                value={proj.name}
+                onChange={updateProject(i, "name")}
+              />
+              <input
+                placeholder={t("cvEditor.wizard.techUsedOptional")}
+                value={proj.tech_used}
+                onChange={updateProject(i, "tech_used")}
+              />
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label={t("cvEditor.wizard.removeProject")}
+                onClick={() => removeProject(i)}
+              >
+                <HubIcon name="trash-2" size={16} stroke={2} />
+              </button>
+            </div>
+            <textarea
+              placeholder={t("cvEditor.placeholders.projectDesc")}
+              value={proj.description}
+              onChange={updateProject(i, "description")}
+              rows={3}
+            />
+          </div>
+        ))}
+        <button type="button" className="add-btn" onClick={addProject}>
+          <HubIcon name="plus" size={14} stroke={2} />
+          {t("cvEditor.addProject")}
+        </button>
+      </section>
+
+      <section className="form-section">
+        <h3>
+          <HubIcon name="award" size={16} stroke={2} />
+          {t("cvEditor.sections.certifications")}
+        </h3>
+        <p className="hint-text">{t("cvEditor.wizard.certificationsOptional")}</p>
+        {data.certifications.map((cert, i) => (
+          <div className="repeatable-block" key={i}>
+            <div className="form-row">
+              <input
+                placeholder={t("cvEditor.placeholders.certification")}
+                value={cert}
+                onChange={updateCertification(i)}
+              />
+              <button
+                type="button"
+                className="icon-btn"
+                aria-label={t("cvEditor.wizard.removeCertification")}
+                onClick={() => removeCertification(i)}
+              >
+                <HubIcon name="trash-2" size={16} stroke={2} />
+              </button>
+            </div>
+          </div>
+        ))}
+        <button type="button" className="add-btn" onClick={addCertification}>
+          <HubIcon name="plus" size={14} stroke={2} />
+          {t("cvEditor.addCertification")}
+        </button>
       </section>
 
       <div className="step-footer">

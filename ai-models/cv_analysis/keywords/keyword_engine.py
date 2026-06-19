@@ -38,6 +38,11 @@ def _is_keyword_present(cv_lower: str, raw: str) -> bool:
     return False
 
 
+def keyword_absent_from_cv(cv_text: str, raw: str) -> bool:
+    """True when a JD keyword is not found in CV text (heuristic)."""
+    return not _is_keyword_present(cv_text.lower(), raw)
+
+
 def match_keywords(cv_text: str, jd_context: JDContext, *, limit: int = 30) -> KeywordMatchResult:
     """Extract JD keywords, compute coverage rows and missing keyword list."""
     keywords = list(

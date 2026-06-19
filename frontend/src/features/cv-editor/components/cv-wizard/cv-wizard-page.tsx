@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import { HubIcon } from "@/features/hub-shell";
 import { isTemplateId, type TemplateId } from "@/features/cv-editor/data/cv-templates";
-import { generatedCvToCvData } from "@/features/cv-editor/lib/generated-cv-to-cv-data";
+import { mergeWizardWithGeneratedCv } from "@/features/cv-editor/lib/generated-cv-to-cv-data";
 import type { CvData } from "@/features/cv-editor/data/cv-types";
 import { Step1BasicInfo } from "./step1-basic-info";
 import { Step2Generating } from "./step2-generating";
@@ -33,8 +33,8 @@ export default function CvWizardPage() {
   };
 
   const handleGenerationComplete = (cv: GeneratedCv) => {
-    const targetJob = basicInfo?.target_job ?? cv.target_title ?? "";
-    const mapped = generatedCvToCvData(cv, targetJob);
+    if (!basicInfo) return;
+    const mapped = mergeWizardWithGeneratedCv(basicInfo, cv);
     setGeneratedCv(cv);
     setCvData(mapped);
     setStep(3);

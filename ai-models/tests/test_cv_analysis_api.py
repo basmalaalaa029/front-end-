@@ -27,25 +27,6 @@ Python, FastAPI, PostgreSQL, Docker
 ### BSc Computer Science — MIT (2016–2020)
 """
 
-MOCK_RESULT = {
-    "cv_inventory": "Jane Doe — Backend engineer",
-    "ats_signals": "ATS SIGNALS",
-    "keyword_coverage": {"coverage": [], "missing_keywords": [], "jd_keywords": []},
-    "analysis": {
-        "ats": {"overall_score": 75, "clarity_score": 75, "structure_score": 75,
-                "impact_score": 75, "skills_relevance_score": 75, "ats_readiness_score": 75,
-                "strengths": [], "weaknesses": [], "improvement_suggestions": [], "rewrite_suggestions": []},
-        "hr": {"overall_score": 76, "clarity_score": 76, "structure_score": 76,
-               "impact_score": 76, "skills_relevance_score": 76, "ats_readiness_score": 76,
-               "strengths": [], "weaknesses": [], "improvement_suggestions": [], "rewrite_suggestions": []},
-        "blended": {"overall_score": 75, "clarity_score": 75, "structure_score": 75,
-                    "impact_score": 75, "skills_relevance_score": 75, "ats_readiness_score": 75,
-                    "strengths": [], "weaknesses": [], "improvement_suggestions": [], "rewrite_suggestions": []},
-    },
-    "latency_ms": 100,
-}
-
-
 def test_start_analysis_job_returns_job_id():
     cfg = CVAnalysisConfig(mock_inference=True)
     with patch("cv_analysis.api.service._run_job_background"):
@@ -79,5 +60,55 @@ def test_pipeline_mock_inference(monkeypatch):
 
     from cv_analysis.pipeline import run_analysis_pipeline
     result = run_analysis_pipeline(cv_text=SAMPLE_CV)
-    assert "analysis" in result
-    assert result["analysis"]["ats"]["overall_score"] >= 0
+    assert "ats" in result
+    assert "hr" in result
+    assert result["ats"]["overall_score"] >= 0
+    assert "cv_inventory" not in result
+    assert "analysis" not in result
+
+
+def test_target_role_reaches_judge_prompt(monkeypatch):
+    monkeypatch.setenv("CV_ANALYSIS_MOCK_INFERENCE", "true")
+    from cv_analysis.config import reset_config_cache
+    reset_config_cache()
+
+    from cv_analysis.judges.cache import get_cache
+    from cv_analysis.judges.model_runtime import get_analysis_runtime
+    from cv_analysis.judges.queue import inference_queue
+    from cv_analysis.pipeline import run_analysis_pipeline
+
+    get_cache().clear()
+    runtime = get_analysis_runtime()
+    runtime.start()
+    inference_queue.mark_ready()
+    inference_queue.start()
+
+    prompts: list[str] = []
+
+    def _capture_chat(_pipe, system, user, temperature=None):
+        prompts.append(user)
+        from cv_analysis.judges.model_runtime import MockLlamaClient
+        return MockLlamaClient().chat(system, user)
+
+    monkeypatch.setattr("cv_analysis.judges.llm_analysis.judge_chat", _capture_chat)
+
+    run_analysis_pipeline(cv_text=SAMPLE_CV, target_role="Data Scientist")
+    assert prompts
+    assert "Target role: Data Scientist" in prompts[0]
+
+    prompts.clear()
+    get_cache().clear()
+    run_analysis_pipeline(cv_text=SAMPLE_CV, target_role="Product Manager")
+    assert prompts
+    assert "Target role: Product Manager" in prompts[0]
+
+
+def test_judge_cache_varies_by_target_role():
+    from cv_analysis.judges.cache import LRUCache
+    from cv_analysis.judges.utils import jd_hash
+    from hashlib import md5
+
+    cv_hash = md5(b"cv").hexdigest()[:12]
+    key_a = LRUCache.make_key(cv_hash, jd_hash("Data Scientist|"), 0, "combined-judge", namespace="judge")
+    key_b = LRUCache.make_key(cv_hash, jd_hash("Product Manager|"), 0, "combined-judge", namespace="judge")
+    assert key_a != key_b

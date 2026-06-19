@@ -35,18 +35,11 @@ class CVAnalysisConfig(BaseSettings):
     gguf_dir: str = Field(default_factory=lambda: os.getenv("GGUF_DIR", "models/gguf"))
 
     max_concurrent_inferences: int = 1
-    request_timeout_seconds: int = 120
     judge_max_tokens: int = 1200
     judge_max_retries: int = 3
-    judge_submit_timeout_s: int = 900
 
-    enforce_score_ceilings: bool = True
-    enforce_dedup: bool = True
     job_ttl_seconds: int = 3600
     job_max_sessions: int = 200
-
-    ats_weight: float = 0.40
-    hr_weight: float = 0.35
 
     ontology_path: str = Field(default_factory=lambda: os.getenv("ONTOLOGY_PATH", ""))
     embedding_model: str = "all-MiniLM-L6-v2"

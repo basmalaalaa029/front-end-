@@ -103,7 +103,6 @@ function ScoreHero({ result }: { result: CvAnalysisResult }) {
   const R = 38;
   const C = 2 * Math.PI * R;
   const off = C - (score / 100) * C;
-  const wordCount = result.extraction_word_count ?? 0;
 
   return (
     <div className="score-hero">
@@ -158,37 +157,6 @@ function ScoreHero({ result }: { result: CvAnalysisResult }) {
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ExtractionSummary({ result }: { result: CvAnalysisResult }) {
-  const { t } = useI18n();
-  const wordCount = result.extraction_word_count;
-  const sections = result.sections_detected ?? [];
-
-  if (!wordCount && sections.length === 0) return null;
-
-  return (
-    <div className="extraction-panel">
-      <h4>{t("analysis.extractionTitle")}</h4>
-      {wordCount ? (
-        <p className="meta">{t("analysis.extractionWords", { count: String(wordCount) })}</p>
-      ) : null}
-      {sections.length > 0 ? (
-        <>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-tertiary)", marginBottom: 6 }}>
-            {t("analysis.sectionsDetected")}
-          </div>
-          <div className="section-chips">
-            {sections.map((section) => (
-              <span key={section} className="section-chip">
-                {section.replace(/_/g, " ")}
-              </span>
-            ))}
-          </div>
-        </>
-      ) : null}
     </div>
   );
 }
@@ -250,7 +218,7 @@ function resolveIssues(result: CvAnalysisResult): AnalysisIssue[] {
     recommendation:
       recommendation || "Update that part of your CV, then run the analysis again.",
     rewrite: rewrite || undefined,
-    severity: (i < 2 ? "gap" : "warn") as const,
+    severity: i < 2 ? "gap" : "warn",
   }));
 }
 
@@ -366,74 +334,6 @@ function IssuesRecommendations({ result }: { result: CvAnalysisResult }) {
           ))}
         </section>
       ) : null}
-    </div>
-  );
-}
-
-function GapMatrix({
-  rows,
-  targetLabel,
-  missingKeywords = [],
-}: {
-  rows: { name: string; coverage: number }[];
-  targetLabel: string;
-  missingKeywords?: string[];
-}) {
-  const { t } = useI18n();
-
-  return (
-    <div className="card" style={{ marginTop: 18 }}>
-      <div
-        style={{
-          padding: "14px 18px",
-          borderBottom: "1px solid var(--border-subtle)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 600 }}>Keyword & skill coverage</h3>
-        <span style={{ fontSize: 12, color: "var(--fg-tertiary)" }}>{targetLabel}</span>
-      </div>
-      <div>
-        {rows.length === 0 ? (
-          <p style={{ padding: 16, fontSize: 13, color: "var(--fg-tertiary)" }}>
-            Add a job description to see keyword coverage.
-          </p>
-        ) : (
-          rows.map((r) => {
-            const color =
-              r.coverage >= 70
-                ? "var(--moss-500)"
-                : r.coverage >= 40
-                  ? "var(--amber-500)"
-                  : "var(--rust-500)";
-            return (
-              <div key={r.name} className="gap-row">
-                <div className="name">{r.name}</div>
-                <div className="bar">
-                  <i style={{ width: `${r.coverage}%`, background: color }} />
-                </div>
-                <div className="pct">{r.coverage}%</div>
-              </div>
-            );
-          })
-        )}
-      </div>
-      <div className="missing-kw-block">
-        <h4>{t("analysis.missingKeywordsTitle")}</h4>
-        {missingKeywords.length === 0 ? (
-          <p className="missing-kw-empty">{t("analysis.missingKeywordsEmpty")}</p>
-        ) : (
-          <div className="missing-kw-list">
-            {missingKeywords.map((kw) => (
-              <span key={kw} className="missing-kw-tag">
-                {kw}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -962,12 +862,6 @@ export default function AnalysisPage() {
             <div className="analysis-grid">
               <div>
                 <ScoreHero result={result} />
-                <ExtractionSummary result={result} />
-                <GapMatrix
-                  rows={result.keyword_coverage}
-                  targetLabel={targetLabel}
-                  missingKeywords={result.missing_keywords ?? []}
-                />
               </div>
               <div>
                 <IssuesRecommendations result={result} />

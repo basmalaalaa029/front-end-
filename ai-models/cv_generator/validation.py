@@ -50,18 +50,16 @@ def _collect_source_metrics(cv: CVData) -> set[str]:
 
 
 def categorize_skills_field(skills_field: Any) -> Optional[Dict[str, List[str]]]:
-    """Extract categorized skills dict from Gemini JSON."""
+    """Extract categorized skills dict from Gemini JSON (all category keys)."""
     if not isinstance(skills_field, dict):
         return None
     out: Dict[str, List[str]] = {}
-    for key in _SKILL_CATEGORIES:
-        items = [
-            str(item).strip()
-            for item in (skills_field.get(key) or [])
-            if str(item).strip()
-        ]
+    for key, raw in skills_field.items():
+        if not isinstance(raw, list):
+            continue
+        items = [str(item).strip() for item in raw if str(item).strip()]
         if items:
-            out[key] = items
+            out[str(key)] = items
     return out or None
 
 
@@ -71,8 +69,10 @@ def flatten_skills_field(skills_field: Any) -> List[str]:
         return [str(s).strip() for s in skills_field if str(s).strip()]
     if isinstance(skills_field, dict):
         out: List[str] = []
-        for key in _SKILL_CATEGORIES:
-            for item in skills_field.get(key, []) or []:
+        for items in skills_field.values():
+            if not isinstance(items, list):
+                continue
+            for item in items:
                 label = str(item).strip()
                 if label and label not in out:
                     out.append(label)
@@ -279,9 +279,13 @@ def merge_enhancement(original: CVData, enhanced_partial: dict) -> CVData:
         data["education"] = merged_edu
 
     if enhanced_partial.get("certifications"):
-        data["certifications"] = [
+        ai_certs = [
             str(c).strip() for c in enhanced_partial["certifications"] if str(c).strip()
         ]
+        orig_certs = [str(c).strip() for c in (original.certifications or []) if str(c).strip()]
+        data["certifications"] = list(dict.fromkeys(orig_certs + ai_certs))
+    elif original.certifications:
+        data["certifications"] = list(original.certifications)
 
     if enhanced_partial.get("languages"):
         data["languages"] = [

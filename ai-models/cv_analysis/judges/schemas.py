@@ -75,8 +75,6 @@ class EnsembleResult(BaseModel):
     model_config = {"arbitrary_types_allowed": True, "revalidate_instances": "never"}
     ats_output: JudgeOutput
     hr_output: JudgeOutput
-    rule_output: JudgeOutput
-    weighted: JudgeOutput
     cv_text: str = ""
 
 
