@@ -1,0 +1,105 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>CVBuilder · Analysis</title>
+<link rel="stylesheet" href="../_shared/app.css">
+<link rel="stylesheet" href="analysis.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="../_shared/AppChrome.jsx"></script>
+<script type="text/babel" src="AnalysisComponents.jsx"></script>
+<script type="text/babel">
+const subscores = [
+  { label: "Skill match", value: 92 },
+  { label: "Experience", value: 88 },
+  { label: "Impact phrasing", value: 71 },
+  { label: "Keyword coverage", value: 76 },
+];
+const crits = [
+  {
+    section: "Summary",
+    status: "warn",
+    summary: "Three sentences. Leads with role and years, but buries the strongest signal (your design-system work) in the last clause.",
+    quote: "Product designer focused on tools that earn user trust through clarity.",
+    fix: "Lead with the win: \"Senior product designer who grew Square's design system from 12 to 86 components — adopted across every product team.\"",
+  },
+  {
+    section: "Experience · Square",
+    status: "pass",
+    summary: "Strong quantified outcomes. Action verbs are direct. Conversion delta on checkout is exactly the proof Stripe will look for.",
+  },
+  {
+    section: "Experience · Stripe",
+    status: "warn",
+    summary: "Two bullets, one strong. The second reads passive — 'partnered with platform team' could be rewritten to show what you owned.",
+    fix: "Try: \"Owned the empty-state pattern that became the cross-product standard for 40+ pages.\"",
+  },
+  {
+    section: "Skills",
+    status: "fail",
+    summary: "Missing keywords from the JD: \"design tokens\", \"motion\", and \"front-end ownership\". These are explicit must-haves in the posting.",
+    fix: "Add: Design tokens · Motion design · Front-end ownership (React, CSS). Pair each with one experience bullet that proves it.",
+  },
+];
+const gaps = [
+  { name: "Design systems", coverage: 95 },
+  { name: "Figma", coverage: 100 },
+  { name: "Prototyping", coverage: 85 },
+  { name: "Design tokens", coverage: 30 },
+  { name: "Motion design", coverage: 25 },
+  { name: "Front-end (React/CSS)", coverage: 45 },
+  { name: "Workshop facilitation", coverage: 80 },
+];
+
+function App() {
+  return (
+    <div className="app">
+      <AppSidebar active="analysis" />
+      <div className="app-main">
+        <AppHeader
+          title="Analysis"
+          sub="vs Senior Product Designer · Stripe"
+          right={<>
+            <button className="btn btn-secondary"><Icon name="refresh-ccw" size={14} stroke={2}/>Re-run</button>
+            <button className="btn btn-ai"><Icon name="sparkles" size={14} stroke={2}/>Apply all fixes</button>
+          </>}
+        />
+        <div className="analysis-layout">
+          <div className="target-bar">
+            <Icon name="target" size={18} />
+            <div>
+              <div className="label">Target role</div>
+              <div className="role">Senior Product Designer</div>
+            </div>
+            <div style={{ width: 1, height: 28, background: "var(--border-subtle)" }} />
+            <div>
+              <div className="label">Company</div>
+              <div className="company">Stripe · Remote · $180k–220k</div>
+            </div>
+            <div style={{ marginLeft: "auto" }}>
+              <button className="btn btn-ghost"><Icon name="external-link" size={14} stroke={2} />Job posting</button>
+            </div>
+          </div>
+
+          <div className="analysis-grid">
+            <div>
+              <ScoreHero score={87} subscores={subscores} />
+              <GapMatrix rows={gaps} />
+            </div>
+            <div>
+              {crits.map((c, i) => <CritCard key={i} {...c} />)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body></html>

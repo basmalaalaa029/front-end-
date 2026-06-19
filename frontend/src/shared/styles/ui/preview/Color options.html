@@ -1,0 +1,340 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>CVBuilder · Color options</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 36px 32px 80px; background: #F4EFE2; font-family: var(--font-sans); color: #1B1A16; }
+  .page-head { max-width: 1180px; margin: 0 auto 28px; }
+  .page-head .eyebrow { color: #6E624C; }
+  .page-head h1 { font-size: 32px; letter-spacing: -0.025em; font-weight: 700; margin: 8px 0 6px; }
+  .page-head p { color: #57534A; max-width: 600px; margin: 0; font-size: 15px; }
+
+  .options { display: grid; grid-template-columns: 1fr; gap: 22px; max-width: 1180px; margin: 0 auto; }
+
+  .opt {
+    background: var(--bg, #fff);
+    color: var(--fg, #1B1A16);
+    border: 1px solid var(--bd, #E5DFCF);
+    border-radius: 14px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+  }
+  .opt-info {
+    background: var(--info-bg, rgba(0,0,0,.02));
+    padding: 22px;
+    border-right: 1px solid var(--bd, #E5DFCF);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .opt-num { font-family: var(--font-mono); font-size: 11px; color: var(--muted, #8A8478); letter-spacing: .1em; text-transform: uppercase; }
+  .opt-name { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+  .opt-desc { font-size: 13px; color: var(--muted, #8A8478); line-height: 1.5; }
+  .swatches { display: flex; gap: 6px; margin-top: 4px; }
+  .sw { width: 32px; height: 32px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.05); }
+  .vibes { font-size: 11px; color: var(--muted, #8A8478); display: flex; gap: 6px; flex-wrap: wrap; }
+  .vibe { padding: 2px 8px; border-radius: 999px; background: rgba(0,0,0,.05); }
+
+  .opt-preview { padding: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: flex-start; }
+  /* Mini chrome */
+  .chrome { background: var(--brand, #3C6240); color: var(--brand-fg, #fff); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+  .chrome .dot { width: 26px; height: 26px; background: var(--brand-soft, rgba(255,255,255,.18)); border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+  .chrome .dot i { width: 14px; height: 14px; }
+  .chrome strong { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .chrome .sub { font-size: 11px; opacity: .7; margin-left: auto; }
+
+  /* card */
+  .card {
+    background: var(--surface, #fff);
+    border: 1px solid var(--bd, #E5DFCF);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .card .row { display: flex; align-items: center; justify-content: space-between; }
+  .card .title { font-size: 13.5px; font-weight: 600; }
+  .card .meta { font-size: 11.5px; color: var(--muted, #8A8478); margin-top: 2px; }
+  .pill { font-family: var(--font-mono); font-size: 11px; padding: 3px 10px; border-radius: 999px; background: var(--brand-soft, #DEE9DC); color: var(--brand, #2F4D33); font-weight: 500; }
+  .ai-line { display: flex; gap: 6px; align-items: flex-start; font-size: 12px; color: var(--muted, #57534A); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--bd, #E5DFCF); }
+  .ai-line i { color: var(--brand, #3C6240); flex-shrink: 0; width: 13px; height: 13px; }
+
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { font-size: 12.5px; font-weight: 500; border-radius: 6px; padding: 7px 12px; border: 1px solid transparent; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; }
+  .btn.primary { background: var(--brand, #3C6240); color: var(--brand-fg, #fff); }
+  .btn.secondary { background: var(--surface, #fff); border-color: var(--bd, #D9D0BB); color: var(--fg, #1B1A16); }
+  .btn.accent { background: var(--accent, #8E5634); color: #fff; }
+  .btn.ai { background: linear-gradient(180deg, var(--brand, #3C6240), var(--brand-d, #2F4D33)); color: var(--brand-fg, #fff); }
+  .btn i { width: 13px; height: 13px; }
+
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .badge { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 999px; }
+  .b-brand { background: var(--brand-soft, #DEE9DC); color: var(--brand-d, #2F4D33); }
+  .b-accent { background: var(--accent-soft, #F0E0D2); color: var(--accent-d, #6E422A); }
+  .b-warn { background: #F7EBC8; color: #6B4A0E; }
+  .b-rust { background: #F4D9D1; color: #6B2A1A; }
+  .b-ai { background: #1F1A14; color: #DEE9DC; display: inline-flex; align-items: center; gap: 4px; }
+  .b-ai i { width: 10px; height: 10px; color: currentColor; }
+
+  /* Per-option color tokens */
+  .opt-1 {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #1B1A16; --muted: #8A8478; --bd: #ECE5D4;
+    --info-bg: #FAF7F0;
+    --brand: #3C6240; --brand-d: #2F4D33; --brand-soft: #DEE9DC; --brand-fg: #fff;
+    --accent: #8E5634; --accent-d: #6E422A; --accent-soft: #F0E0D2;
+  }
+  .opt-2 {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #14181F; --muted: #6B7280; --bd: #E5E7EB;
+    --info-bg: #F5F7FA;
+    --brand: #1B3A6B; --brand-d: #122A4F; --brand-soft: #DBE5F0; --brand-fg: #fff;
+    --accent: #B98826; --accent-d: #8C661B; --accent-soft: #F4E6C6;
+  }
+  .opt-3 {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #102825; --muted: #5E7572; --bd: #DDE7E5;
+    --info-bg: #F1F6F5;
+    --brand: #115E59; --brand-d: #0C4844; --brand-soft: #CFE6E3; --brand-fg: #fff;
+    --accent: #C4624F; --accent-d: #93462F; --accent-soft: #F4D8D0;
+  }
+  .opt-4 {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #16161A; --muted: #6B6B72; --bd: #E5E5EA;
+    --info-bg: #F5F5F7;
+    --brand: #16161A; --brand-d: #0A0A0E; --brand-soft: #E5E5EA; --brand-fg: #fff;
+    --accent: #C5821B; --accent-d: #95620F; --accent-soft: #F5E3C0;
+  }
+  .opt-5 {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #1F2419; --muted: #6F7666; --bd: #E1E3D9;
+    --info-bg: #F4F5EE;
+    --brand: #6E8B5A; --brand-d: #56714A; --brand-soft: #E2E9D6; --brand-fg: #fff;
+    --accent: #B07A4C; --accent-d: #835735; --accent-soft: #EFDFCC;
+  }
+  .opt-6 {
+    --bg: #FFFFFF; --surface: #FFFFFF; --fg: #1A1620; --muted: #6D6675; --bd: #E8E1EB;
+    --info-bg: #F6F2F7;
+    --brand: #4C2A52; --brand-d: #371F3B; --brand-soft: #E5D4E9; --brand-fg: #fff;
+    --accent: #B8674F; --accent-d: #8A4934; --accent-soft: #F2D8CD;
+  }
+</style>
+</head>
+<body>
+  <div class="page-head">
+    <div class="eyebrow" style="text-transform:uppercase; font-size:11px; letter-spacing:.08em; font-weight:600;">Color exploration · 6 directions</div>
+    <h1>Pick a palette</h1>
+    <p>Each option keeps the same type, layout, and component rules — only colors change. Same building blocks shown in each so you can compare apples-to-apples.</p>
+  </div>
+
+  <div class="options">
+
+    <!-- 1. Moss (current) -->
+    <div class="opt opt-1">
+      <div class="opt-info">
+        <div class="opt-num">Option 01 · current</div>
+        <div class="opt-name">Moss &amp; Clay</div>
+        <div class="opt-desc">Forest green + warm terracotta + bone. Earthy and grounded — calm advisor vibe.</div>
+        <div class="swatches">
+          <div class="sw" style="background:#3C6240"></div>
+          <div class="sw" style="background:#8E5634"></div>
+          <div class="sw" style="background:#FAF7F0"></div>
+          <div class="sw" style="background:#1B1A16"></div>
+        </div>
+        <div class="vibes"><span class="vibe">Earthy</span><span class="vibe">Trustworthy</span><span class="vibe">Calm</span></div>
+      </div>
+      <div class="opt-preview">
+        <div class="chrome"><span class="dot"><i data-lucide="sparkles"></i></span><strong>CVBuilder</strong><span class="sub">87% match</span></div>
+        <div class="btnrow">
+          <button class="btn primary"><i data-lucide="arrow-right"></i>Continue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn ai"><i data-lucide="sparkles"></i>Ask copilot</button>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="row"><span><span class="title">Senior Product Designer</span><div class="meta">Stripe · Remote · $180–220k</div></span><span class="pill">92% match</span></div>
+          <div class="ai-line"><i data-lucide="sparkles"></i><span>Strong fit on design systems, payments UX, and senior IC track record.</span></div>
+        </div>
+        <div class="badges" style="grid-column: span 2">
+          <span class="badge b-brand">Strong match</span>
+          <span class="badge b-accent">Pro</span>
+          <span class="badge b-warn">Needs work</span>
+          <span class="badge b-rust">Gap</span>
+          <span class="badge b-ai"><i data-lucide="sparkles"></i>AI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Navy & Gold -->
+    <div class="opt opt-2">
+      <div class="opt-info">
+        <div class="opt-num">Option 02</div>
+        <div class="opt-name">Navy &amp; Gold</div>
+        <div class="opt-desc">Deep navy primary, warm gold accent, cool neutral. Most "corporate-LinkedIn-trustworthy" of the bunch.</div>
+        <div class="swatches">
+          <div class="sw" style="background:#1B3A6B"></div>
+          <div class="sw" style="background:#B98826"></div>
+          <div class="sw" style="background:#F5F7FA"></div>
+          <div class="sw" style="background:#14181F"></div>
+        </div>
+        <div class="vibes"><span class="vibe">Corporate</span><span class="vibe">Authoritative</span><span class="vibe">Classic</span></div>
+      </div>
+      <div class="opt-preview">
+        <div class="chrome"><span class="dot"><i data-lucide="sparkles"></i></span><strong>CVBuilder</strong><span class="sub">87% match</span></div>
+        <div class="btnrow">
+          <button class="btn primary"><i data-lucide="arrow-right"></i>Continue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn ai"><i data-lucide="sparkles"></i>Ask copilot</button>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="row"><span><span class="title">Senior Product Designer</span><div class="meta">Stripe · Remote · $180–220k</div></span><span class="pill">92% match</span></div>
+          <div class="ai-line"><i data-lucide="sparkles"></i><span>Strong fit on design systems, payments UX, and senior IC track record.</span></div>
+        </div>
+        <div class="badges" style="grid-column: span 2">
+          <span class="badge b-brand">Strong match</span>
+          <span class="badge b-accent">Pro</span>
+          <span class="badge b-warn">Needs work</span>
+          <span class="badge b-rust">Gap</span>
+          <span class="badge b-ai"><i data-lucide="sparkles"></i>AI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Teal & Coral -->
+    <div class="opt opt-3">
+      <div class="opt-info">
+        <div class="opt-num">Option 03</div>
+        <div class="opt-name">Teal &amp; Coral</div>
+        <div class="opt-desc">Deep teal primary, soft coral accent. Modern + warm — feels closer to fintech / health than pure corporate.</div>
+        <div class="swatches">
+          <div class="sw" style="background:#115E59"></div>
+          <div class="sw" style="background:#C4624F"></div>
+          <div class="sw" style="background:#F1F6F5"></div>
+          <div class="sw" style="background:#102825"></div>
+        </div>
+        <div class="vibes"><span class="vibe">Modern</span><span class="vibe">Warm</span><span class="vibe">Confident</span></div>
+      </div>
+      <div class="opt-preview">
+        <div class="chrome"><span class="dot"><i data-lucide="sparkles"></i></span><strong>CVBuilder</strong><span class="sub">87% match</span></div>
+        <div class="btnrow">
+          <button class="btn primary"><i data-lucide="arrow-right"></i>Continue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn ai"><i data-lucide="sparkles"></i>Ask copilot</button>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="row"><span><span class="title">Senior Product Designer</span><div class="meta">Stripe · Remote · $180–220k</div></span><span class="pill">92% match</span></div>
+          <div class="ai-line"><i data-lucide="sparkles"></i><span>Strong fit on design systems, payments UX, and senior IC track record.</span></div>
+        </div>
+        <div class="badges" style="grid-column: span 2">
+          <span class="badge b-brand">Strong match</span>
+          <span class="badge b-accent">Pro</span>
+          <span class="badge b-warn">Needs work</span>
+          <span class="badge b-rust">Gap</span>
+          <span class="badge b-ai"><i data-lucide="sparkles"></i>AI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Slate & Amber -->
+    <div class="opt opt-4">
+      <div class="opt-info">
+        <div class="opt-num">Option 04</div>
+        <div class="opt-name">Slate &amp; Amber</div>
+        <div class="opt-desc">Near-black primary, amber accent, clean neutral. Most premium / editorial — feels like Stripe, Linear, Vercel.</div>
+        <div class="swatches">
+          <div class="sw" style="background:#16161A"></div>
+          <div class="sw" style="background:#C5821B"></div>
+          <div class="sw" style="background:#F5F5F7"></div>
+          <div class="sw" style="background:#6B6B72"></div>
+        </div>
+        <div class="vibes"><span class="vibe">Editorial</span><span class="vibe">Premium</span><span class="vibe">Minimal</span></div>
+      </div>
+      <div class="opt-preview">
+        <div class="chrome"><span class="dot"><i data-lucide="sparkles"></i></span><strong>CVBuilder</strong><span class="sub">87% match</span></div>
+        <div class="btnrow">
+          <button class="btn primary"><i data-lucide="arrow-right"></i>Continue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn ai"><i data-lucide="sparkles"></i>Ask copilot</button>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="row"><span><span class="title">Senior Product Designer</span><div class="meta">Stripe · Remote · $180–220k</div></span><span class="pill">92% match</span></div>
+          <div class="ai-line"><i data-lucide="sparkles"></i><span>Strong fit on design systems, payments UX, and senior IC track record.</span></div>
+        </div>
+        <div class="badges" style="grid-column: span 2">
+          <span class="badge b-brand">Strong match</span>
+          <span class="badge b-accent">Pro</span>
+          <span class="badge b-warn">Needs work</span>
+          <span class="badge b-rust">Gap</span>
+          <span class="badge b-ai"><i data-lucide="sparkles"></i>AI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Sage & Caramel -->
+    <div class="opt opt-5">
+      <div class="opt-info">
+        <div class="opt-num">Option 05</div>
+        <div class="opt-name">Sage &amp; Caramel</div>
+        <div class="opt-desc">Softer take on the current direction — lighter sage instead of forest, with caramel accent. Friendlier, less serious.</div>
+        <div class="swatches">
+          <div class="sw" style="background:#6E8B5A"></div>
+          <div class="sw" style="background:#B07A4C"></div>
+          <div class="sw" style="background:#F4F5EE"></div>
+          <div class="sw" style="background:#1F2419"></div>
+        </div>
+        <div class="vibes"><span class="vibe">Friendly</span><span class="vibe">Organic</span><span class="vibe">Approachable</span></div>
+      </div>
+      <div class="opt-preview">
+        <div class="chrome"><span class="dot"><i data-lucide="sparkles"></i></span><strong>CVBuilder</strong><span class="sub">87% match</span></div>
+        <div class="btnrow">
+          <button class="btn primary"><i data-lucide="arrow-right"></i>Continue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn ai"><i data-lucide="sparkles"></i>Ask copilot</button>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="row"><span><span class="title">Senior Product Designer</span><div class="meta">Stripe · Remote · $180–220k</div></span><span class="pill">92% match</span></div>
+          <div class="ai-line"><i data-lucide="sparkles"></i><span>Strong fit on design systems, payments UX, and senior IC track record.</span></div>
+        </div>
+        <div class="badges" style="grid-column: span 2">
+          <span class="badge b-brand">Strong match</span>
+          <span class="badge b-accent">Pro</span>
+          <span class="badge b-warn">Needs work</span>
+          <span class="badge b-rust">Gap</span>
+          <span class="badge b-ai"><i data-lucide="sparkles"></i>AI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Plum & Rust -->
+    <div class="opt opt-6">
+      <div class="opt-info">
+        <div class="opt-num">Option 06</div>
+        <div class="opt-name">Plum &amp; Rust</div>
+        <div class="opt-desc">Deep plum primary with rust accent. Distinctive and grown-up — stands out without being loud.</div>
+        <div class="swatches">
+          <div class="sw" style="background:#4C2A52"></div>
+          <div class="sw" style="background:#B8674F"></div>
+          <div class="sw" style="background:#F6F2F7"></div>
+          <div class="sw" style="background:#1A1620"></div>
+        </div>
+        <div class="vibes"><span class="vibe">Distinctive</span><span class="vibe">Mature</span><span class="vibe">Warm</span></div>
+      </div>
+      <div class="opt-preview">
+        <div class="chrome"><span class="dot"><i data-lucide="sparkles"></i></span><strong>CVBuilder</strong><span class="sub">87% match</span></div>
+        <div class="btnrow">
+          <button class="btn primary"><i data-lucide="arrow-right"></i>Continue</button>
+          <button class="btn secondary">Cancel</button>
+          <button class="btn ai"><i data-lucide="sparkles"></i>Ask copilot</button>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="row"><span><span class="title">Senior Product Designer</span><div class="meta">Stripe · Remote · $180–220k</div></span><span class="pill">92% match</span></div>
+          <div class="ai-line"><i data-lucide="sparkles"></i><span>Strong fit on design systems, payments UX, and senior IC track record.</span></div>
+        </div>
+        <div class="badges" style="grid-column: span 2">
+          <span class="badge b-brand">Strong match</span>
+          <span class="badge b-accent">Pro</span>
+          <span class="badge b-warn">Needs work</span>
+          <span class="badge b-rust">Gap</span>
+          <span class="badge b-ai"><i data-lucide="sparkles"></i>AI</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>lucide.createIcons({ attrs: { "stroke-width": 1.75 } });</script>
+</body></html>

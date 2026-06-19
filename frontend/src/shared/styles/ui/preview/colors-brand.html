@@ -1,0 +1,57 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Brand colors</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .row { display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: flex-start; margin-bottom: 22px; }
+  .row:last-child { margin-bottom: 0; }
+  .label { font-size: 13px; color: var(--fg-secondary); padding-top: 8px; }
+  .label strong { display: block; color: var(--fg-primary); font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .scale { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+  .sw { aspect-ratio: 1; border-radius: 6px; position: relative; }
+  .sw[data-primary]::after { content: ""; position: absolute; inset: 0; border: 2px solid var(--fg-primary); border-radius: 6px; opacity: .9; }
+  .stop { font-family: var(--font-mono); font-size: 10px; color: var(--fg-tertiary); text-align: center; margin-top: 4px; }
+</style></head>
+<body>
+  <div class="row">
+    <div class="label"><strong>Electric</strong>primary</div>
+    <div>
+      <div class="scale">
+        <div class="sw" style="background:#F2F5FC"></div><div class="sw" style="background:#E1E8F8"></div>
+        <div class="sw" style="background:#C5D2F0"></div><div class="sw" style="background:#9DB1E3"></div>
+        <div class="sw" style="background:#7891D4"></div><div class="sw" style="background:#5A75C5"></div>
+        <div class="sw" data-primary style="background:#4A6CDB"></div><div class="sw" style="background:#3D5BB8"></div>
+        <div class="sw" style="background:#324A95"></div><div class="sw" style="background:#233566"></div>
+      </div>
+      <div class="scale">
+        <div class="stop">50</div><div class="stop">100</div><div class="stop">200</div><div class="stop">300</div>
+        <div class="stop">400</div><div class="stop">500</div><div class="stop">600</div><div class="stop">700</div>
+        <div class="stop">800</div><div class="stop">900</div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="label"><strong>Mono</strong>accent</div>
+    <div>
+      <div class="scale">
+        <div class="sw" style="background:#F7F7F8;border:1px solid #EDEDEF"></div><div class="sw" style="background:#EDEDEF"></div>
+        <div class="sw" style="background:#D9D9DD"></div><div class="sw" style="background:#B5B5BD"></div>
+        <div class="sw" style="background:#82828C"></div><div class="sw" style="background:#5A5A63"></div>
+        <div class="sw" data-primary style="background:#3D3D44"></div><div class="sw" style="background:#28282E"></div>
+        <div class="sw" style="background:#1F1F23"></div><div class="sw" style="background:#0A0A0C"></div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="label"><strong>Neutral</strong>grayscale</div>
+    <div>
+      <div class="scale">
+        <div class="sw" style="background:#FAFAFA;border:1px solid #E5E5E7"></div>
+        <div class="sw" style="background:#F5F5F7"></div>
+        <div class="sw" style="background:#EDEDEF"></div><div class="sw" style="background:#D9D9DD"></div>
+        <div class="sw" style="background:#B5B5BD"></div><div class="sw" style="background:#82828C"></div>
+        <div class="sw" style="background:#5A5A63"></div><div class="sw" style="background:#3F3F46"></div>
+        <div class="sw" style="background:#27272A"></div><div class="sw" style="background:#1F1F23"></div>
+      </div>
+    </div>
+  </div>
+</body></html>

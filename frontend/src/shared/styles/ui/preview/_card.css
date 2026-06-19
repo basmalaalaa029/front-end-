@@ -1,0 +1,15 @@
+/* Shared styles for preview cards. ~700px wide cards, no titles. */
+@import url("../colors_and_type.css");
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-canvas);
+  font-family: var(--font-sans);
+  color: var(--fg-primary);
+}
+body {
+  padding: 28px;
+  min-height: 100vh;
+}

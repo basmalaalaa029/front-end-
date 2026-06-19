@@ -1,0 +1,476 @@
+/* CVBuilder welcome layout — use with colors_and_type.css (tokens + base). */
+.welcome-page * { box-sizing: border-box; }
+
+.welcome-page .topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-canvas);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.welcome-page .topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.welcome-page .topbar .brand strong {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.welcome-page .topbar .right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.welcome-page .btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  transition: all 140ms var(--ease-out);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.welcome-page .btn-ghost {
+  background: transparent;
+  color: var(--fg-secondary);
+}
+
+.welcome-page .btn-ghost:hover {
+  background: var(--bone-200);
+  color: var(--fg-primary);
+  text-decoration: none;
+}
+
+.welcome-page .btn-primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.welcome-page .btn-primary:hover {
+  background: var(--brand-hover);
+  text-decoration: none;
+}
+
+.welcome-page .btn-secondary {
+  background: #fff;
+  border-color: var(--border-default);
+  color: var(--fg-primary);
+}
+
+.welcome-page .btn-secondary:hover {
+  background: var(--bone-100);
+  text-decoration: none;
+}
+
+.welcome-page main {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 56px 40px 80px;
+}
+
+.welcome-page .hero {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 56px;
+}
+
+.welcome-page .hero .hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--moss-700);
+  background: var(--moss-100);
+  padding: 5px 11px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+}
+
+.welcome-page .hero h1 {
+  font-size: 52px;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+
+.welcome-page .hero h1 em {
+  font-style: normal;
+  color: var(--moss-600);
+  font-family: var(--font-display);
+}
+
+.welcome-page .hero p {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--fg-secondary);
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+.welcome-page .feature-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 64px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  box-shadow: var(--shadow-xs);
+}
+
+@media (max-width: 1023px) {
+  .welcome-page .feature-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .welcome-page .feature {
+    border-right: 0 !important;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 12px;
+  }
+  .welcome-page .feature:nth-child(3),
+  .welcome-page .feature:nth-child(4) {
+    border-bottom: 0;
+    padding-bottom: 6px;
+  }
+}
+
+.welcome-page .feature {
+  padding: 6px 10px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.welcome-page .feature:last-child {
+  border-right: 0;
+}
+
+.welcome-page .feature .ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--moss-100);
+  color: var(--moss-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.welcome-page .feature:nth-child(2) .ico {
+  background: var(--clay-100);
+  color: var(--clay-700);
+}
+
+.welcome-page .feature:nth-child(4) .ico {
+  background: var(--clay-100);
+  color: var(--clay-700);
+}
+
+.welcome-page .feature h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.welcome-page .feature p {
+  font-size: 12.5px;
+  color: var(--fg-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.welcome-page .section-label {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.welcome-page .section-label h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 0 0 6px;
+}
+
+.welcome-page .section-label p {
+  color: var(--fg-secondary);
+  font-size: 15px;
+  margin: 0;
+}
+
+.welcome-page .paths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .welcome-page .paths {
+    grid-template-columns: 1fr;
+  }
+}
+
+.welcome-page .path {
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 26px 24px 22px;
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--fg-primary);
+  display: flex;
+  flex-direction: column;
+  transition: all 180ms var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-page .path:hover {
+  border-color: var(--moss-300);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.welcome-page .path .badge {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--fg-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.welcome-page .path .glyph {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.welcome-page .path-build .glyph {
+  background: var(--moss-100);
+  color: var(--moss-700);
+}
+
+.welcome-page .path-upload .glyph {
+  background: var(--bone-200);
+  color: var(--bone-700);
+}
+
+.welcome-page .path-interview .glyph {
+  background: var(--clay-100);
+  color: var(--clay-700);
+}
+
+.welcome-page .path h3 {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
+}
+
+.welcome-page .path .lead {
+  font-size: 13.5px;
+  color: var(--fg-secondary);
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+
+.welcome-page .path .bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.welcome-page .path .bullets li {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--fg-secondary);
+}
+
+.welcome-page .path .bullets svg {
+  flex-shrink: 0;
+  color: var(--moss-500);
+}
+
+.welcome-page .path .cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--moss-700);
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.welcome-page .path .cta svg {
+  transition: transform 180ms var(--ease-out);
+}
+
+.welcome-page .path:hover .cta svg {
+  transform: translateX(3px);
+}
+
+.welcome-page .path-build::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--moss-500), var(--moss-400));
+}
+
+.welcome-page .path-upload::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--moss-600), var(--moss-500));
+}
+
+.welcome-page .recommend-tag {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-size: 10.5px;
+  font-weight: 600;
+  background: var(--moss-700);
+  color: var(--moss-100);
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.welcome-page .below-paths {
+  margin-top: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 22px;
+  font-size: 13px;
+  color: var(--fg-tertiary);
+}
+
+.welcome-page .below-paths a {
+  color: var(--fg-secondary);
+  text-decoration: none;
+}
+
+.welcome-page .below-paths a:hover {
+  color: var(--moss-700);
+  text-decoration: underline;
+}
+
+.welcome-page .below-paths .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.welcome-page .trust {
+  margin-top: 56px;
+  padding: 22px 28px;
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.welcome-page .trust .ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--moss-100);
+  color: var(--moss-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.welcome-page .trust .copy {
+  font-size: 13.5px;
+  color: var(--fg-secondary);
+  line-height: 1.5;
+}
+
+.welcome-page .trust .copy strong {
+  color: var(--fg-primary);
+  font-weight: 600;
+}
+
+.welcome-page .brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--moss-500), var(--moss-700));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.welcome-page .feature .ico svg {
+  width: 18px;
+  height: 18px;
+}
+
+.welcome-page .path .glyph svg {
+  width: 24px;
+  height: 24px;
+}
+
+.welcome-page .path .bullets svg {
+  width: 13px;
+  height: 13px;
+}
+
+.welcome-page .trust .ico svg {
+  width: 18px;
+  height: 18px;
+}

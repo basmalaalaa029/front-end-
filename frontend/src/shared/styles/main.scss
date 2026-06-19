@@ -1,0 +1,13 @@
+// =============================================================================
+// Shared styles entry — imported from `src/main.tsx` (after `./index.css` / Tailwind).
+// =============================================================================
+
+@use "base/variables";
+@use "base/careerforge";
+@use "base/typography";
+@use "base/reset";
+@use "layout/landing-pages";
+@use "layout/app-chrome";
+@use "components/preview-card";
+@use "utilities/mixins";
+@use "vendors/primereact";

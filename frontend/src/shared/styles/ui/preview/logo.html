@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Logo &amp; brand mark</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  body { padding: 22px 24px; }
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 18px; align-items: stretch; }
+  .tile { border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; min-height: 120px; }
+  .tile .meta { font-family: var(--font-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: .08em; }
+  .light { background:#fff; border:1px solid #ECE5D4; }
+  .canvas { background:#FAF7F0; border:1px solid #ECE5D4; }
+  .dark { background:#1F1A14; }
+  .dark .meta { color:#8A8478; }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="tile light">
+      <img src="../assets/logo.svg" width="180" height="36" alt="">
+      <div class="meta">Wordmark · light</div>
+    </div>
+    <div class="tile canvas">
+      <img src="../assets/logo-mark.svg" width="48" height="48" alt="">
+      <div class="meta">Mark only</div>
+    </div>
+    <div class="tile dark">
+      <img src="../assets/logo-on-dark.svg" width="180" height="36" alt="">
+      <div class="meta">Wordmark · dark</div>
+    </div>
+  </div>
+</body></html>

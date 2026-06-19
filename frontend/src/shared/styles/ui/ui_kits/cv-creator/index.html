@@ -1,0 +1,81 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>CVBuilder · CV Creator</title>
+<link rel="stylesheet" href="../_shared/app.css">
+<link rel="stylesheet" href="creator.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="../_shared/AppChrome.jsx"></script>
+<script type="text/babel" src="CVCanvas.jsx"></script>
+<script type="text/babel">
+const data = {
+  name: "Maya Hernandez",
+  role: "Senior Product Designer",
+  email: "maya@hernandez.design",
+  location: "San Francisco, CA",
+  url: "maya.design",
+  summary: "Product designer focused on tools that earn user trust through clarity. Eight years across fintech, developer tooling, and consumer health. Led design for checkout and onboarding at Square, shipped 14 features in 2024 alone, partnered tightly with PMs and front-end on every release.",
+  experience: [
+    {
+      title: "Senior Product Designer",
+      company: "Square",
+      location: "San Francisco",
+      dates: "2021 — Present",
+      bullets: [
+        "Led design for checkout, cutting drop-off 38% across web and in-app surfaces.",
+        "Helped with onboarding redesign across 6 squads.",
+        "Built the design system from 12 components to 86, adopted by every product team.",
+      ],
+    },
+    {
+      title: "Product Designer",
+      company: "Stripe",
+      location: "Remote",
+      dates: "2018 — 2021",
+      bullets: [
+        "Shipped the v2 billing portal — 4.6 → 4.9 NPS, 22% support ticket reduction.",
+        "Partnered with platform team to define the empty-state pattern used across 40+ pages.",
+      ],
+    },
+  ],
+  education: [
+    { school: "Rhode Island School of Design", degree: "BFA, Graphic Design", dates: "2014 — 2018" },
+  ],
+  skills: ["Figma", "Design systems", "Prototyping", "User research", "Front-end", "Accessibility", "Workshop facilitation"],
+};
+
+function App() {
+  const [highlighted, setHighlighted] = React.useState(null);
+  return (
+    <div className="app">
+      <AppSidebar active="creator" />
+      <div className="app-main">
+        <AppHeader
+          title="Maya — Senior Designer CV"
+          sub="Edited just now · Auto-saved"
+          right={<>
+            <span style={{ fontSize: 12, color: "var(--fg-tertiary)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <Icon name="check-circle-2" size={14} stroke={2} /> Saved
+            </span>
+            <button className="btn btn-secondary"><Icon name="download" size={14} stroke={2}/>Export</button>
+            <button className="btn btn-ai"><Icon name="sparkles" size={14} stroke={2}/>Run analysis</button>
+          </>}
+        />
+        <div className="creator-layout">
+          <CVCanvas data={data} highlightedBullet={highlighted} />
+          <AIRail score={87} onApply={(t) => { setHighlighted(t); setTimeout(() => setHighlighted(null), 1800); }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body></html>

@@ -1,0 +1,309 @@
+/* CareerForge hub chrome — shared across feature UI kits */
+@import url("../../colors_and_type.css");
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--surface); min-height: 100vh; }
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ---------- Top navigation (replaces sidebar) ---------- */
+.app-topnav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--header-height);
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.app-topnav-brand {
+  flex-shrink: 0;
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.app-topnav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-topnav-links::-webkit-scrollbar {
+  display: none;
+}
+
+.app-topnav-links .nav-item {
+  white-space: nowrap;
+  font-size: 13px;
+  padding: 7px 10px;
+}
+
+.app-topnav-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.app-topnav-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: inherit;
+  max-width: 180px;
+}
+
+.app-topnav-user:hover {
+  background: var(--surface);
+}
+
+.app-topnav-user-name {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-topnav-logout-label {
+  display: inline;
+}
+
+@media (max-width: 900px) {
+  .app-topnav-user-name,
+  .app-topnav-logout-label {
+    display: none;
+  }
+
+  .app-topnav {
+    padding: 0 12px;
+    gap: 8px;
+  }
+}
+
+/* ---------- Sidebar (legacy — unused) ---------- */
+.app-sidebar {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 18px;
+}
+
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.app-sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.nav-item:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.nav-item.is-active {
+  background: var(--purple-light);
+  color: var(--purple-dark);
+}
+
+.nav-item.is-active .icon { color: var(--purple); }
+.nav-item .icon { color: var(--text-faint); flex-shrink: 0; }
+
+.sidebar-foot {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.user-row:hover { background: var(--surface); }
+
+.user-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.user-meta { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 500; }
+.user-sub { font-size: 11px; color: var(--text-faint); }
+
+/* ---------- Header ---------- */
+.app-main { display: flex; flex-direction: column; min-width: 0; background: var(--white); }
+
+.app-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.header-left { display: flex; flex-direction: column; gap: 2px; }
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.header-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.header-right { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary { background: var(--purple); color: #fff; }
+.btn-primary:hover { opacity: 0.88; }
+
+.btn-secondary {
+  background: var(--white);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.btn-secondary:hover { background: var(--surface); }
+
+.btn-ghost { background: transparent; color: var(--text-muted); }
+.btn-ghost:hover { background: var(--surface); color: var(--text); }
+
+.btn-ai {
+  background: var(--purple);
+  color: #fff;
+  box-shadow: 0 0 0 1px var(--purple-mid) inset;
+}
+
+.btn-accent { background: var(--teal); color: #fff; }
+.btn-accent:hover { opacity: 0.88; }
+.btn-sm { font-size: 12px; padding: 5px 9px; }
+
+/* ---------- Generic ---------- */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xs);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--purple);
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--purple-light);
+  color: var(--purple-dark);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px 3px 7px;
+  border-radius: var(--radius-pill);
+}
+
+.divider { height: 1px; background: var(--border); border: 0; margin: 16px 0; }
+.icon { display: inline-flex; }
+.icon svg { stroke-width: 1.75; }

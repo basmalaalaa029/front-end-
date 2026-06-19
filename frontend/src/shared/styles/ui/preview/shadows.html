@@ -1,0 +1,19 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Shadows &amp; elevation</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .row { display: flex; gap: 22px; align-items: flex-end; }
+  .item { text-align: center; }
+  .box { width: 88px; height: 88px; background: #fff; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-family: var(--font-mono); font-size: 11px; color: var(--fg-secondary); }
+  .tok { font-family: var(--font-mono); font-size: 11px; color: var(--fg-secondary); margin-top: 10px; }
+</style></head>
+<body>
+  <div class="row">
+    <div class="item"><div class="box" style="box-shadow:0 1px 2px rgba(40,30,15,.06)">xs</div><div class="tok">shadow-xs</div></div>
+    <div class="item"><div class="box" style="box-shadow:0 1px 3px rgba(40,30,15,.08),0 1px 2px rgba(40,30,15,.04)">sm</div><div class="tok">shadow-sm</div></div>
+    <div class="item"><div class="box" style="box-shadow:0 4px 12px -2px rgba(40,30,15,.10),0 2px 4px -1px rgba(40,30,15,.05)">md</div><div class="tok">shadow-md</div></div>
+    <div class="item"><div class="box" style="box-shadow:0 12px 28px -8px rgba(40,30,15,.16),0 4px 8px -2px rgba(40,30,15,.06)">lg</div><div class="tok">shadow-lg</div></div>
+    <div class="item"><div class="box" style="box-shadow:0 24px 56px -12px rgba(40,30,15,.22),0 8px 16px -4px rgba(40,30,15,.08)">xl</div><div class="tok">shadow-xl</div></div>
+    <div class="item"><div class="box" style="background:#F4EFE2;box-shadow:inset 0 1px 2px rgba(40,30,15,.06)">inset</div><div class="tok">inset</div></div>
+  </div>
+</body></html>

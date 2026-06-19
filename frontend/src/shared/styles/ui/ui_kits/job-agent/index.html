@@ -1,0 +1,74 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>CVBuilder · Job Agent</title>
+<link rel="stylesheet" href="../_shared/app.css">
+<link rel="stylesheet" href="agent.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="../_shared/AppChrome.jsx"></script>
+<script type="text/babel" src="AgentComponents.jsx"></script>
+<script type="text/babel">
+const JOBS = [
+  { id: 1, brand: "stripe", logo: "S", title: "Senior Product Designer, Payments", company: "Stripe", location: "Remote", salary: "$180–220k", match: 92,
+    why: "Strong overlap on design systems, payments UX, and senior IC track record. Your Square checkout work directly mirrors their stated focus." },
+  { id: 2, brand: "linear", logo: "L", title: "Staff Product Designer", company: "Linear", location: "Remote · NA/EU", salary: "$200–240k", match: 84,
+    why: "Linear values opinionated taste and fast shipping. Your 14-features-in-2024 cadence and design-system ownership map cleanly." },
+  { id: 3, brand: "figma",  logo: "F", title: "Senior Designer, Design Systems", company: "Figma", location: "San Francisco · Hybrid", salary: "$190–230k", match: 81,
+    why: "Your Square design-system work (12 → 86 components, full adoption) is the exact case study they recruit for." },
+  { id: 4, brand: "notion", logo: "N", title: "Senior Product Designer", company: "Notion", location: "New York · Hybrid", salary: "$170–210k", match: 73,
+    why: "Good story-fit, but their current open roles lean toward AI features — your portfolio is stronger on payments." },
+  { id: 5, brand: "vercel", logo: "V", title: "Product Designer, Platform", company: "Vercel", location: "Remote", salary: "$160–200k", match: 68,
+    why: "Strong on platform thinking, lighter on the dev-tooling specifics they typically want." },
+];
+
+function App() {
+  const [selected, setSelected] = React.useState(JOBS[0]);
+  return (
+    <div className="app">
+      <AppSidebar active="agent" />
+      <div className="app-main">
+        <AppHeader
+          title="Job Agent"
+          sub="47 new roles · 6 strong matches"
+          right={<>
+            <button className="btn btn-secondary"><Icon name="settings" size={14} stroke={2}/>Preferences</button>
+            <button className="btn btn-ai"><Icon name="sparkles" size={14} stroke={2}/>Run new search</button>
+          </>}
+        />
+        <div className="agent-layout">
+          <div className="agent-main">
+            <div className="filter-bar">
+              <span className="chip selected">Remote <span className="x">✕</span></span>
+              <span className="chip selected">$160k+ <span className="x">✕</span></span>
+              <span className="chip selected">Senior / Staff <span className="x">✕</span></span>
+              <span className="chip">Posted this week</span>
+              <span className="chip">Series B+</span>
+              <span className="chip"><Icon name="plus" size={11} stroke={2}/>Add filter</span>
+            </div>
+            <div className="results-head">
+              <h2>Ranked matches</h2>
+              <span className="meta">Sorted by fit · updated 8m ago</span>
+            </div>
+            <div className="job-list">
+              {JOBS.map(j => (
+                <JobCard key={j.id} job={j} selected={selected.id === j.id} onClick={() => setSelected(j)} />
+              ))}
+            </div>
+          </div>
+          <div className="agent-context">
+            <ContextPanel job={selected} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body></html>

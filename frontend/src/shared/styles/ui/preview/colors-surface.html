@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Surface &amp; foreground</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .col h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-tertiary); margin: 0 0 10px; font-weight: 600; }
+  .stack { display: flex; flex-direction: column; gap: 6px; }
+  .tile { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+  .tile .name { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.06); }
+  .hex { font-family: var(--font-mono); font-size: 11px; color: var(--fg-tertiary); }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="col">
+      <h3>Surfaces</h3>
+      <div class="stack">
+        <div class="tile" style="background:#FAFAFA;border:1px solid #E5E5E7"><span class="name"><span class="dot" style="background:#FAFAFA"></span>bg-canvas</span><span class="hex">#FAFAFA</span></div>
+        <div class="tile" style="background:#FFFFFF;border:1px solid #E5E5E7"><span class="name"><span class="dot" style="background:#FFFFFF;border-color:#D1D1D5"></span>bg-surface</span><span class="hex">#FFFFFF</span></div>
+        <div class="tile" style="background:#FFFFFF;border:1px solid #E5E5E7"><span class="name"><span class="dot" style="background:#FFFFFF;border-color:#D1D1D5"></span>bg-elevated</span><span class="hex">#FFFFFF</span></div>
+        <div class="tile" style="background:#F4F4F5"><span class="name"><span class="dot" style="background:#F4F4F5"></span>bg-sunken</span><span class="hex">#F4F4F5</span></div>
+        <div class="tile" style="background:#0A0A0C;color:#FAFAFA"><span class="name"><span class="dot" style="background:#0A0A0C;border-color:#3F3F46"></span>bg-inverse</span><span class="hex" style="color:#A1A1A8">#0A0A0C</span></div>
+      </div>
+    </div>
+    <div class="col">
+      <h3>Foreground</h3>
+      <div class="stack">
+        <div class="tile" style="background:#fff;border:1px solid #E5E5E7;color:#0A0A0C"><span class="name"><span class="dot" style="background:#0A0A0C"></span>fg-primary</span><span class="hex">#0A0A0C</span></div>
+        <div class="tile" style="background:#fff;border:1px solid #E5E5E7;color:#3F3F46"><span class="name"><span class="dot" style="background:#3F3F46"></span>fg-secondary</span><span class="hex">#3F3F46</span></div>
+        <div class="tile" style="background:#fff;border:1px solid #E5E5E7;color:#71717A"><span class="name"><span class="dot" style="background:#71717A"></span>fg-tertiary</span><span class="hex">#71717A</span></div>
+        <div class="tile" style="background:#fff;border:1px solid #E5E5E7;color:#A1A1A8"><span class="name"><span class="dot" style="background:#A1A1A8"></span>fg-disabled</span><span class="hex">#A1A1A8</span></div>
+        <div class="tile" style="background:#1E4FE6;color:#fff"><span class="name"><span class="dot" style="background:#fff"></span>fg-on-brand</span><span class="hex" style="color:#B3CBFF">#FFFFFF</span></div>
+      </div>
+    </div>
+  </div>
+</body></html>

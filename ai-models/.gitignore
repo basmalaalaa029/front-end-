@@ -1,0 +1,46 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pycache
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# HuggingFace model cache (huge — never commit)
+.cache/
+models/
+
+# GGUF models + llama.cpp prebuilt server (huge — never commit)
+*.gguf
+.llama.cpp/
+vendor/llama-server/
+vendor/llama-prebuilt/
+bin/llama-server
+
+# Runtime outputs
+output/
+logs/
+*.db
+*.sqlite
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp

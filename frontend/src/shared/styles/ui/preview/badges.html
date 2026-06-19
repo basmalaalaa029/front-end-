@@ -1,0 +1,53 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Badges &amp; chips</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  body { padding: 22px 24px; }
+  .group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-tertiary); font-weight: 600; min-width: 84px; }
+  .badge {
+    font-family: var(--font-sans); font-weight: 500; font-size: 12px; border-radius: 999px;
+    padding: 3px 10px; display: inline-flex; gap: 6px; align-items: center; line-height: 1.4;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .b-moss   { background: #DEE9DC; color: #2F4D33; }
+  .b-clay   { background: #F0E0D2; color: #6E422A; }
+  .b-amber  { background: #F7EBC8; color: #6B4A0E; }
+  .b-rust   { background: #F4D9D1; color: #6B2A1A; }
+  .b-sky    { background: #D6E4EC; color: #1F4054; }
+  .b-bone   { background: #F4EFE2; color: #524938; }
+  .b-solid  { background: #3C6240; color: #fff; }
+  .b-ai     { background: #1F1A14; color: #DEE9DC; padding-left: 8px; }
+  .b-ai svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .chip {
+    font-size: 12px; padding: 5px 12px; border-radius: 999px;
+    background: #fff; border: 1px solid #D9D0BB; color: #1B1A16;
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .chip.selected { background: #DEE9DC; border-color: #94B68F; color: #2F4D33; }
+  .chip .x { color: #8A8478; }
+</style></head>
+<body>
+  <div class="group"><span class="label">Status</span>
+    <span class="badge b-moss"><span class="dot"></span>Strong match</span>
+    <span class="badge b-amber"><span class="dot"></span>Needs work</span>
+    <span class="badge b-rust"><span class="dot"></span>Gap detected</span>
+    <span class="badge b-sky"><span class="dot"></span>In review</span>
+    <span class="badge b-bone">Draft</span>
+    <span class="badge b-solid">Active</span>
+  </div>
+  <div class="group"><span class="label">AI &amp; meta</span>
+    <span class="badge b-ai"><svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/></svg>AI suggestion</span>
+    <span class="badge b-clay">Pro</span>
+    <span class="badge b-moss">Verified</span>
+    <span class="badge b-bone">87% match</span>
+  </div>
+  <div class="group"><span class="label">Filter chips</span>
+    <span class="chip selected">Remote ✕</span>
+    <span class="chip selected">Full-time ✕</span>
+    <span class="chip">San Francisco</span>
+    <span class="chip">$120k+</span>
+    <span class="chip">Senior</span>
+    <span class="chip">+ Add filter</span>
+  </div>
+</body></html>

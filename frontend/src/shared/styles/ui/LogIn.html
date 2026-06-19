@@ -1,0 +1,129 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8">
+<title>CVBuilder · Sign in</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="login.css">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<div class="login-page">
+<div class="shell">
+
+  <!-- LEFT: form -->
+  <div class="left">
+    <div class="left-head">
+      <a href="Welcome.html" class="brand">
+        <img src="assets/logo-mark.svg" width="26" height="26" alt="">
+        <strong>CVBuilder</strong>
+      </a>
+      <a href="Welcome.html" class="back"><i data-lucide="arrow-left"></i> Back to home</a>
+    </div>
+
+    <div class="form-wrap">
+      <form class="form" onsubmit="event.preventDefault();">
+        <h1>Welcome back.</h1>
+        <p class="lead">Sign in to pick up where you left off — your drafts, applications, and interview practice are saved.</p>
+
+        <div class="oauth">
+          <button type="button" class="oauth-btn">
+            <svg viewBox="0 0 18 18" class="g-google" aria-hidden="true">
+              <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.49h4.84c-.21 1.12-.84 2.07-1.79 2.71v2.26h2.9c1.7-1.57 2.69-3.88 2.69-6.62z"/>
+              <path fill="#34A853" d="M9 18c2.43 0 4.46-.81 5.95-2.18l-2.9-2.26c-.81.54-1.83.86-3.05.86-2.34 0-4.33-1.58-5.04-3.71H.96v2.33C2.45 15.98 5.48 18 9 18z"/>
+              <path fill="#FBBC05" d="M3.96 10.71A5.4 5.4 0 0 1 3.68 9c0-.59.1-1.17.28-1.71V4.96H.96A8.99 8.99 0 0 0 0 9c0 1.45.35 2.83.96 4.04l3-2.33z"/>
+              <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.45 2.02.96 4.96l3 2.33C4.67 5.16 6.66 3.58 9 3.58z"/>
+            </svg>
+            Continue with Google
+          </button>
+          <button type="button" class="oauth-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="#0A66C2" d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.95v5.66H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z"/>
+            </svg>
+            Continue with LinkedIn
+          </button>
+        </div>
+
+        <div class="divider-or">or sign in with email</div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@work.com" autocomplete="email" />
+        </div>
+
+        <div class="field">
+          <label for="pwd">
+            <span>Password</span>
+            <a href="#">Forgot password?</a>
+          </label>
+          <div class="input-wrap">
+            <input id="pwd" type="password" placeholder="••••••••" autocomplete="current-password" />
+            <button class="show-pwd" type="button" aria-label="Show password" onclick="
+              var p=document.getElementById('pwd');
+              p.type = p.type==='password' ? 'text' : 'password';
+            "><i data-lucide="eye"></i></button>
+          </div>
+        </div>
+
+        <label class="checkbox-row">
+          <input type="checkbox" /> Keep me signed in on this device
+        </label>
+
+        <button class="submit" type="submit">
+          Sign in <i data-lucide="arrow-right"></i>
+        </button>
+
+        <div class="signup-row">
+          New to CVBuilder? <a href="Welcome.html">Create an account</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="left-foot">
+      <span>© 2026 CVBuilder · Your data stays yours.</span>
+      <span>
+        <a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Help</a>
+      </span>
+    </div>
+  </div>
+
+  <!-- RIGHT: pitch -->
+  <div class="right">
+    <div>
+      <span class="right-eyebrow"><i data-lucide="sparkles"></i> AI career copilot</span>
+      <div class="pitch">
+        <h2>One workspace from <em>first draft</em> to offer letter.</h2>
+        <p>Build, analyze, and tailor your CV. Match to live job openings. Rehearse interviews. CVBuilder is the only tool you'll open during your search.</p>
+      </div>
+
+      <div class="preview-card">
+        <div class="header">
+          <div class="av">MH</div>
+          <div>
+            <div class="name">Maya Hernandez · CV</div>
+            <div class="role">Senior Product Designer</div>
+          </div>
+          <span class="score-pill">92% match</span>
+        </div>
+        <div class="bar"><span class="bar-fill"></span></div>
+        <div class="ai-line">
+          <i data-lucide="sparkles"></i>
+          <span>Strong fit for Stripe — your design-systems work maps directly to the role's first 90-day goals. Tighten 2 bullet metrics to push to 96%.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="testimonial">
+      <blockquote>The interview simulator alone was worth it — I walked into my final round having practiced every weak spot.”</blockquote>
+      <div class="cite">
+        <div class="av-sm">JR</div>
+        <span><strong style="color:white;font-weight:600">Jordan Reyes</strong> · Senior PM at Linear</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>lucide.createIcons({ attrs: { "stroke-width": 1.75 } });</script>
+</body></html>

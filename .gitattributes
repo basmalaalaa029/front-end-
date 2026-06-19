@@ -1,0 +1,14 @@
+# Normalize line endings so package-lock.json and text files do not churn on Windows vs macOS/Linux
+* text=auto eol=lf
+
+package-lock.json text eol=lf
+package.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf

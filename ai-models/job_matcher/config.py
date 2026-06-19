@@ -1,0 +1,47 @@
+"""
+config.py
+---------
+Central configuration for the job matching system.
+"""
+
+import os
+
+ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID", "")
+ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY", "")
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = "llama3-8b-8192"
+
+DEFAULT_TOP_N = 10
+DEFAULT_COUNTRY = "us"
+MAX_JOBS_TO_FETCH = 250
+SCORE_STRONG = 65
+SCORE_GOOD = 40
+
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+EMBEDDING_CACHE = True
+
+USE_CROSS_ENCODER = True
+CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+CROSS_ENCODER_TOP_N = 50
+CROSS_ENCODER_BLEND = 0.35
+
+USE_LLM_CV_PARSER = True
+USE_LLM_EXPLAIN = True
+
+SKILL_MATCH_THRESHOLD = 0.70
+
+WEIGHT_SEMANTIC = 40
+WEIGHT_SKILLS = 20
+WEIGHT_SENIORITY = 15
+WEIGHT_TITLE = 15
+WEIGHT_EXTRA = 10
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUTS_DIR = os.path.join(BASE_DIR, "outputs")
+
+API_TIMEOUT = 15
+MAX_QUERIES = 3
+REMOTEOK_MAX = 60
+THEMUSE_PAGES = 3
+ADZUNA_RESULTS = 50

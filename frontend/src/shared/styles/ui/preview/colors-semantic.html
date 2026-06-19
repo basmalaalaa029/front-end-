@@ -1,0 +1,49 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Semantic colors</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .tok { display: flex; flex-direction: column; gap: 10px; }
+  .chip { height: 64px; border-radius: 10px; display:flex; align-items:flex-end; padding: 10px; font-size: 11px; font-family: var(--font-mono); }
+  .row { display: flex; gap: 8px; }
+  .pair { flex: 1; height: 28px; border-radius: 6px; }
+  .meta { font-size: 12px; color: var(--fg-secondary); display: flex; justify-content: space-between; }
+  .meta strong { color: var(--fg-primary); font-weight: 600; }
+  .hex { font-family: var(--font-mono); font-size: 10px; color: var(--fg-tertiary); }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="tok">
+      <div class="chip" style="background:#3C6240; color:#fff">Aa</div>
+      <div class="row">
+        <div class="pair" style="background:#DEE9DC"></div>
+        <div class="pair" style="background:#1A2C1D"></div>
+      </div>
+      <div class="meta"><strong>Success</strong><span class="hex">moss-600</span></div>
+    </div>
+    <div class="tok">
+      <div class="chip" style="background:#C58A1D; color:#fff">Aa</div>
+      <div class="row">
+        <div class="pair" style="background:#F7EBC8"></div>
+        <div class="pair" style="background:#6B4A0E"></div>
+      </div>
+      <div class="meta"><strong>Warning</strong><span class="hex">amber-500</span></div>
+    </div>
+    <div class="tok">
+      <div class="chip" style="background:#B5432B; color:#fff">Aa</div>
+      <div class="row">
+        <div class="pair" style="background:#F4D9D1"></div>
+        <div class="pair" style="background:#6B2A1A"></div>
+      </div>
+      <div class="meta"><strong>Danger</strong><span class="hex">rust-500</span></div>
+    </div>
+    <div class="tok">
+      <div class="chip" style="background:#3E6E8E; color:#fff">Aa</div>
+      <div class="row">
+        <div class="pair" style="background:#D6E4EC"></div>
+        <div class="pair" style="background:#1F4054"></div>
+      </div>
+      <div class="meta"><strong>Info</strong><span class="hex">sky-500</span></div>
+    </div>
+  </div>
+</body></html>

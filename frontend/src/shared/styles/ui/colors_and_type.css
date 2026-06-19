@@ -1,0 +1,80 @@
+/* CareerForge Design System — Foundation tokens + semantic HTML defaults */
+
+@import "./tokens.css";
+
+html, body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--lh-relaxed);
+  color: var(--fg-primary);
+  background: var(--bg-surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--fg-primary);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--lh-tight);
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 { font-size: var(--text-5xl); letter-spacing: -0.5px; }
+h2 { font-size: var(--text-4xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); }
+h6 {
+  font-size: var(--text-md);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--fg-secondary);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-sans);
+}
+
+p {
+  margin: 0;
+  line-height: var(--lh-relaxed);
+  text-wrap: pretty;
+  color: var(--fg-primary);
+}
+
+small, .text-small { font-size: var(--text-sm); color: var(--fg-secondary); }
+
+.eyebrow {
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wider);
+  font-weight: var(--weight-medium);
+  color: var(--purple);
+}
+
+a {
+  color: var(--brand);
+  text-decoration: none;
+  text-underline-offset: 3px;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover { color: var(--brand-hover); text-decoration: underline; }
+
+code, kbd, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+kbd {
+  background: var(--bg-sunken);
+  border: 1px solid var(--border-default);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-sm);
+  padding: 1px 6px;
+  font-size: var(--text-xs);
+  color: var(--fg-secondary);
+}
+
+::selection { background: var(--purple-light); color: var(--purple-dark); }

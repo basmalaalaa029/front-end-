@@ -1,0 +1,45 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Buttons</title>
+<link rel="stylesheet" href="_card.css">
+<style>
+  body { padding: 24px; }
+  .group { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-tertiary); font-weight: 600; min-width: 64px; }
+  .btn {
+    font-family: var(--font-sans); font-weight: 500; font-size: 14px; border-radius: 6px;
+    padding: 8px 14px; border: 1px solid transparent; cursor: pointer; line-height: 1; display: inline-flex; gap: 8px; align-items: center;
+    transition: all .14s ease;
+  }
+  .btn.primary { background: #3C6240; color: #fff; }
+  .btn.primary:hover { background: #2F4D33; }
+  .btn.secondary { background: #fff; border-color: #D9D0BB; color: #1B1A16; }
+  .btn.secondary:hover { background: #FBF8F1; border-color: #B8A87F; }
+  .btn.ghost { background: transparent; color: #1B1A16; }
+  .btn.ghost:hover { background: #F4EFE2; }
+  .btn.danger { background: #B5432B; color: #fff; }
+  .btn.accent { background: #8E5634; color: #fff; }
+  .btn.ai { background: linear-gradient(180deg, #3C6240, #2F4D33); color: #fff; box-shadow: 0 0 0 1px #6D9466 inset; }
+  .btn.sm { font-size: 12px; padding: 6px 10px; }
+  .btn.lg { font-size: 15px; padding: 11px 18px; }
+  .icon { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .disabled { opacity: .5; cursor: not-allowed; }
+</style></head>
+<body>
+  <div class="group"><span class="label">Primary</span>
+    <button class="btn primary">Continue</button>
+    <button class="btn primary"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>Next step</button>
+    <button class="btn primary sm">Save</button>
+    <button class="btn primary lg">Get started</button>
+  </div>
+  <div class="group"><span class="label">Secondary</span>
+    <button class="btn secondary">Cancel</button>
+    <button class="btn secondary"><svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download PDF</button>
+    <button class="btn ghost">View details</button>
+  </div>
+  <div class="group"><span class="label">Status</span>
+    <button class="btn accent">Apply now</button>
+    <button class="btn danger">Discard</button>
+    <button class="btn ai"><svg class="icon" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>Ask copilot</button>
+    <button class="btn secondary disabled">Disabled</button>
+  </div>
+</body></html>

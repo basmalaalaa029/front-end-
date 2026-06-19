@@ -1,0 +1,92 @@
+import {
+  AlertTriangle,
+  AlignLeft,
+  ArrowRight,
+  Award,
+  Bookmark,
+  Briefcase,
+  Building2,
+  Check,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Circle,
+  DollarSign,
+  Download,
+  ExternalLink,
+  FileText,
+  FolderOpen,
+  GraduationCap,
+  GripVertical,
+  Keyboard,
+  Lightbulb,
+  Loader2,
+  MapPin,
+  Mic,
+  Pause,
+  Plus,
+  RefreshCw,
+  Send,
+  Settings,
+  Sparkles,
+  Trash2,
+  User,
+  Square,
+  Tag,
+  Target,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
+
+const ICONS: Record<string, LucideIcon> = {
+  "file-text": FileText,
+  target: Target,
+  briefcase: Briefcase,
+  mic: Mic,
+  settings: Settings,
+  sparkles: Sparkles,
+  "refresh-ccw": RefreshCw,
+  "refresh-cw": RefreshCw,
+  "external-link": ExternalLink,
+  "building-2": Building2,
+  "map-pin": MapPin,
+  "dollar-sign": DollarSign,
+  plus: Plus,
+  check: Check,
+  "check-circle-2": CheckCircle2,
+  "arrow-right": ArrowRight,
+  "loader-2": Loader2,
+  circle: Circle,
+  download: Download,
+  pause: Pause,
+  square: Square,
+  tag: Tag,
+  "align-left": AlignLeft,
+  "graduation-cap": GraduationCap,
+  wrench: Wrench,
+  "folder-open": FolderOpen,
+  award: Award,
+  "grip-vertical": GripVertical,
+  keyboard: Keyboard,
+  send: Send,
+  user: User,
+  bookmark: Bookmark,
+  "alert-triangle": AlertTriangle,
+  "alert-circle": AlertTriangle,
+  lightbulb: Lightbulb,
+  "trash-2": Trash2,
+  "chevron-down": ChevronDown,
+  "chevron-right": ChevronRight,
+};
+
+type HubIconProps = {
+  name: string;
+  size?: number;
+  stroke?: number;
+  className?: string;
+};
+
+export function HubIcon({ name, size = 18, stroke = 1.75, className }: HubIconProps) {
+  const Cmp = ICONS[name] ?? Sparkles;
+  return <Cmp size={size} strokeWidth={stroke} className={className} />;
+}

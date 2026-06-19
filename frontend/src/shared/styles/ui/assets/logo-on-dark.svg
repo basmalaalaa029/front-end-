@@ -1,0 +1,6 @@
+<svg width="180" height="36" viewBox="0 0 180 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="0" y="2" width="32" height="32" rx="8" fill="#F4EFE2"></rect>
+  <path d="M9.5 23 C 9.5 15.5, 14.5 10.5, 22.5 10.5 C 22.5 18, 17.5 23, 9.5 23 Z" fill="#3C6240"></path>
+  <path d="M9.5 23 L 19.5 13" stroke="#F4EFE2" stroke-width="1.6" stroke-linecap="round"></path>
+  <text x="42" y="24.5" font-family="Geist, Inter, system-ui, sans-serif" font-size="19" font-weight="700" letter-spacing="-0.6" fill="#FBF8F1">CVBuilder</text>
+</svg>

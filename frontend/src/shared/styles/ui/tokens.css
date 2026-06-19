@@ -1,0 +1,198 @@
+/* CareerForge design tokens — imported by app and colors_and_type.css */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap");
+
+:root {
+  /* CareerForge palette */
+  --purple:       #534AB7;
+  --purple-light: #EEEDFE;
+  --purple-mid:   #AFA9EC;
+  --purple-dark:  #3C3489;
+  --teal:         #0F6E56;
+  --teal-light:   #E1F5EE;
+  --blue:         #185FA5;
+  --blue-light:   #E6F1FB;
+  --text:         #1a1a1a;
+  --text-muted:   #6b6b6b;
+  --text-faint:   #a0a0a0;
+  --border:       rgba(0, 0, 0, 0.08);
+  --border-strong:rgba(0, 0, 0, 0.15);
+  --surface:      #f9f8f6;
+  --white:        #ffffff;
+  --radius:       12px;
+  --radius-sm:    8px;
+  --radius-pill:  999px;
+
+  /* Legacy moss scale → purple aliases */
+  --moss-50:  var(--purple-light);
+  --moss-100: #E4E2FA;
+  --moss-200: var(--purple-mid);
+  --moss-300: #8B84D8;
+  --moss-400: #6E65C4;
+  --moss-500: var(--purple);
+  --moss-600: #453DA0;
+  --moss-700: var(--purple-dark);
+  --moss-800: #2E2870;
+  --moss-900: #1E1A4D;
+
+  --clay-50:  #F7F7F8;
+  --clay-100: #EDEDEF;
+  --clay-200: #D9D9DD;
+  --clay-300: #B5B5BD;
+  --clay-400: #82828C;
+  --clay-500: #5A5A63;
+  --clay-600: #3D3D44;
+  --clay-700: #28282E;
+  --clay-800: #18181B;
+  --clay-900: #0A0A0C;
+
+  --bone-50:  #FAFAFA;
+  --bone-100: var(--surface);
+  --bone-200: #E5E5E7;
+  --bone-300: #D1D1D5;
+  --bone-400: #A1A1A8;
+  --bone-500: #71717A;
+  --bone-600: #52525A;
+  --bone-700: #3F3F46;
+  --bone-800: #27272A;
+  --bone-900: #18181B;
+
+  --amber-500: #BA7517;
+  --amber-100: #FAEEDA;
+  --rust-500:  #993C1D;
+  --rust-100:  #F4D9D1;
+  --sky-500:   var(--blue);
+  --sky-100:   var(--blue-light);
+
+  --bg-canvas:    var(--surface);
+  --bg-surface:   var(--white);
+  --bg-elevated:  var(--white);
+  --bg-sunken:    #f0eff5;
+  --bg-inverse:   var(--text);
+
+  --fg-primary:    var(--text);
+  --fg-secondary:  var(--text-muted);
+  --fg-tertiary:   var(--text-faint);
+  --fg-disabled:   #c0c0c0;
+  --fg-on-primary: var(--white);
+  --fg-on-inverse: var(--surface);
+
+  --border-subtle:  var(--border);
+  --border-default: rgba(0, 0, 0, 0.12);
+  --border-strong:  rgba(0, 0, 0, 0.15);
+  --border-focus:   var(--purple);
+
+  --brand:         var(--purple);
+  --brand-hover:   #453DA0;
+  --brand-active:  var(--purple-dark);
+  --brand-soft:    var(--purple-light);
+  --brand-fg:      var(--white);
+
+  --accent:        var(--teal);
+  --accent-hover:  #0C5A46;
+  --accent-soft:   var(--teal-light);
+
+  --success:       var(--teal);
+  --success-soft:  var(--teal-light);
+  --success-fg:    #085041;
+
+  --warning:       var(--amber-500);
+  --warning-soft:  var(--amber-100);
+  --warning-fg:    #633806;
+
+  --danger:        var(--rust-500);
+  --danger-soft:   var(--rust-100);
+  --danger-fg:     #6B2A1A;
+
+  --info:          var(--blue);
+  --info-soft:     var(--blue-light);
+  --info-fg:       #0C447C;
+
+  --ai-bg:         var(--purple-light);
+  --ai-fg:         var(--purple-dark);
+  --ai-border:     var(--purple-mid);
+  --ai-glow:       0 0 0 1px var(--purple-mid), 0 0 24px -8px var(--purple);
+
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --font-display: "DM Serif Display", Georgia, "Times New Roman", serif;
+
+  --text-2xs: 11px;
+  --text-xs:  12px;
+  --text-sm:  13px;
+  --text-md:  14px;
+  --text-base:16px;
+  --text-lg:  17px;
+  --text-xl:  20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+  --text-5xl: 52px;
+  --text-6xl: 60px;
+  --text-7xl: 76px;
+
+  --lh-tight:  1.1;
+  --lh-snug:   1.25;
+  --lh-normal: 1.45;
+  --lh-relaxed:1.6;
+
+  --tracking-tightest: -0.04em;
+  --tracking-tighter:  -0.025em;
+  --tracking-tight:    -0.015em;
+  --tracking-normal:   0;
+  --tracking-wide:     0.02em;
+  --tracking-wider:    0.06em;
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  --space-0:  0;
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  --radius-xs:   2px;
+  --radius-md:   var(--radius);
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-2xl:  20px;
+
+  --shadow-xs:  0 1px 2px rgba(10, 10, 12, 0.06);
+  --shadow-sm:  0 1px 3px rgba(10, 10, 12, 0.08), 0 1px 2px rgba(10, 10, 12, 0.04);
+  --shadow-md:  0 4px 12px -2px rgba(10, 10, 12, 0.10), 0 2px 4px -1px rgba(10, 10, 12, 0.05);
+  --shadow-lg:  0 12px 28px -8px rgba(10, 10, 12, 0.16), 0 4px 8px -2px rgba(10, 10, 12, 0.06);
+  --shadow-xl:  0 24px 56px -12px rgba(10, 10, 12, 0.22), 0 8px 16px -4px rgba(10, 10, 12, 0.08);
+
+  --shadow-inset: inset 0 1px 2px rgba(10, 10, 12, 0.05);
+  --ring-focus: 0 0 0 3px rgba(83, 74, 183, 0.25);
+
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.64, 1);
+
+  --duration-instant: 80ms;
+  --duration-fast:    140ms;
+  --duration-medium:  220ms;
+  --duration-slow:    380ms;
+
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1200px;
+  --container-2xl:1440px;
+
+  --header-height: 64px;
+  --sidebar-width: 260px;
+  --sidebar-collapsed: 64px;
+}
