@@ -19,8 +19,23 @@ import { useAuthStore } from "@/features/auth/stores/auth-store";
 import { useRequireAuthNavigate } from "@/features/auth/lib/use-require-auth-navigate";
 import { LandingNav } from "@/features/landing/components/landing-nav";
 import { LandingFooter } from "@/features/landing/components/landing-footer";
+import { useI18n } from "@/features/i18n";
+import type { TemplateId } from "@/features/cv-editor/data/cv-templates";
+import { TemplateLivePreview } from "@/features/cv-editor/components/cv-template-picker-page/template-live-preview";
+
+const LANDING_TEMPLATE_IDS = ["modern", "executive", "tech"] as const satisfies readonly TemplateId[];
+
+const LANDING_TEMPLATE_BADGES: Record<
+  (typeof LANDING_TEMPLATE_IDS)[number],
+  { badge: string; badgeClass: string; featured?: boolean }
+> = {
+  modern: { badge: "Popular", badgeClass: "cf-badge-popular", featured: true },
+  executive: { badge: "New", badgeClass: "cf-badge-new" },
+  tech: { badge: "Clean", badgeClass: "cf-badge-clean" },
+};
 
 export default function Home() {
+  const { t } = useI18n();
   const token = useAuthStore((s) => s.token);
   const navigate = useNavigate();
   const requireAuth = useRequireAuthNavigate();
@@ -188,34 +203,28 @@ export default function Home() {
           colour.
         </p>
         <div className="cf-tmpl-grid">
-          {[
-            { name: "Professional", badge: "Popular", badgeClass: "cf-badge-popular", accent: "#534AB7", featured: true },
-            { name: "Modern", badge: "New", badgeClass: "cf-badge-new", accent: "#0F6E56", featured: false },
-            { name: "Creative", badge: "Clean", badgeClass: "cf-badge-clean", accent: "#993C1D", featured: false },
-          ].map((t) => (
-            <button
-              key={t.name}
-              type="button"
-              className={`cf-tmpl-card${t.featured ? " featured" : ""}`}
-              onClick={() => requireAuth("/dashboard/editor")}
-            >
-              <div className="cf-tmpl-preview">
-                <div className="cf-tmpl-accent-bar" style={{ background: t.accent }} />
-                <div className="cf-tmpl-lines">
-                  <div className="cf-tl accent" style={{ width: "60%", background: t.accent }} />
-                  <div className="cf-tl" style={{ width: "40%" }} />
-                  <div style={{ height: 8 }} />
-                  <div className="cf-tl accent" style={{ width: "80%", background: t.accent }} />
-                  <div className="cf-tl" style={{ width: "100%" }} />
-                  <div className="cf-tl" style={{ width: "75%" }} />
+          {LANDING_TEMPLATE_IDS.map((id) => {
+            const meta = LANDING_TEMPLATE_BADGES[id];
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`cf-tmpl-card${meta.featured ? " featured" : ""}`}
+                onClick={() => requireAuth(`/dashboard/editor/create/${id}`)}
+              >
+                <div className="cf-tmpl-preview">
+                  <TemplateLivePreview
+                    templateId={id}
+                    title={t(`cvEditor.templates.${id}.name`)}
+                  />
                 </div>
-              </div>
-              <div className="cf-tmpl-footer">
-                <span className="cf-tmpl-name">{t.name}</span>
-                <span className={`cf-tmpl-badge ${t.badgeClass}`}>{t.badge}</span>
-              </div>
-            </button>
-          ))}
+                <div className="cf-tmpl-footer">
+                  <span className="cf-tmpl-name">{t(`cvEditor.templates.${id}.name`)}</span>
+                  <span className={`cf-tmpl-badge ${meta.badgeClass}`}>{meta.badge}</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
         <div style={{ marginTop: 20 }}>
           <button type="button" className="btn-secondary" onClick={() => requireAuth("/dashboard/editor")}>
@@ -366,7 +375,7 @@ export default function Home() {
             🚀 Start for free today
           </div>
           <h2>Your dream job is one CV away</h2>
-          <p>Join 50,000+ professionals who built their careers with CareerForge.</p>
+          <p>Join 50,000+ professionals who built their careers with CareerPilot.</p>
           <div className="cf-cta-actions">
             <button type="button" className="btn-primary" onClick={() => requireAuth("/dashboard/editor")}>
               <FilePlus size={16} strokeWidth={2} aria-hidden />

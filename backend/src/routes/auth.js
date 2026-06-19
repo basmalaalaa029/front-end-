@@ -2,7 +2,7 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import passport from "passport";
 import { User } from "../models/User.js";
-import { signToken } from "../middleware/auth.js";
+import { requireAuth, signToken } from "../middleware/auth.js";
 import {
   decodeOAuthState,
   encodeOAuthState,
@@ -49,6 +49,12 @@ router.post("/register", async (req, res) => {
     console.error("Register error:", err);
     return fail(res, 500, "Registration failed");
   }
+});
+
+router.get("/me", requireAuth, (req, res) => {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  return ok(res, req.user.toAuthPayload(token));
 });
 
 router.post("/login", async (req, res) => {

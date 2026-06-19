@@ -55,7 +55,8 @@ If port 8000 is busy: `./scripts/stop.sh && ./scripts/run.sh` (also frees port 8
 Edit `ai-models/.env`:
 
 - `HUGGINGFACE_TOKEN` — required for model download
-- `JWT_SECRET` — must match `backend/.env`
+- `JWT_SECRET` — must match `backend/.env` (CV Agent verifies backend-issued JWTs only)
+- `CV_AGENT_AUTH_DISABLED=false` — auth required by default; set `true` only for isolated API tests
 
 ### 3. Download models (~20 GB, run once)
 

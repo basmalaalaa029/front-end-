@@ -1,8 +1,8 @@
-# CVBuilder Design System
+# CareerPilot Design System
 
 > An AI career copilot. Build a CV worth reading, analyze it against any role, find matching jobs, and rehearse the interview — all in one place.
 
-CVBuilder is a desktop-first web product organized around four AI-driven surfaces:
+CareerPilot is a desktop-first web product organized around four AI-driven surfaces:
 
 | Surface | Role |
 |---|---|
@@ -37,7 +37,7 @@ Fonts: **Geist** + **Geist Mono** (Google Fonts CDN, no local files needed). Ico
 
 ## Content fundamentals
 
-CVBuilder's voice is a **trusted professional advisor** — like a good career coach who has done this 10,000 times and won't waste your time.
+CareerPilot's voice is a **trusted professional advisor** — like a good career coach who has done this 10,000 times and won't waste your time.
 
 **Tone.** Calm, specific, outcome-oriented. We don't hype. We don't apologize. We don't lecture. We give a clear recommendation and the reasoning behind it, then get out of the way.
 
@@ -46,7 +46,7 @@ CVBuilder's voice is a **trusted professional advisor** — like a good career c
 - **"You"** when giving advice. *"Your summary buries the win — lead with the 38% improvement."*
 - Never **"I"** from the AI. The copilot speaks as a service, not as a personality.
 
-**Casing.** Sentence case everywhere — buttons, nav, page titles, modal headers. Reserve Title Case for proper nouns (CVBuilder, Stripe, Senior Product Designer) and the wordmark only.
+**Casing.** Sentence case everywhere — buttons, nav, page titles, modal headers. Reserve Title Case for proper nouns (CareerPilot, Stripe, Senior Product Designer) and the wordmark only.
 
 **Punctuation.** Periods on full sentences; trim from fragments and CTAs. Em-dashes for tightening sentences — like that. Oxford comma always.
 

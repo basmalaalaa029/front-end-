@@ -26,7 +26,7 @@ export default function Footer() {
         {/* Contact */}
         <div>
           <h3 className="text-white font-semibold mb-3">Contact</h3>
-          <p className="text-sm">support@cvbuilder.com</p>
+          <p className="text-sm">support@careerpilot.com</p>
           <p className="text-sm mt-1">+20 100 000 0000</p>
         </div>
 

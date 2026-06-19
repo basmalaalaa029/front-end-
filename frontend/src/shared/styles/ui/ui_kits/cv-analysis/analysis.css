@@ -154,6 +154,48 @@
   line-height: 1.45;
 }
 
+.analysis-loading {
+  margin-bottom: 16px;
+  padding: 20px 16px;
+  text-align: center;
+  color: var(--fg-secondary);
+}
+
+.analysis-loading p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--fg-primary);
+}
+
+.analysis-loading__hint {
+  margin-top: 8px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--fg-tertiary) !important;
+}
+
+.analysis-form .cv-file-empty,
+.analysis-form .cv-file-card {
+  margin-top: 8px;
+}
+
+.analysis-empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--fg-secondary);
+}
+
+.analysis-empty-state p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.analysis-empty-state__hint {
+  margin-top: 10px !important;
+  font-size: 13px;
+  color: var(--fg-tertiary);
+}
+
 .cv-file-card {
   display: flex;
   align-items: center;

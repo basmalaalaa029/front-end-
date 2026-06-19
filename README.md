@@ -1,4 +1,4 @@
-# CareerForge
+# CareerPilot
 
 AI-powered CV builder: analyze resumes, generate tailored CVs, match jobs, and practice interviews.
 
@@ -54,7 +54,7 @@ If port 8000 is busy: `cd ai-models && ./scripts/stop.sh && ./scripts/run.sh`
 ## Project layout
 
 ```
-careerforge/
+careerpilot/
 ├── frontend/     React + Vite (vertical feature slices)
 ├── backend/      Express auth API (login, OAuth, profile)
 ├── ai-models/    FastAPI AI services (analysis, CV gen, jobs, interview)

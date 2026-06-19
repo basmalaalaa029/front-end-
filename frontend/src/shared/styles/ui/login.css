@@ -1,4 +1,4 @@
-/* CareerForge auth layout */
+/* CareerPilot auth layout */
 .login-page * { box-sizing: border-box; }
 
 .login-page {
@@ -543,6 +543,16 @@
 
 .login-page .checkbox-row a:hover {
   text-decoration: underline;
+}
+
+.auth-session-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  color: var(--fg-secondary);
+  font-size: 14px;
 }
 
 .login-page .left[dir="rtl"] .input-wrap .show-pwd {

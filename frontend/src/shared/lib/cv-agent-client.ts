@@ -1,5 +1,5 @@
 /**
- * Unified CV Agent HTTP client — adds JWT from auth store to all :8000 requests.
+ * Unified CV Agent HTTP client — requires backend-issued JWT on all :8000 requests.
  */
 import { useAuthStore } from "@/features/auth/stores/auth-store";
 import {
@@ -22,6 +22,14 @@ export class CvAgentClientError extends Error {
   }
 }
 
+function handleUnauthorized(): void {
+  const { logout } = useAuthStore.getState();
+  logout();
+  if (window.location.pathname !== "/login") {
+    window.location.href = "/login";
+  }
+}
+
 export async function readCvAgentError(res: Response): Promise<string> {
   try {
     const body = await res.json();
@@ -37,14 +45,22 @@ export async function readCvAgentError(res: Response): Promise<string> {
   }
 }
 
+function requireToken(): string {
+  const token = useAuthStore.getState().token;
+  if (!token) {
+    throw new CvAgentClientError("Not authenticated", 401);
+  }
+  return token;
+}
+
 function authHeaders(
   extra?: HeadersInit,
   body?: BodyInit | null,
 ): HeadersInit {
-  const token = useAuthStore.getState().token;
+  const token = requireToken();
   const base: Record<string, string> = {
     Accept: "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    Authorization: `Bearer ${token}`,
   };
   // FormData: browser must set Content-Type with multipart boundary.
   const skipContentType = body instanceof FormData;
@@ -75,10 +91,21 @@ export type CvAgentFetchOptions = RequestInit & {
   signal?: AbortSignal;
 };
 
+async function handleCvAgentResponse(res: Response): Promise<void> {
+  if (res.status === 401) {
+    handleUnauthorized();
+  }
+  if (!res.ok) {
+    throw new CvAgentClientError(await readCvAgentError(res), res.status);
+  }
+}
+
 export async function cvAgentFetch<T>(
   path: string,
   init: CvAgentFetchOptions = {},
 ): Promise<T> {
+  requireToken();
+
   const { timeoutMs, signal, body, ...rest } = init;
   let fetchSignal = signal;
   if (timeoutMs) {
@@ -93,9 +120,7 @@ export async function cvAgentFetch<T>(
     headers: authHeaders(rest.headers, body),
   });
 
-  if (!res.ok) {
-    throw new CvAgentClientError(await readCvAgentError(res), res.status);
-  }
+  await handleCvAgentResponse(res);
 
   if (res.status === 204) {
     return undefined as T;
@@ -113,6 +138,8 @@ export async function cvAgentFetchRaw(
   path: string,
   init: CvAgentFetchOptions = {},
 ): Promise<Response> {
+  requireToken();
+
   const { timeoutMs, signal, body, ...rest } = init;
   let fetchSignal = signal;
   if (timeoutMs) {
@@ -127,9 +154,7 @@ export async function cvAgentFetchRaw(
     headers: authHeaders(rest.headers, body),
   });
 
-  if (!res.ok) {
-    throw new CvAgentClientError(await readCvAgentError(res), res.status);
-  }
+  await handleCvAgentResponse(res);
 
   return res;
 }

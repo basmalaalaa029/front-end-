@@ -9,7 +9,7 @@ import { configurePassport } from "./config/passport.js";
 
 const PORT = Number(process.env.PORT) || 5000;
 const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/cvbuilder";
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/careerpilot";
 
 if (!process.env.JWT_SECRET) {
   console.warn("⚠️  JWT_SECRET is not set — using insecure dev default");
@@ -33,7 +33,7 @@ app.use(passport.initialize());
 configurePassport();
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, service: "cvbuilder-auth-api" });
+  res.json({ ok: true, service: "careerpilot-auth-api" });
 });
 
 app.use("/api/auth", authRoutes);

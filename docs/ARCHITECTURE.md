@@ -1,4 +1,4 @@
-# CareerForge — Vertical Slice Architecture
+# CareerPilot — Vertical Slice Architecture
 
 Reference diagram: [`cv_builder_architecture.svg`](../cv_builder_architecture.svg)
 
@@ -49,11 +49,13 @@ Each folder under `frontend/src/features/` is a vertical slice: components, lib,
 
 ## Authentication flow
 
-1. User logs in via `backend/` → receives JWT
-2. Frontend stores token in `useAuthStore`
-3. All AI requests include `Authorization: Bearer <token>`
-4. `cv_agent/app/auth.py` verifies JWT (same `JWT_SECRET` as backend)
-5. Dev bypass: `CV_AGENT_AUTH_DISABLED=true` in `ai-models/.env`
+Node.js `backend/` (port 5000) is the **only** authentication service.
+
+1. User registers or logs in via `backend/` (`POST /api/auth/register`, `/login`, or OAuth) → receives JWT
+2. Frontend stores token in `useAuthStore` and validates session via `GET /api/auth/me`
+3. All CV Agent requests include `Authorization: Bearer <token>`
+4. `cv_agent/app/auth.py` verifies the JWT (same `JWT_SECRET` as backend) — no login on Python
+5. For isolated API testing only: `CV_AGENT_AUTH_DISABLED=true` in `ai-models/.env`
 
 ## Environment
 

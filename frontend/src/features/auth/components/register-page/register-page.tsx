@@ -13,6 +13,7 @@ import {
   validateRegisterPassword,
 } from "@/features/auth/lib/validation";
 import { getAuthReturnTarget } from "@/features/auth/lib/use-require-auth-navigate";
+import { OAuthButtons } from "@/features/auth/components/oauth-buttons/oauth-buttons";
 
 type RegisterField = "name" | "email" | "password" | "confirmPassword";
 type FieldErrors = Partial<Record<RegisterField, string>>;
@@ -162,7 +163,7 @@ export default function Register() {
               <span className="brand-mark" aria-hidden>
                 <FileText size={14} strokeWidth={1.75} />
               </span>
-              <strong>CareerForge</strong>
+              <strong>CareerPilot</strong>
             </Link>
             <Link to="/" className="back">
               <ArrowLeft size={14} strokeWidth={1.75} aria-hidden />
@@ -174,8 +175,10 @@ export default function Register() {
             <form className="form" onSubmit={handleRegister} noValidate>
               <h1>Create your account</h1>
               <p className="lead">
-                Start your journey with CareerForge — one workspace for your CV, analysis, and jobs.
+                Start your journey with CareerPilot — one workspace for your CV, analysis, and jobs.
               </p>
+
+              <OAuthButtons dividerLabel="or sign up with email" />
 
               <div className={`field${errors.name && touched.name ? " field--error" : ""}`}>
                 <label htmlFor="reg-name">Full name</label>
@@ -298,7 +301,7 @@ export default function Register() {
           </div>
 
           <div className="left-foot">
-            <span>© 2026 CareerForge · Your data stays yours.</span>
+            <span>© 2026 CareerPilot · Your data stays yours.</span>
             <span>
               <a href="#terms">Terms</a> · <a href="#privacy">Privacy</a> · <a href="#help">Help</a>
             </span>
@@ -316,7 +319,7 @@ export default function Register() {
               </h2>
               <p>
                 Build, analyze, and tailor your CV. Match to live job openings. Rehearse interviews.
-                CareerForge is the only tool you&apos;ll open during your search.
+                CareerPilot is the only tool you&apos;ll open during your search.
               </p>
             </div>
 

@@ -11,15 +11,14 @@ import type { AnalysisFileSource } from "@/features/cv-analysis/lib/cv-analysis-
 import { CvAnalysisApiError } from "@/features/cv-analysis/lib/cv-analysis-api";
 import { CvAgentClientError } from "@/shared/lib/cv-agent-client";
 import {
-  CV_AGENT_BASE,
   loadAnalysisCache,
   saveAnalysisCache,
   clearActiveAnalysisSession,
   loadActiveAnalysisSession,
   pollAnalysisJob,
   resumeAnalysisAsync,
-  STAGE_LABELS,
 } from "@/features/cv-analysis/lib/cv-analysis-api";
+import { logAnalysisStage } from "@/features/cv-analysis/lib/map-analysis-result";
 import { takePendingAnalysisFile } from "@/features/cv-analysis/lib/pending-upload";
 import type {
   AnalysisIssue,
@@ -236,7 +235,7 @@ function IssuesRecommendations({ result }: { result: CvAnalysisResult }) {
   if (!hasStrengths && issues.length === 0 && sectionFeedback.length === 0) {
     return (
       <div className="ir-panel card" style={{ padding: 20, color: "var(--fg-secondary)", fontSize: 13 }}>
-        No issues or recommendations returned. Try adding a job description for richer feedback.
+        {t("analysis.noIssuesReturned")}
       </div>
     );
   }
@@ -339,6 +338,7 @@ function IssuesRecommendations({ result }: { result: CvAnalysisResult }) {
 }
 
 export default function AnalysisPage() {
+  const { t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -346,11 +346,8 @@ export default function AnalysisPage() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [fileSource, setFileSource] = useState<AnalysisFileSource | null>(null);
   const [result, setResult] = useState<CvAnalysisResult | null>(null);
-  const [analysisStage, setAnalysisStage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingHint, setLoadingHint] = useState("");
   const [showInputs, setShowInputs] = useState(true);
-  const [contextFromCv, setContextFromCv] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const initRef = useRef(false);
@@ -383,7 +380,6 @@ export default function AnalysisPage() {
         };
       });
       const detected = hasDetectedCvContext(ctx);
-      setContextFromCv(detected);
       return detected ? next : null;
     },
     [],
@@ -394,14 +390,9 @@ export default function AnalysisPage() {
   }, []);
 
   const handleAnalysisStatus = useCallback((status: AnalysisJobResponse) => {
-    setAnalysisStage(status.stage);
     setShowInputs(false);
     if (status.status === "processing") {
-      const elapsed =
-        status.elapsed_s != null
-          ? ` (${Math.round(status.elapsed_s)}s elapsed)`
-          : "";
-      setLoadingHint((STAGE_LABELS[status.stage] ?? "Analysis in progress…") + elapsed);
+      logAnalysisStage(status.stage, status.elapsed_s);
     }
   }, []);
 
@@ -417,12 +408,6 @@ export default function AnalysisPage() {
         company: data.company || prev.company,
         jobDescription: data.job_description || prev.jobDescription,
       }));
-      if (
-        (data.target_role && data.target_role !== "Target role") ||
-        (data.job_description && data.job_description.length > 0)
-      ) {
-        setContextFromCv(true);
-      }
       saveAnalysisCache(data, {
         ...form,
         fileName: file.name,
@@ -445,9 +430,7 @@ export default function AnalysisPage() {
       abortRef.current = ac;
 
       setLoading(true);
-      setAnalysisStage(null);
       setResult(null);
-      setLoadingHint("Starting CV analysis…");
       try {
         const data = await runAnalysisUploadAsync(
           file,
@@ -468,39 +451,33 @@ export default function AnalysisPage() {
           err instanceof CvAgentClientError
         ) {
           if (err.status === 401) {
-            toast.error(
-              "CV Agent rejected your session. Log in again, or set CV_AGENT_AUTH_DISABLED=true in ai-models/.env for local dev.",
-            );
+            toast.error(t("analysis.sessionExpired"));
           } else {
             toast.error(err.message);
           }
           return;
         }
-        const msg = err instanceof Error ? err.message : "Analysis failed";
-        if (msg.includes("fetch") || msg.includes("Failed")) {
-          toast.error(
-            `Cannot reach CV Agent at ${CV_AGENT_BASE}. Start ai-models (source .venv/bin/activate && python main.py).`,
-          );
+        const msg = err instanceof Error ? err.message : t("analysis.analysisFailed");
+        if (msg.includes("fetch") || msg.includes("Failed") || msg.includes("Network")) {
+          toast.error(t("analysis.serviceUnavailable"));
         } else {
           toast.error(msg);
         }
       } finally {
         setLoading(false);
-        setLoadingHint("");
-        setAnalysisStage(null);
       }
     },
-    [finishAnalysis, handleAnalysisStatus],
+    [finishAnalysis, handleAnalysisStatus, t],
   );
 
   const runAnalysis = useCallback(() => {
     if (!cvFile || !fileSource) {
-      toast.error("Choose a CV file to analyze — upload one or use your editor draft.");
+      toast.error(t("analysis.chooseFile"));
       fileRef.current?.click();
       return;
     }
     void runAnalysisWithFile(cvFile, inputs, fileSource);
-  }, [cvFile, fileSource, inputs, runAnalysisWithFile]);
+  }, [cvFile, fileSource, inputs, runAnalysisWithFile, t]);
 
   const uploadCvFile = useCallback(
     async (
@@ -525,7 +502,6 @@ export default function AnalysisPage() {
       abortRef.current = ac;
       setLoading(true);
       setResult(null);
-      setLoadingHint("Resuming analysis… waiting for AI judges.");
       try {
         const data = await resumeAnalysisAsync(jobId, ac.signal, handleAnalysisStatus);
         const draft = getDraftAnalysisFile();
@@ -542,14 +518,21 @@ export default function AnalysisPage() {
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         clearActiveAnalysisSession();
-        const msg = err instanceof Error ? err.message : "Analysis failed";
-        toast.error(msg);
+        if (err instanceof CvAnalysisApiError || err instanceof CvAgentClientError) {
+          toast.error(err.message);
+          return;
+        }
+        const msg = err instanceof Error ? err.message : t("analysis.analysisFailed");
+        toast.error(
+          msg.includes("fetch") || msg.includes("Failed") || msg.includes("Network")
+            ? t("analysis.serviceUnavailable")
+            : msg,
+        );
       } finally {
         setLoading(false);
-        setLoadingHint("");
       }
     },
-    [cvFile, fileSource, finishAnalysis, handleAnalysisStatus, inputs],
+    [cvFile, fileSource, finishAnalysis, handleAnalysisStatus, inputs, t],
   );
 
   useEffect(() => {
@@ -575,7 +558,7 @@ export default function AnalysisPage() {
           void uploadCvFile(file, form, nav.fileSource ?? "upload");
         })();
       } else {
-        toast.error("No file found — choose a PDF or DOCX to upload.");
+        toast.error(t("analysis.noFile"));
         fileRef.current?.click();
       }
       return;
@@ -627,7 +610,7 @@ export default function AnalysisPage() {
           const peek = await pollAnalysisJob(activeJob);
           if (peek.status === "failed") {
             clearActiveAnalysisSession();
-            toast.error(peek.error ?? "Previous analysis failed. Run it again.");
+            toast.error(peek.error ?? t("analysis.previousFailed"));
             return;
           }
           if (peek.status === "ready" && peek.result) {
@@ -646,9 +629,7 @@ export default function AnalysisPage() {
             err instanceof CvAnalysisApiError ||
             (err instanceof CvAgentClientError && err.status === 404)
           ) {
-            toast.error(
-              "Previous analysis session expired. Upload your CV and run analysis again.",
-            );
+            toast.error(t("analysis.sessionExpiredUpload"));
           }
         }
       })();
@@ -662,6 +643,7 @@ export default function AnalysisPage() {
     resumeInFlightAnalysis,
     runAnalysisWithFile,
     uploadCvFile,
+    t,
   ]);
 
   const handleFilePick = (file: File) => {
@@ -669,14 +651,14 @@ export default function AnalysisPage() {
   };
 
   const targetLabel = result
-    ? `vs ${result.target_role}${result.company ? ` · ${result.company}` : ""}`
-    : `vs ${inputs.targetRole}${inputs.company ? ` · ${inputs.company}` : ""}`;
+    ? `vs ${result.target_role}`
+    : `vs ${inputs.targetRole}`;
 
   return (
     <>
       <HubHeader
         title="Analysis"
-        sub={loading ? loadingHint || "Analyzing…" : targetLabel}
+        sub={loading ? t("analysis.analyzing") : targetLabel}
         right={
           <>
             <button
@@ -713,60 +695,26 @@ export default function AnalysisPage() {
       <div className="analysis-layout">
         {showInputs ? (
           <div
-            className="card"
+            className="card analysis-form"
             style={{
               marginBottom: 20,
               padding: 18,
               display: "grid",
-              gap: 12,
+              gap: 16,
             }}
           >
-            <p className="analysis-context-note">
-              {contextFromCv
-                ? "Role and profile context were detected from your CV file."
-                : cvFile
-                  ? "File attached. For PDF/DOCX, click Run analysis — the server will read role and summary from the file."
-                  : "Attach a CV file — role and summary will be detected automatically."}
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600 }}>Target role</label>
-                <input
-                  className="field-input"
-                  style={{ width: "100%", marginTop: 4, padding: 8, borderRadius: 8, border: "1px solid var(--border-subtle)" }}
-                  value={inputs.targetRole}
-                  readOnly={contextFromCv}
-                  onChange={(e) => setInputs((s) => ({ ...s, targetRole: e.target.value }))}
-                />
-              </div>
-              <div>
-                <label style={{ fontSize: 12, fontWeight: 600 }}>Company</label>
-                <input
-                  className="field-input"
-                  style={{ width: "100%", marginTop: 4, padding: 8, borderRadius: 8, border: "1px solid var(--border-subtle)" }}
-                  value={inputs.company}
-                  readOnly={contextFromCv && Boolean(inputs.company)}
-                  onChange={(e) => setInputs((s) => ({ ...s, company: e.target.value }))}
-                  placeholder="Detected from latest role"
-                />
-              </div>
-            </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600 }}>Profile context (from CV)</label>
-              <textarea
-                rows={4}
-                style={{ width: "100%", marginTop: 4, padding: 10, borderRadius: 8, border: "1px solid var(--border-subtle)", fontFamily: "inherit" }}
-                value={inputs.jobDescription}
-                readOnly={contextFromCv && Boolean(inputs.jobDescription)}
-                onChange={(e) => setInputs((s) => ({ ...s, jobDescription: e.target.value }))}
-                placeholder="Professional summary and skills — extracted from your CV after you attach a file"
+              <label style={{ fontSize: 12, fontWeight: 600 }}>{t("analysis.targetRoleLabel")}</label>
+              <input
+                className="field-input"
+                style={{ width: "100%", marginTop: 4, padding: 8, borderRadius: 8, border: "1px solid var(--border-subtle)" }}
+                value={inputs.targetRole}
+                onChange={(e) => setInputs((s) => ({ ...s, targetRole: e.target.value }))}
+                placeholder={t("analysis.targetRolePlaceholder")}
               />
             </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600 }}>Your CV</label>
-              <p style={{ fontSize: 12, color: "var(--fg-tertiary)", margin: "4px 0 8px" }}>
-                Analyze a file from your device or your latest CV editor draft — not raw text.
-              </p>
+              <label style={{ fontSize: 12, fontWeight: 600 }}>{t("analysis.yourCvLabel")}</label>
               {cvFile && fileSource ? (
                 <CvFileCard
                   file={cvFile}
@@ -777,14 +725,14 @@ export default function AnalysisPage() {
               ) : (
                 <div className="cv-file-empty">
                   <HubIcon name="folder-open" size={28} />
-                  <p>No CV file selected yet.</p>
+                  <p>{t("analysis.noCvSelected")}</p>
                   <button
                     type="button"
                     className="btn btn-secondary"
                     disabled={loading}
                     onClick={() => fileRef.current?.click()}
                   >
-                    Upload PDF / DOCX / TXT
+                    {t("analysis.uploadCv")}
                   </button>
                 </div>
               )}
@@ -800,43 +748,19 @@ export default function AnalysisPage() {
                 }}
               />
             </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <div>
               <button type="button" className="btn btn-ai" disabled={loading} onClick={() => void runAnalysis()}>
                 <HubIcon name="sparkles" size={14} stroke={2} />
-                {loading ? "Analyzing…" : "Run analysis"}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                disabled={loading}
-                onClick={() => fileRef.current?.click()}
-              >
-                <HubIcon name="folder-open" size={14} stroke={2} />
-                {cvFile ? "Replace file" : "Upload file"}
+                {loading ? t("analysis.analyzing") : t("analysis.runAnalysis")}
               </button>
             </div>
           </div>
         ) : null}
 
         {loading ? (
-          <div className="card" style={{ marginBottom: 16, padding: 16 }}>
-            {analysisStage ? (
-              <>
-                <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                  {STAGE_LABELS[analysisStage] ?? "Analysis in progress…"}
-                </p>
-                <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 0 }}>
-                  Stage: {analysisStage}
-                </p>
-              </>
-            ) : (
-              <p style={{ fontWeight: 600, marginBottom: 8 }}>
-                Starting CV analysis…
-              </p>
-            )}
-            <p style={{ fontSize: 12, marginTop: 8, fontStyle: "italic" }}>
-              {loadingHint || "Analyzing… First run may take several minutes while models load."}
-            </p>
+          <div className="card analysis-loading" role="status" aria-live="polite">
+            <p>{t("analysis.analyzing")}</p>
+            <p className="analysis-loading__hint">{t("analysis.analyzingHint")}</p>
           </div>
         ) : null}
 
@@ -869,16 +793,9 @@ export default function AnalysisPage() {
             </div>
           </>
         ) : loading ? null : (
-          <div className="card" style={{ padding: 32, textAlign: "center", color: "var(--fg-secondary)" }}>
-            <p>
-              Upload a CV file or open Analysis from the CV editor, then click{" "}
-              <strong>Run analysis</strong>.
-            </p>
-            <p style={{ fontSize: 13, marginTop: 8 }}>
-              Uses <code>POST /analyze</code> on the CV Agent at{" "}
-              <code>{CV_AGENT_BASE}</code> (set <code>VITE_CV_AGENT_URL</code> in{" "}
-              <code>.env.local</code>).
-            </p>
+          <div className="card analysis-empty-state">
+            <p>{t("analysis.emptyState")}</p>
+            <p className="analysis-empty-state__hint">{t("analysis.emptyStateHint")}</p>
           </div>
         )}
       </div>

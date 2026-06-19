@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Optional: print commands to start all three CareerForge services in separate terminals.
+# Optional: print commands to start all three CareerPilot services in separate terminals.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 cat <<EOF
-CareerForge — run each service in its own terminal:
+CareerPilot — run each service in its own terminal:
 
   # MongoDB (once)
   cd $ROOT && docker compose up -d mongo

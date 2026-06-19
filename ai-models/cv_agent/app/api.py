@@ -115,6 +115,14 @@ if _FASTAPI_AVAILABLE:
 
         @app.on_event("startup")
         async def _startup_cv_analysis() -> None:
+            from cv_agent.app.auth import _auth_disabled
+
+            if not _auth_disabled() and not os.getenv("JWT_SECRET", "").strip():
+                raise RuntimeError(
+                    "JWT_SECRET is required when CV_AGENT_AUTH_DISABLED=false. "
+                    "Use the same value as backend/.env."
+                )
+
             if _analysis_cfg.warmup_on_startup:
                 runtime = get_analysis_runtime()
                 threading.Thread(

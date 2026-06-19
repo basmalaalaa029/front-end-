@@ -1,4 +1,4 @@
-# CareerForge Frontend
+# CareerPilot Frontend
 
 React + Vite app with vertical feature slices under `src/features/`.
 

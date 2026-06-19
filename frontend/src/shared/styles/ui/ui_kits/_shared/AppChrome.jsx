@@ -22,7 +22,7 @@ function Icon({ name, size = 18, stroke = 1.75, className = "" }) {
   return <span ref={ref} className={"icon " + className} style={{ display: "inline-flex", width: size, height: size }} />;
 }
 
-function AppSidebar({ active = "creator", brand = "CVBuilder" }) {
+function AppSidebar({ active = "creator", brand = "CareerPilot" }) {
   return (
     <aside className="app-sidebar">
       <div className="brand">

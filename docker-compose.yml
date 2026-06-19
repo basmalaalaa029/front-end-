@@ -1,11 +1,11 @@
 services:
   mongo:
     image: mongo:7
-    container_name: careerforge-mongo
+    container_name: careerpilot-mongo
     ports:
       - "27017:27017"
     volumes:
-      - careerforge_mongo_data:/data/db
+      - careerpilot_mongo_data:/data/db
 
 volumes:
-  careerforge_mongo_data:
+  careerpilot_mongo_data:

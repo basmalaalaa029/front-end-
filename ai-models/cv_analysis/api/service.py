@@ -28,6 +28,7 @@ def _run_job_background(
 
         def on_stage(stage: str) -> None:
             store.update(job_id, stage=JobStage(stage))
+            logger.info("[cv_analysis] Job %s stage=%s", job_id[:8], stage)
 
         result = run_analysis_pipeline(
             cv_text=cv_text,

@@ -12,9 +12,8 @@ import { CvEditorPage, CvTemplatePickerPage, CvWizardPage } from "@/features/cv-
 import { JobAgentPage } from "@/features/job-agent";
 import { InterviewPage } from "@/features/interview";
 import Home from "@/features/landing";
-import { LoginPage, RegisterPage, ProtectedRoute } from "@/features/auth";
+import { LoginPage, RegisterPage, ProtectedRoute, GuestRoute } from "@/features/auth";
 import { OAuthCallbackPage } from "@/features/auth/components/oauth-callback-page";
-import { ProfilePage } from "@/features/profile";
 
 function App() {
   return (
@@ -32,8 +31,8 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+        <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
         <Route path="/auth/callback" element={<OAuthCallbackPage />} />
 
         {/* Protected routes — redirect to /login if not authenticated */}
@@ -51,7 +50,7 @@ function App() {
           <Route path="/dashboard/editor/create/:templateId" element={<CvWizardPage />} />
           <Route path="/dashboard/editor/build/:templateId" element={<CvEditorPage />} />
           <Route path="/dashboard/interview" element={<InterviewPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile" element={<Navigate to="/dashboard" replace />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

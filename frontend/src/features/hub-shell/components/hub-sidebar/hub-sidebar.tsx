@@ -10,7 +10,7 @@ const NAV = [
   { label: "Interview Coach", icon: "mic", to: "/dashboard/interview" },
 ] as const;
 
-export function HubSidebar({ brand = "CareerForge" }: { brand?: string }) {
+export function HubSidebar({ brand = "CareerPilot" }: { brand?: string }) {
   const user = useAuthStore((s) => s.user);
 
   const initials =
@@ -48,13 +48,6 @@ export function HubSidebar({ brand = "CareerForge" }: { brand?: string }) {
           <HubIcon name="sparkles" size={18} />
           <span>Overview</span>
         </NavLink>
-        <NavLink
-          to="/profile"
-          className={({ isActive }) => "nav-item " + (isActive ? "is-active" : "")}
-        >
-          <HubIcon name="settings" size={18} />
-          <span>Profile</span>
-        </NavLink>
       </nav>
       <div className="sidebar-foot">
         <div className="user-row">
@@ -63,7 +56,6 @@ export function HubSidebar({ brand = "CareerForge" }: { brand?: string }) {
             <div className="user-name">{user?.name ?? "Guest"}</div>
             <div className="user-sub">{user?.email ?? "Sign in to sync"}</div>
           </div>
-          <HubIcon name="settings" size={16} />
         </div>
       </div>
     </aside>

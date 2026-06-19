@@ -74,7 +74,6 @@ const IconLogin = () => (
 const NAV_ITEMS = [
   { key: "home", label: "الرئيسية", path: "/", icon: <IconGrid /> },
   { key: "dashboard", label: "لوحة التحكم", path: "/dashboard", icon: <IconBriefcase /> },
-  { key: "profile", label: "ملفي الشخصي", path: "/profile", icon: <IconUser /> },
   { key: "cv", label: "الـ CV", path: "/cv", icon: <IconCV /> },
 ];
 /* ============================
@@ -264,11 +263,6 @@ export default function Navbar() {
                         icon: <IconBriefcase />,
                         label: "لوحة التحكم",
                         path: "/dashboard",
-                      },
-                      {
-                        icon: <IconUser />,
-                        label: "البروفايل",
-                        path: "/profile",
                       },
                       {
                         icon: <IconCV />,

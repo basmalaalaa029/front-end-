@@ -8,6 +8,7 @@ import { LandingNav } from "@/features/landing/components/landing-nav";
 import { LandingFooter } from "@/features/landing/components/landing-footer";
 import { validateEmail, validateLoginPassword } from "@/features/auth/lib/validation";
 import { getAuthReturnTarget } from "@/features/auth/lib/use-require-auth-navigate";
+import { OAuthButtons } from "@/features/auth/components/oauth-buttons/oauth-buttons";
 
 type FieldErrors = { email?: string; password?: string };
 
@@ -117,7 +118,7 @@ export default function Login() {
               <span className="brand-mark" aria-hidden>
                 <FileText size={14} strokeWidth={1.75} />
               </span>
-              <strong>CareerForge</strong>
+              <strong>CareerPilot</strong>
             </Link>
             <Link to="/" className="back">
               <ArrowLeft size={14} strokeWidth={1.75} aria-hidden />
@@ -132,6 +133,8 @@ export default function Login() {
                 Sign in to pick up where you left off — your drafts, applications, and interview practice
                 are saved.
               </p>
+
+              <OAuthButtons />
 
               <div className={`field${errors.email && touched.email ? " field--error" : ""}`}>
                 <label htmlFor="email">Email</label>
@@ -200,13 +203,13 @@ export default function Login() {
               </button>
 
               <div className="signup-row">
-                New to CareerForge? <Link to="/register">Create an account</Link>
+                New to CareerPilot? <Link to="/register">Create an account</Link>
               </div>
             </form>
           </div>
 
           <div className="left-foot">
-            <span>© 2026 CareerForge · Your data stays yours.</span>
+            <span>© 2026 CareerPilot · Your data stays yours.</span>
             <span>
               <a href="#terms">Terms</a> · <a href="#privacy">Privacy</a> · <a href="#help">Help</a>
             </span>
@@ -224,7 +227,7 @@ export default function Login() {
               </h2>
               <p>
                 Build, analyze, and tailor your CV. Match to live job openings. Rehearse interviews.
-                CareerForge is the only tool you&apos;ll open during your search.
+                CareerPilot is the only tool you&apos;ll open during your search.
               </p>
             </div>
 

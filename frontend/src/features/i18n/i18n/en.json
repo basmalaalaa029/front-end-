@@ -12,17 +12,17 @@
     "language": "Language"
   },
   "brand": {
-    "name": "CareerForge"
+    "name": "CareerPilot"
   },
   "footer": {
-    "aboutTitle": "CareerForge",
+    "aboutTitle": "CareerPilot",
     "aboutText": "Build a professional CV in minutes, match with the right jobs, and practice interviews with AI.",
     "linksTitle": "Quick links",
     "home": "Home",
     "dashboard": "Dashboard",
     "pricing": "Pricing",
     "contactTitle": "Contact",
-    "rights": "CareerForge. All rights reserved."
+    "rights": "CareerPilot. All rights reserved."
   },
   "common": {
     "kb": "KB"
@@ -122,7 +122,7 @@
     }
   },
   "home": {
-    "brand": "CareerForge",
+    "brand": "CareerPilot",
     "pricing": "Pricing",
     "signIn": "Log in",
     "createAccount": "Create CV — it's free",
@@ -166,7 +166,7 @@
     "browseTemplates": "Browse templates",
     "seePricing": "See pricing",
     "trustTitle": "Your data stays yours.",
-    "trustBody": "CareerForge never sells your CV or applies to jobs without your approval. Cancel anytime."
+    "trustBody": "CareerPilot never sells your CV or applies to jobs without your approval. Cancel anytime."
   },
   "cvEditor": {
     "pickTitle": "CV Creator",
@@ -402,7 +402,28 @@
     "exampleWording": "Example you can use",
     "severityGap": "Important",
     "severityWarn": "Tip",
-    "ensembleHint": "Scored with Qwen ATS + HR judges — scores and recommendations come from the model."
+    "ensembleHint": "Scored with Qwen ATS + HR judges — scores and recommendations come from the model.",
+    "emptyState": "Upload a CV file or open Analysis from the CV editor, then click Run analysis.",
+    "emptyStateHint": "We'll score your CV for ATS fit and give you tailored recommendations to improve it.",
+    "targetRoleLabel": "Target role",
+    "targetRolePlaceholder": "e.g. Senior Software Engineer",
+    "yourCvLabel": "Your CV",
+    "noCvSelected": "No CV file selected yet.",
+    "uploadCv": "Upload PDF / DOCX / TXT",
+    "contextDetected": "Role and profile context were detected from your CV file.",
+    "contextFileAttached": "File attached. Click Run analysis — we'll read your role and summary from the file.",
+    "contextAttachFile": "Attach a CV file — role and summary will be detected automatically.",
+    "runAnalysis": "Run analysis",
+    "analyzing": "Analyzing…",
+    "analyzingHint": "We're reviewing your CV. This may take a few minutes — please keep this page open.",
+    "chooseFile": "Choose a CV file to analyze — upload one or use your editor draft.",
+    "sessionExpired": "Your session expired. Please sign in again.",
+    "serviceUnavailable": "Analysis is temporarily unavailable. Please try again in a few minutes.",
+    "analysisFailed": "Analysis failed. Please try again.",
+    "noFile": "No file found — choose a PDF or DOCX to upload.",
+    "previousFailed": "Previous analysis failed. Run it again.",
+    "sessionExpiredUpload": "Your previous analysis session expired. Upload your CV and run analysis again.",
+    "noIssuesReturned": "No issues or recommendations returned. Try adding a job description for richer feedback."
   },
   "login": {
     "back": "Back to home",
@@ -417,9 +438,9 @@
     "remember": "Keep me signed in on this device",
     "submit": "Sign in",
     "signingIn": "Signing in…",
-    "newUser": "New to CareerForge?",
+    "newUser": "New to CareerPilot?",
     "create": "Create an account",
-    "foot": "© 2026 CareerForge · Your data stays yours.",
+    "foot": "© 2026 CareerPilot · Your data stays yours.",
     "terms": "Terms",
     "privacy": "Privacy",
     "help": "Help",
@@ -427,7 +448,7 @@
     "pitchH1": "One workspace from",
     "pitchH1Em": "first draft",
     "pitchH1Rest": "to offer letter.",
-    "pitchP": "Build, analyze, and tailor your CV. Match to live job openings. Rehearse interviews. CareerForge is the only tool you'll open during your search.",
+    "pitchP": "Build, analyze, and tailor your CV. Match to live job openings. Rehearse interviews. CareerPilot is the only tool you'll open during your search.",
     "previewAi": "Strong fit for Stripe — your design-systems work maps directly to the role's first 90-day goals. Tighten 2 bullet metrics to push to 96%.",
     "quote": "The interview simulator alone was worth it — I walked into my final round having practiced every weak spot.",
     "cite": "Jordan Reyes · Senior PM at Linear"

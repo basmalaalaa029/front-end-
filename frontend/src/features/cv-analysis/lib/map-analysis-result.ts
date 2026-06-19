@@ -181,9 +181,17 @@ export function mapApiResultToCvAnalysis(
   };
 }
 
-export const STAGE_LABELS: Record<string, string> = {
-  parsing: "Parsing CV…",
-  features: "Extracting features and keywords…",
-  judging: "AI judge is scoring your CV (CPU: typically 3–10 min for first run)…",
-  done: "Finalizing results…",
+/** Internal stage labels — logged in dev console / backend only, not shown in UI. */
+export const STAGE_LOG_LABELS: Record<string, string> = {
+  parsing: "Parsing CV",
+  features: "Extracting features and keywords",
+  judging: "AI judge scoring (CPU: typically 3–10 min for first run)",
+  done: "Finalizing results",
 };
+
+export function logAnalysisStage(stage: string, elapsedS?: number | null): void {
+  const label = STAGE_LOG_LABELS[stage] ?? stage;
+  const elapsed =
+    elapsedS != null ? ` (${Math.round(elapsedS)}s elapsed)` : "";
+  console.debug(`[CV Analysis] ${label}${elapsed}`);
+}

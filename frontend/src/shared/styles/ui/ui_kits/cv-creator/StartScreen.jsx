@@ -190,7 +190,7 @@ function StartScreen() {
       <div className="start-head">
         <div className="eyebrow">Step 1 of 3 · Choose a starting point</div>
         <h1>Start your CV</h1>
-        <p>Pick a template that fits your field, or upload an existing CV and we'll rebuild it inside CVBuilder — same content, better structure.</p>
+        <p>Pick a template that fits your field, or upload an existing CV and we'll rebuild it inside CareerPilot — same content, better structure.</p>
       </div>
 
       <div className="start-grid">

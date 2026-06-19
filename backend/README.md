@@ -1,6 +1,6 @@
-# CareerForge Backend
+# CareerPilot Backend
 
-Express API for login, registration, profile, and OAuth (port **5000**).
+Express API — **sole authentication service** for CareerPilot (port **5000**). Issues JWTs for login, registration, OAuth, and session validation. The CV Agent (`ai-models/`) only verifies these tokens; it does not register or log in users.
 
 ## Quick start
 
@@ -30,7 +30,7 @@ Set `VITE_API_URL=http://localhost:5000/api` in `frontend/.env`.
 
 ### 4. JWT secret
 
-Use the **same** `JWT_SECRET` in `backend/.env` and `ai-models/.env` so the AI service accepts login tokens.
+Use the **same** `JWT_SECRET` in `backend/.env` and `ai-models/.env` so the CV Agent accepts tokens issued by this backend.
 
 ## Endpoints
 
@@ -38,6 +38,7 @@ Use the **same** `JWT_SECRET` in `backend/.env` and `ai-models/.env` so the AI s
 |--------|------|-------------|
 | POST | `/api/auth/register` | Create account |
 | POST | `/api/auth/login` | Email login |
+| GET | `/api/auth/me` | Current user + session validation (Bearer token) |
 | GET | `/api/auth/google` | Google OAuth |
 | GET | `/api/auth/linkedin` | LinkedIn OAuth |
 | GET | `/api/users/profile` | Profile (Bearer token) |

@@ -1,4 +1,4 @@
-/* CareerForge landing page */
+/* CareerPilot landing page */
 
 .cf-landing {
   color: var(--text);
@@ -276,10 +276,27 @@
 .cf-tmpl-card.featured { border: 2px solid var(--purple); }
 
 .cf-tmpl-preview {
-  background: var(--surface);
-  padding: 16px;
-  min-height: 160px;
   position: relative;
+  background: #eef1f5;
+  min-height: 280px;
+  height: 280px;
+  overflow: hidden;
+}
+
+.cf-tmpl-preview .template-live-preview {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cf-tmpl-preview .template-live-preview iframe {
+  width: 220%;
+  height: 220%;
+  border: none;
+  transform: scale(0.455);
+  transform-origin: top left;
+  background: #fff;
 }
 
 .cf-tmpl-accent-bar {

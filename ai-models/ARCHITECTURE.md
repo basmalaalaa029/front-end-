@@ -365,11 +365,13 @@ From the monorepo root (`front-end-`):
 
 ### Authentication flow
 
-1. User logs in via `backend/` → receives JWT
-2. Frontend stores token in `useAuthStore`
+Node.js `backend/` (port 5000) is the **only** authentication service — register, login, OAuth, and JWT issuance.
+
+1. User authenticates via `backend/` → receives JWT
+2. Frontend stores token in `useAuthStore` and validates via `GET /api/auth/me`
 3. All CV Agent requests include `Authorization: Bearer <token>`
-4. `cv_agent/app/auth.py` verifies JWT (same `JWT_SECRET` as backend)
-5. Dev bypass: `CV_AGENT_AUTH_DISABLED=true` in `ai-models/.env`
+4. `cv_agent/app/auth.py` verifies backend-issued JWT (same `JWT_SECRET`) — no login on Python
+5. Isolated API testing only: `CV_AGENT_AUTH_DISABLED=true` in `ai-models/.env`
 
 ### Local development (3 terminals)
 
@@ -392,7 +394,7 @@ cd ai-models && source .venv/bin/activate && python3 main.py
 |----------|---------|-------------|
 | `HUGGINGFACE_TOKEN` | — | Required to download models |
 | `JWT_SECRET` | — | Must match `backend/.env` |
-| `CV_AGENT_AUTH_DISABLED` | `false` | Skip JWT check (local dev only) |
+| `CV_AGENT_AUTH_DISABLED` | `false` | Skip JWT check (pytest / isolated API tests only) |
 | `WRITER_MODEL` | `mistralai/Mistral-7B-Instruct-v0.3` | CV writer model |
 | `JUDGE_BASE_MODEL` | `OsamaHayba/qwen-ats-merged-stage1` | ATS judge base |
 | `JUDGE_ADAPTER_PATH` | `OsamaHayba/cv-analysis-final-stage2` | ATS judge LoRA adapter |

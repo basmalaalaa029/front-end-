@@ -10,7 +10,7 @@ const NAV = [
   { label: "Interview Coach", icon: "mic", to: "/dashboard/interview" },
 ] as const;
 
-export function HubTopNav({ brand = "CareerForge" }: { brand?: string }) {
+export function HubTopNav({ brand = "CareerPilot" }: { brand?: string }) {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
@@ -56,20 +56,13 @@ export function HubTopNav({ brand = "CareerForge" }: { brand?: string }) {
           <HubIcon name="sparkles" size={16} />
           <span>Overview</span>
         </NavLink>
-        <NavLink
-          to="/profile"
-          className={({ isActive }) => "nav-item " + (isActive ? "is-active" : "")}
-        >
-          <HubIcon name="settings" size={16} />
-          <span>Profile</span>
-        </NavLink>
       </nav>
 
       <div className="app-topnav-actions">
-        <NavLink to="/profile" className="app-topnav-user" title={user?.email ?? "Profile"}>
+        <div className="app-topnav-user" title={user?.email ?? user?.name ?? "Account"}>
           <span className="user-av">{initials}</span>
           <span className="app-topnav-user-name">{user?.name ?? "Guest"}</span>
-        </NavLink>
+        </div>
         <button
           type="button"
           className="btn btn-ghost btn-sm app-topnav-logout"

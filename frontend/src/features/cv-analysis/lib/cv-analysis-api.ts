@@ -6,7 +6,7 @@ import {
   CvAgentClientError,
   cvAgentFetch,
 } from "@/shared/lib/cv-agent-client";
-import { mapApiResultToCvAnalysis, STAGE_LABELS } from "./map-analysis-result";
+import { mapApiResultToCvAnalysis } from "./map-analysis-result";
 import type {
   AnalysisJobResponse,
   AnalysisStartResponse,
@@ -179,7 +179,6 @@ export async function resumeAnalysisAsync(
   return pollUntilComplete(jobId, { signal }, onStatus);
 }
 
-export { STAGE_LABELS };
 
 export const ANALYSIS_CACHE_KEY = "hub:lastAnalysis";
 

@@ -1,9 +1,5 @@
 import { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Upload } from "lucide-react";
-import toast from "react-hot-toast";
-import { setPendingAnalysisFile } from "@/features/cv-analysis/lib/pending-upload";
-import type { AnalysisNavigationState } from "@/features/cv-analysis/types";
 import { useI18n } from "@/features/i18n";
 import { TEMPLATE_IDS, type TemplateId } from "@/features/cv-editor/data/cv-templates";
 import {
@@ -19,18 +15,7 @@ export default function CvTemplatePickerPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
   const gridRef = useRef<HTMLDivElement>(null);
-  const uploadRef = useRef<HTMLInputElement>(null);
   const [activeFilter, setActiveFilter] = useState<TemplateFilterId>("all");
-
-  const handleUploadResume = () => {
-    uploadRef.current?.click();
-  };
-
-  const handleUploadFile = (file: File) => {
-    setPendingAnalysisFile(file);
-    const navState: AnalysisNavigationState = { autoUpload: true };
-    navigate("/dashboard/analyzer", { state: navState });
-  };
 
   const visibleIds = useMemo(
     () => TEMPLATE_IDS.filter((id) => templateMatchesFilter(id, activeFilter)),
@@ -54,36 +39,6 @@ export default function CvTemplatePickerPage() {
           <button type="button" className="btn btn-primary btn-lg" onClick={scrollToTemplates}>
             {t("cvEditor.gallery.createResume")}
           </button>
-          <button
-            type="button"
-            className="btn btn-outline btn-lg"
-            onClick={handleUploadResume}
-          >
-            <Upload size={18} strokeWidth={2} aria-hidden />
-            {t("cvEditor.gallery.uploadResume")}
-          </button>
-          <input
-            ref={uploadRef}
-            type="file"
-            accept=".pdf,.docx,.doc,.txt"
-            hidden
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const ok =
-                /\.(pdf|docx?|txt)$/i.test(file.name) ||
-                file.type.includes("pdf") ||
-                file.type.includes("word") ||
-                file.type === "text/plain";
-              if (!ok) {
-                toast.error("Please upload a PDF, DOCX, or TXT file.");
-                e.target.value = "";
-                return;
-              }
-              handleUploadFile(file);
-              e.target.value = "";
-            }}
-          />
         </div>
       </section>
 
