@@ -17,10 +17,16 @@ from cv_analysis.config import CVAnalysisConfig, get_cv_analysis_config
 
 
 class LlamaCppClient:
-    """HTTP client for llama-server /v1/chat/completions."""
+    """HTTP client for llama-server /v1/chat/completions (local or remote GPU)."""
 
-    def __init__(self, base_url: str) -> None:
+    def __init__(self, base_url: str, *, api_key: str = "") -> None:
         self.base_url = base_url.rstrip("/")
+        self._api_key = (api_key or "").strip()
+
+    def _headers(self) -> dict[str, str]:
+        if self._api_key:
+            return {"Authorization": f"Bearer {self._api_key}"}
+        return {}
 
     def chat(
         self,
@@ -41,12 +47,12 @@ class LlamaCppClient:
         url = f"{self.base_url}/v1/chat/completions"
         t0 = time.perf_counter()
         with httpx.Client(timeout=None) as client:
-            resp = client.post(url, json=payload)
+            resp = client.post(url, json=payload, headers=self._headers())
             resp.raise_for_status()
             data = resp.json()
         text = (data["choices"][0]["message"]["content"] or "").strip()
         logger.info(
-            "[cv_analysis] llama-server generated %d chars in %.1fs",
+            "[cv_analysis] inference server generated %d chars in %.1fs",
             len(text), time.perf_counter() - t0,
         )
         return text
@@ -100,6 +106,25 @@ class LlamaServerProcess:
                 self._client = MockLlamaClient()
                 self._ready = True
                 logger.info("[cv_analysis] Using mock inference client")
+                return
+
+            if cfg.is_remote_inference():
+                base_url = cfg.resolve_inference_url()
+                timeout_s = cfg.remote_health_timeout_s
+                logger.info(
+                    "[cv_analysis] Remote inference mode — connecting to %s (timeout %ds)",
+                    base_url, timeout_s,
+                )
+                if self._wait_for_health(base_url, timeout_s=timeout_s, proc=None):
+                    self._client = LlamaCppClient(base_url, api_key=cfg.remote_api_key)
+                    self._ready = True
+                    logger.info("[cv_analysis] Remote judge server ready at %s", base_url)
+                else:
+                    logger.error(
+                        "[cv_analysis] Remote judge server not reachable at %s — "
+                        "start gpu_inference on GPU: ./scripts/run_gpu_inference.sh",
+                        base_url,
+                    )
                 return
 
             model_path = cfg.resolve_model_path()
@@ -157,8 +182,8 @@ class LlamaServerProcess:
                 stderr=subprocess.PIPE,
                 cwd=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
             )
-            if self._wait_for_health(base_url, timeout_s=180):
-                self._client = LlamaCppClient(base_url)
+            if self._wait_for_health(base_url, timeout_s=180, proc=self._proc):
+                self._client = LlamaCppClient(base_url, api_key=cfg.remote_api_key)
                 self._ready = True
                 logger.info("[cv_analysis] Judge server ready at %s", base_url)
             else:
@@ -174,7 +199,9 @@ class LlamaServerProcess:
                     f": {err[:500]}" if err else "",
                 )
 
-    def _wait_for_health(self, base_url: str, timeout_s: int = 120) -> bool:
+    def _wait_for_health(
+        self, base_url: str, timeout_s: int = 120, proc: Optional[subprocess.Popen] = None,
+    ) -> bool:
         deadline = time.monotonic() + timeout_s
         probes: List[str] = [
             f"{base_url.rstrip('/')}/health",
@@ -182,17 +209,30 @@ class LlamaServerProcess:
             f"{base_url.rstrip('/')}/docs",
         ]
         while time.monotonic() < deadline:
-            if self._proc and self._proc.poll() is not None:
+            if proc is not None and proc.poll() is not None:
                 return False
             for health_url in probes:
                 try:
-                    with httpx.Client(timeout=3.0) as client:
+                    with httpx.Client(timeout=5.0) as client:
                         resp = client.get(health_url)
                         if resp.status_code == 200:
+                            # Remote GPU service may still be loading weights.
+                            try:
+                                body = resp.json()
+                                if body.get("status") == "loading":
+                                    continue
+                                if body.get("status") == "error":
+                                    logger.error(
+                                        "[cv_analysis] Remote server error: %s",
+                                        body.get("error", body),
+                                    )
+                                    return False
+                            except Exception:
+                                pass
                             return True
                 except Exception:
                     pass
-            time.sleep(1.0)
+            time.sleep(2.0)
         return False
 
     def stop(self) -> None:

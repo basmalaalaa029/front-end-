@@ -28,10 +28,19 @@ class CVAnalysisConfig(BaseSettings):
     model_gpu_layers: int = 0
     model_threads: int = Field(default_factory=lambda: os.cpu_count() or 4)
 
+    # local  -> start llama-server subprocess with GGUF on this machine
+    # remote -> connect to an external OpenAI-compatible server (gpu_inference/service.py)
+    inference_mode: str = Field(
+        default_factory=lambda: os.getenv("CV_ANALYSIS_INFERENCE_MODE", "local").lower()
+    )
     inference_backend: str = "llama_cpp"
     llama_server_url: str = "http://127.0.0.1:8080"
     llama_server_port: int = 8080
     llama_server_bin: str = "llama-server"
+    remote_api_key: str = Field(default_factory=lambda: os.getenv("CV_ANALYSIS_REMOTE_API_KEY", ""))
+    remote_health_timeout_s: int = Field(
+        default_factory=lambda: int(os.getenv("CV_ANALYSIS_REMOTE_HEALTH_TIMEOUT_S", "300"))
+    )
     gguf_dir: str = Field(default_factory=lambda: os.getenv("GGUF_DIR", "models/gguf"))
 
     max_concurrent_inferences: int = 1
@@ -65,6 +74,14 @@ class CVAnalysisConfig(BaseSettings):
             pkg_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             gguf = os.path.join(pkg_root, gguf)
         return os.path.join(gguf, path)
+
+    def is_remote_inference(self) -> bool:
+        return (self.inference_mode or "local").lower() == "remote"
+
+    def resolve_inference_url(self) -> str:
+        if self.llama_server_url:
+            return self.llama_server_url.rstrip("/")
+        return f"http://127.0.0.1:{self.llama_server_port}"
 
     def resolve_llama_server_bin(self) -> str:
         """Return path to llama-server: explicit config → repo bin/ → PATH."""

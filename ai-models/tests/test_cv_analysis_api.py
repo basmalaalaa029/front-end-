@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+import httpx
+
 from cv_analysis.api.service import get_job_status, start_analysis_job
 from cv_analysis.config import CVAnalysisConfig
 
@@ -101,6 +103,35 @@ def test_target_role_reaches_judge_prompt(monkeypatch):
     run_analysis_pipeline(cv_text=SAMPLE_CV, target_role="Product Manager")
     assert prompts
     assert "Target role: Product Manager" in prompts[0]
+
+
+def test_remote_inference_connects_without_local_gguf(monkeypatch):
+    """Remote mode skips local llama-server and uses HTTP client only."""
+    monkeypatch.setenv("CV_ANALYSIS_INFERENCE_MODE", "remote")
+    monkeypatch.setenv("CV_ANALYSIS_LLAMA_SERVER_URL", "http://remote-gpu.test:8080")
+    monkeypatch.setenv("CV_ANALYSIS_REMOTE_API_KEY", "test-key")
+    from cv_analysis.config import reset_config_cache
+    reset_config_cache()
+
+    import cv_analysis.judges.model_runtime as rt
+    rt._runtime = None
+
+    health_resp = httpx.Response(
+        200,
+        json={"status": "ok", "model_loaded": True},
+        request=httpx.Request("GET", "http://remote-gpu.test:8080/health"),
+    )
+
+    with patch.object(rt, "httpx") as mock_httpx:
+        mock_client = mock_httpx.Client.return_value.__enter__.return_value
+        mock_client.get.return_value = health_resp
+
+        runtime = rt.get_analysis_runtime()
+        runtime.start()
+
+    assert runtime.ready
+    assert runtime.client is not None
+    mock_client.get.assert_called()
 
 
 def test_judge_cache_varies_by_target_role():

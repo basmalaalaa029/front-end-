@@ -48,6 +48,8 @@ python scripts/download_gguf.py    # cv-analysis-Q4_K_M.gguf (~4.5 GB)
 
 **CV analysis** uses a local `llama-server` on port **8080** with `models/gguf/cv-analysis-Q4_K_M.gguf`. First model load can take 30–60s on CPU; judging a CV typically takes 20–90s. Check `/health` — `analysis_ready` should be `true` before analyzing.
 
+**Remote GPU (optional):** Run the fine-tuned HF model on a GPU server and point the CPU app at it — see [`gpu_inference/README.md`](gpu_inference/README.md). Set `CV_ANALYSIS_INFERENCE_MODE=remote` and `CV_ANALYSIS_LLAMA_SERVER_URL=http://YOUR_GPU:8080`.
+
 If port 8000 is busy: `./scripts/stop.sh && ./scripts/run.sh` (also frees port 8080)
 
 ### 2. Configure environment
