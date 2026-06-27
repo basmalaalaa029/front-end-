@@ -16,15 +16,16 @@ type JudgeBlock = {
   rewrite_suggestions?: string[];
 };
 
-type ApiAnalysisResult = {
+type LegacyNestedResult = {
   ats?: JudgeBlock;
   hr?: JudgeBlock;
-  /** @deprecated Legacy nested shape */
   analysis?: {
     ats?: JudgeBlock;
     hr?: JudgeBlock;
   };
 };
+
+export type ApiAnalysisResult = JudgeBlock | LegacyNestedResult;
 
 const OVERLAP_DROP = 0.72;
 
@@ -81,8 +82,14 @@ function issuesFromJudge(block: JudgeBlock, cvLower?: string): AnalysisIssue[] {
     const problem = (weaknesses[i] ?? "").trim();
     if (!problem || problem.toLowerCase().startsWith("judge output could not be parsed")) continue;
     const recommendation = (suggestions[i] ?? "").trim();
-    const rewrite = (rewrites[i] ?? "").trim();
-    if (cvLower && rewriteContradictsCv(rewrite, recommendation, cvLower)) continue;
+    const rewrite = rewrites[i];
+    const rewriteText =
+      typeof rewrite === "string"
+        ? rewrite.trim()
+        : rewrite && typeof rewrite === "object" && "improved" in rewrite
+          ? String((rewrite as { improved?: string }).improved ?? "").trim()
+          : "";
+    if (cvLower && rewriteContradictsCv(rewriteText, recommendation, cvLower)) continue;
     const title = problem.split(".")[0].trim().slice(0, 72) || `Tip ${issues.length + 1}`;
     issues.push({
       id: issues.length + 1,
@@ -91,7 +98,7 @@ function issuesFromJudge(block: JudgeBlock, cvLower?: string): AnalysisIssue[] {
       detail: "",
       recommendation: recommendation || "Update that part of your CV, then run analysis again.",
       evidence: "",
-      rewrite: rewrite || undefined,
+      rewrite: rewriteText || undefined,
       severity: issues.length < 2 ? "gap" : "warn",
     });
   }
@@ -118,10 +125,16 @@ function dedupeStrings(items: string[]): string[] {
   return out;
 }
 
-function resolveJudges(raw: ApiAnalysisResult): { ats: JudgeBlock; hr: JudgeBlock } {
-  const ats = raw.ats ?? raw.analysis?.ats ?? {};
-  const hr = raw.hr ?? raw.analysis?.hr ?? {};
-  return { ats, hr };
+function isFlatModelResult(raw: ApiAnalysisResult): raw is JudgeBlock {
+  return "overall_score" in raw && !("ats" in raw) && !("hr" in raw);
+}
+
+function resolveJudgeBlock(raw: ApiAnalysisResult): JudgeBlock {
+  if (isFlatModelResult(raw)) {
+    return raw;
+  }
+  const nested = raw as LegacyNestedResult;
+  return nested.ats ?? nested.analysis?.ats ?? nested.hr ?? nested.analysis?.hr ?? {};
 }
 
 export function mapApiResultToCvAnalysis(
@@ -133,18 +146,12 @@ export function mapApiResultToCvAnalysis(
     cvText?: string;
   } = {},
 ): CvAnalysisResult {
-  const { ats, hr } = resolveJudges(raw);
+  const block = resolveJudgeBlock(raw);
   const cvLower = opts.cvText?.toLowerCase() ?? "";
+  const overall = block.overall_score ?? 0;
 
-  const atsScore = ats.overall_score ?? 0;
-  const hrScore = hr.overall_score ?? 0;
-  const overall = Math.round((atsScore + hrScore) / 2);
-
-  const strengths = dedupeStrings([...(ats.strengths ?? []), ...(hr.strengths ?? [])]);
-  const issues = dedupeIssues([
-    ...issuesFromJudge(ats, cvLower || undefined),
-    ...issuesFromJudge(hr, cvLower || undefined),
-  ]);
+  const strengths = dedupeStrings(block.strengths ?? []);
+  const issues = dedupeIssues(issuesFromJudge(block, cvLower || undefined));
 
   const weaknesses = issues.map((i) => i.problem);
   const improvement_suggestions = issues.map((i) => i.recommendation);
@@ -155,13 +162,11 @@ export function mapApiResultToCvAnalysis(
     company: opts.company ?? "",
     job_description: opts.jobDescription ?? "",
     overall_score: overall,
-    ats_score: atsScore,
-    hr_score: hrScore,
-    clarity_score: ats.clarity_score ?? hr.clarity_score ?? 0,
-    structure_score: ats.structure_score ?? hr.structure_score ?? 0,
-    impact_score: ats.impact_score ?? hr.impact_score ?? 0,
-    skills_relevance_score: ats.skills_relevance_score ?? hr.skills_relevance_score ?? 0,
-    ats_readiness_score: ats.ats_readiness_score ?? hr.ats_readiness_score ?? 0,
+    clarity_score: block.clarity_score ?? 0,
+    structure_score: block.structure_score ?? 0,
+    impact_score: block.impact_score ?? 0,
+    skills_relevance_score: block.skills_relevance_score ?? 0,
+    ats_readiness_score: block.ats_readiness_score ?? 0,
     verdict: verdictFromScore(overall),
     strengths,
     weaknesses,
@@ -177,7 +182,7 @@ export function mapApiResultToCvAnalysis(
     jd_keywords: [],
     missing_keywords: [],
     latency_ms: 0,
-    analysis_mode: "ensemble",
+    analysis_mode: "model",
   };
 }
 
@@ -185,7 +190,7 @@ export function mapApiResultToCvAnalysis(
 export const STAGE_LOG_LABELS: Record<string, string> = {
   parsing: "Parsing CV",
   features: "Extracting features and keywords",
-  judging: "AI judge scoring (CPU: typically 3–10 min for first run)",
+  judging: "AI model scoring",
   done: "Finalizing results",
 };
 

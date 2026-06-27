@@ -2,7 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "@ui/ui_kits/cv-analysis/analysis.css";
-import { HubHeader, HubIcon } from "@/features/hub-shell";
+import "@/features/hub-shell/components/workflow-pipeline-bar/workflow-pipeline-bar.css";
+import { HubHeader, HubIcon, WorkflowPipelineBar } from "@/features/hub-shell";
+import { handoffCvToJobMatching } from "@/features/cv-analysis/lib/pipeline-cv";
+import type { JobNavigationState } from "@/features/hub-shell/lib/workflow-pipeline";
+import {
+  DEFAULT_WIZARD_TEMPLATE,
+  type CvWizardNavigationState,
+} from "@/features/cv-editor/lib/wizard-navigation";
 import { useI18n } from "@/features/i18n";
 import { getDraftAnalysisFile, cvTextToAnalysisFile, formatCvFileSize } from "@/features/cv-analysis/lib/draft-for-analysis";
 import { resolveAnalysisContextFromFile, hasDetectedCvContext } from "@/features/cv-analysis/lib/resolve-cv-context";
@@ -39,6 +46,9 @@ const EMPTY_INPUTS: AnalysisFormInputs = {
   targetRole: "Target role",
   company: "",
 };
+
+/** Offer AI CV generation when the ATS score is below this threshold. */
+const LOW_SCORE_CV_THRESHOLD = 70;
 
 function CvFileCard({
   file,
@@ -96,8 +106,6 @@ function subscoresFromResult(r: CvAnalysisResult) {
 function ScoreHero({ result }: { result: CvAnalysisResult }) {
   const { t } = useI18n();
   const score = result.overall_score;
-  const ats = result.ats_score ?? result.ats_readiness_score;
-  const hr = result.hr_score ?? result.overall_score;
   const subs = subscoresFromResult(result);
   const R = 38;
   const C = 2 * Math.PI * R;
@@ -109,14 +117,6 @@ function ScoreHero({ result }: { result: CvAnalysisResult }) {
         <div className="score-mini">
           <div className="n">{score}</div>
           <div className="l">{t("analysis.overallScore")}</div>
-        </div>
-        <div className="score-mini">
-          <div className="n">{ats}</div>
-          <div className="l">{t("analysis.atsScore")}</div>
-        </div>
-        <div className="score-mini">
-          <div className="n">{hr}</div>
-          <div className="l">{t("analysis.hrScore")}</div>
         </div>
       </div>
       <div className="score-ring">
@@ -654,6 +654,38 @@ export default function AnalysisPage() {
     ? `vs ${result.target_role}`
     : `vs ${inputs.targetRole}`;
 
+  const continueToJobMatching = () => {
+    if (!result) return;
+    const ok = handoffCvToJobMatching({
+      cvFile: cvFile,
+      targetRole: result.target_role || inputs.targetRole,
+      company: result.company || inputs.company,
+      jobDescription: inputs.jobDescription,
+      source: fileSource === "editor" ? "editor" : "analyze",
+    });
+    if (!ok) {
+      toast.error(t("workflow.needCvContent"));
+      return;
+    }
+    const nav: JobNavigationState = {
+      autoStart: true,
+      targetRole: result.target_role || inputs.targetRole,
+    };
+    navigate("/dashboard/jobs", { state: nav });
+  };
+
+  const generateCvWithAi = () => {
+    if (!result) return;
+    const nav: CvWizardNavigationState = {
+      fromAnalysis: true,
+      targetRole: result.target_role || inputs.targetRole,
+    };
+    navigate(`/dashboard/editor/create/${DEFAULT_WIZARD_TEMPLATE}`, { state: nav });
+  };
+
+  const showGenerateCvCta =
+    result != null && result.overall_score < LOW_SCORE_CV_THRESHOLD;
+
   return (
     <>
       <HubHeader
@@ -693,6 +725,8 @@ export default function AnalysisPage() {
       />
 
       <div className="analysis-layout">
+        <WorkflowPipelineBar current="cv" />
+
         {showInputs ? (
           <div
             className="card analysis-form"
@@ -790,6 +824,34 @@ export default function AnalysisPage() {
               <div>
                 <IssuesRecommendations result={result} />
               </div>
+            </div>
+
+            {showGenerateCvCta ? (
+              <div className="workflow-next-card workflow-next-card--improve">
+                <p>
+                  <strong>{t("analysis.lowScoreGenerateTitle")}</strong>
+                  {" — "}
+                  {t("analysis.lowScoreGenerateLead", {
+                    score: String(result.overall_score),
+                  })}
+                </p>
+                <button type="button" className="btn btn-ai" onClick={generateCvWithAi}>
+                  <HubIcon name="sparkles" size={14} stroke={2} />
+                  {t("analysis.generateCvWithAi")}
+                </button>
+              </div>
+            ) : null}
+
+            <div className="workflow-next-card">
+              <p>
+                <strong>{t("workflow.nextJobsTitle")}</strong>
+                {" — "}
+                {t("workflow.nextJobsLead")}
+              </p>
+              <button type="button" className="btn btn-ai" onClick={continueToJobMatching}>
+                <HubIcon name="arrow-right" size={14} stroke={2} />
+                {t("workflow.continueToJobs")}
+              </button>
             </div>
           </>
         ) : loading ? null : (

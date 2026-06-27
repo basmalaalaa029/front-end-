@@ -66,15 +66,10 @@ export function loadActiveAnalysisSession(): string | null {
 }
 
 export async function startAnalysisJob(
-  req: AnalyzeCvInput & { signal?: AbortSignal; file?: File },
+  req: { file: File; targetRole?: string; signal?: AbortSignal },
 ): Promise<AnalysisStartResponse> {
   const form = new FormData();
-  if (req.file) {
-    form.append("file", req.file);
-  } else if (req.cvText) {
-    form.append("cv_text", req.cvText);
-  }
-  form.append("jd_text", req.jobDescription ?? "");
+  form.append("file", req.file);
   const role = req.targetRole?.trim();
   if (role) {
     form.append("target_role", role);
@@ -146,11 +141,11 @@ async function pollUntilComplete(
 
 export async function runAnalysisUploadAsync(
   file: File,
-  opts: AnalyzeCvInput & { signal?: AbortSignal } = { cvText: "" },
+  opts: AnalyzeCvInput & { signal?: AbortSignal } = {},
   _onPartial?: unknown,
   onStatus?: (status: AnalysisJobResponse) => void,
 ): Promise<CvAnalysisResult> {
-  const start = await startAnalysisJob({ ...opts, file });
+  const start = await startAnalysisJob({ file, targetRole: opts.targetRole, signal: opts.signal });
   if (!start.job_id) {
     throw new CvAnalysisApiError("Analysis failed to start");
   }
@@ -163,12 +158,11 @@ export async function runAnalysisAsync(
   _onPartial?: unknown,
   onStatus?: (status: AnalysisJobResponse) => void,
 ): Promise<CvAnalysisResult> {
-  const start = await startAnalysisJob(req);
-  if (!start.job_id) {
-    throw new CvAnalysisApiError("Analysis failed to start");
+  if (!req.cvText?.trim()) {
+    throw new CvAnalysisApiError("CV file is required for analysis.");
   }
-  saveActiveAnalysisSession(start.job_id);
-  return pollUntilComplete(start.job_id, req, onStatus);
+  const file = new File([req.cvText], "cv.txt", { type: "text/plain" });
+  return runAnalysisUploadAsync(file, req, _onPartial, onStatus);
 }
 
 export async function resumeAnalysisAsync(

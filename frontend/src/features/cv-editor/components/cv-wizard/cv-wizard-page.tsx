@@ -1,24 +1,40 @@
-import { useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { HubIcon } from "@/features/hub-shell";
 import { isTemplateId, type TemplateId } from "@/features/cv-editor/data/cv-templates";
 import { mergeWizardWithGeneratedCv } from "@/features/cv-editor/lib/generated-cv-to-cv-data";
+import { parseWizardNavigationState } from "@/features/cv-editor/lib/wizard-navigation";
 import type { CvData } from "@/features/cv-editor/data/cv-types";
 import { Step1BasicInfo } from "./step1-basic-info";
 import { Step2Generating } from "./step2-generating";
 import { Step3Review } from "./step3-review";
 import { WizardProgress } from "./wizard-progress";
-import type { GeneratedCv, WizardStep1Data } from "./types";
+import { createEmptyWizardStep1, type GeneratedCv, type WizardStep1Data } from "./types";
 import "./cv-wizard.css";
 import "@ui/ui_kits/cv-creator/creator.css";
 
 export default function CvWizardPage() {
   const { templateId } = useParams<{ templateId: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [basicInfo, setBasicInfo] = useState<WizardStep1Data | null>(null);
   const [generatedCv, setGeneratedCv] = useState<GeneratedCv | null>(null);
   const [cvData, setCvData] = useState<CvData | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const initialStep1 = useMemo(() => {
+    const prefill = parseWizardNavigationState(location.state);
+    const role = prefill?.targetRole?.trim();
+    if (!role) return undefined;
+    return { ...createEmptyWizardStep1(), target_job: role };
+  }, [location.state]);
+
+  useEffect(() => {
+    if (parseWizardNavigationState(location.state)) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   if (!templateId || !isTemplateId(templateId)) {
     return <Navigate to="/dashboard/editor" replace />;
@@ -64,7 +80,9 @@ export default function CvWizardPage() {
         </div>
       ) : null}
 
-      {step === 1 ? <Step1BasicInfo onNext={handleStep1Next} /> : null}
+      {step === 1 ? (
+        <Step1BasicInfo onNext={handleStep1Next} initialData={initialStep1} />
+      ) : null}
       {step === 2 && basicInfo ? (
         <Step2Generating
           data={basicInfo}

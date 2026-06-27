@@ -12,15 +12,15 @@ What it does for each model:
   3. Quantize f16 -> Q4_K_M (llama.cpp `llama-quantize`).
 
 Off-the-shelf models (Qwen2.5-7B-Instruct, Phi-3-mini base) do NOT need this —
-download their community GGUF directly with scripts/download_gguf.py.
+download their community GGUF directly from Hugging Face.
 
 Prerequisites:
     pip install transformers peft torch accelerate huggingface-hub
     # llama.cpp (for convert + quantize); the script can clone+build it for you.
 
 Usage:
-    # convert both fine-tunes (phi3 CV writer + Qwen ATS judge):
-    python scripts/convert_to_gguf.py --models phi3 ats
+    # convert phi3 CV writer fine-tune:
+    python scripts/convert_to_gguf.py --models phi3
 
     # custom quant / output dir / existing llama.cpp checkout:
     python scripts/convert_to_gguf.py --models phi3 --quant Q4_K_M \
@@ -55,12 +55,6 @@ FINE_TUNES = {
         os.getenv("PHI3_MODEL", "basmalaalaa029/phi3-cv"),
         os.getenv("PHI3_ADAPTER_SUBFOLDER", "checkpoint-200"),
         "phi3-cv",
-    ),
-    "ats": (
-        os.getenv("JUDGE_BASE_MODEL", "OsamaHayba/qwen-ats-merged-stage1"),
-        os.getenv("JUDGE_ADAPTER_PATH", "OsamaHayba/cv-analysis-final-stage2"),
-        "",
-        "qwen-ats",
     ),
 }
 

@@ -1,0 +1,2 @@
+# Modal CLI + deploy-time deps (install locally only; not required on the FastAPI laptop)
+modal>=0.64.0

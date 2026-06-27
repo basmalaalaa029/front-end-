@@ -118,8 +118,7 @@ fi
 
 echo ""
 echo "✅ Setup complete."
-echo "CV analysis judge: ./scripts/install_llama_server.sh  (builds bin/llama-server)"
-echo "GGUF model:        python scripts/download_gguf.py"
+echo "CV analysis: set MODAL_ENDPOINT_URL in .env to your Modal analyze endpoint"
 echo "Start: ./scripts/run.sh"
 echo "HF login: .venv/bin/hf auth login"
 echo "Stop:  ./scripts/stop.sh"

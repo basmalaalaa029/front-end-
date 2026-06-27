@@ -1,6 +1,10 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getJobResults, matchJobs, matchJobsUpload } from "../lib/job-agent-api";
-import type { JobMatchRequest } from "../types";
+import {
+  matchJobs,
+  matchJobsUpload,
+  waitForJobResults,
+} from "../lib/job-agent-api";
+import type { JobMatchRequest, JobMatchStatus } from "../types";
 
 export function useJobMatch() {
   return useMutation({
@@ -17,10 +21,15 @@ export function useJobMatchUpload() {
   });
 }
 
-export function useJobResults(sessionId: string | null) {
+export function useJobResults(
+  sessionId: string | null,
+  onStatus?: (status: JobMatchStatus) => void,
+) {
   return useQuery({
-    queryKey: ["jobs", sessionId],
-    queryFn: () => getJobResults(sessionId!),
+    queryKey: ["jobs", "result", sessionId],
+    queryFn: () => waitForJobResults(sessionId!, onStatus),
     enabled: Boolean(sessionId),
+    staleTime: Infinity,
+    retry: false,
   });
 }

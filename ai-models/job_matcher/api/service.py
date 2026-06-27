@@ -3,13 +3,19 @@
 from __future__ import annotations
 
 import logging
+import threading
 import time
-import uuid
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from cv_agent.app.config import PipelineConfig
-from job_matcher.api.schemas import MatchRequest, MatchResultsResponse, MatchedJob
-from job_matcher.api.session import MatchSession, get_match_session_manager
+from job_matcher.api.schemas import (
+    MatchRequest,
+    MatchResultsResponse,
+    MatchStartResponse,
+    MatchStatusResponse,
+    MatchedJob,
+)
+from job_matcher.api.session import MatchStage, MatchStatus, get_session_manager
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +42,11 @@ def _why_summary(score: int, title: str, company: str,
     return f"Limited overlap for {title} at {company}. Consider tailoring CV for {kw}."
 
 
-def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJob]:
+def _run_full_pipeline(
+    req: MatchRequest,
+    cfg: PipelineConfig,
+    on_stage: Optional[Callable[[str], None]] = None,
+) -> List[MatchedJob]:
     from job_matcher.cv_reader.parser import parse_cv
     from job_matcher.cv_reader.identity import extract_identity
     from job_matcher.jobs.fetcher import fetch_jobs
@@ -44,6 +54,9 @@ def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJo
     from job_matcher.matching.reranker import CrossEncoderReranker
     from job_matcher.rag.vector_store import JobVectorStore, generate_query
     from job_matcher.rag.explainer import RAGExplainer
+
+    if on_stage:
+        on_stage("parsing")
 
     profile = parse_cv(req.cv_text)
 
@@ -64,6 +77,9 @@ def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJo
     except Exception:
         pass
 
+    if on_stage:
+        on_stage("fetching")
+
     jobs = fetch_jobs(
         profile,
         country="us",
@@ -76,6 +92,9 @@ def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJo
         return []
 
     jobs = pre_filter(profile, jobs)
+
+    if on_stage:
+        on_stage("ranking")
 
     rag_top_k = min(200, len(jobs))
     try:
@@ -94,6 +113,9 @@ def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJo
             ranked = reranker.rerank(profile, ranked, top_n=50)
     except Exception as exc:
         log.warning("Cross-encoder rerank failed (%s), using scored order", exc)
+
+    if on_stage:
+        on_stage("explaining")
 
     try:
         explainer = RAGExplainer()
@@ -143,53 +165,83 @@ def _run_full_pipeline(req: MatchRequest, cfg: PipelineConfig) -> List[MatchedJo
     return results
 
 
-def run_job_match(
+def _run_match_background(
+    session_id: str,
+    req: MatchRequest,
+    cfg: PipelineConfig,
+) -> None:
+    store = get_session_manager()
+    t0 = time.perf_counter()
+    try:
+
+        def on_stage(stage: str) -> None:
+            store.update(session_id, stage=MatchStage(stage))
+            log.info("[job_matcher] Session %s stage=%s", session_id, stage)
+
+        matched = _run_full_pipeline(req, cfg, on_stage=on_stage)
+        latency = int((time.perf_counter() - t0) * 1000)
+        store.update(
+            session_id,
+            status=MatchStatus.READY,
+            stage=MatchStage.DONE,
+            jobs=matched,
+            target_role=req.target_role,
+            latency_ms=latency,
+            completed_at=time.time(),
+        )
+        log.info("[job_matcher] Session %s complete (%d jobs)", session_id, len(matched))
+    except Exception as exc:
+        log.exception("[job_matcher] Session %s failed", session_id)
+        store.update(
+            session_id,
+            status=MatchStatus.FAILED,
+            stage=MatchStage.DONE,
+            error=str(exc),
+            completed_at=time.time(),
+        )
+
+
+def start_job_match(
     req: MatchRequest,
     config: Optional[PipelineConfig] = None,
-) -> MatchResultsResponse:
+) -> MatchStartResponse:
     cfg = config or PipelineConfig()
-    t0 = time.perf_counter()
-    session_id = str(uuid.uuid4())[:12]
-
     text = req.cv_text.strip()
     if len(text) < 50:
         raise ValueError("CV text is too short — provide at least 50 characters.")
 
-    try:
-        matched = _run_full_pipeline(req, cfg)
-    except Exception:
-        log.exception("Job match pipeline failed")
-        matched = []
+    session = get_session_manager().create()
+    threading.Thread(
+        target=_run_match_background,
+        args=(session.session_id, req, cfg),
+        daemon=True,
+        name=f"job-match-{session.session_id}",
+    ).start()
+    return MatchStartResponse(session_id=session.session_id)
 
-    latency = int((time.perf_counter() - t0) * 1000)
 
-    session = MatchSession(
-        session_id=session_id,
-        status="completed",
-        jobs=matched,
-        target_role=req.target_role,
-        latency_ms=latency,
-    )
-    get_match_session_manager().create(session_id, session)
-
-    return MatchResultsResponse(
-        session_id=session_id,
-        status="completed",
-        jobs=matched,
-        target_role=req.target_role,
-        latency_ms=latency,
+def get_match_status(session_id: str) -> Optional[MatchStatusResponse]:
+    session = get_session_manager().get(session_id)
+    if not session:
+        return None
+    elapsed = time.time() - session.created_at
+    return MatchStatusResponse(
+        session_id=session.session_id,
+        status=session.status.value,
+        stage=session.stage.value,
+        elapsed_s=round(elapsed, 1),
+        error=session.error,
     )
 
 
-def get_match_results(session_id: str) -> MatchResultsResponse:
-    rec = get_match_session_manager().get(session_id)
-    if rec is None:
-        raise ValueError(f"Session '{session_id}' not found.")
+def get_match_results(session_id: str) -> Optional[MatchResultsResponse]:
+    session = get_session_manager().get(session_id)
+    if not session or session.status != MatchStatus.READY:
+        return None
     return MatchResultsResponse(
-        session_id=rec.session_id,
-        status=rec.status,
-        jobs=rec.jobs,
-        target_role=rec.target_role,
-        latency_ms=rec.latency_ms,
-        error=rec.error,
+        session_id=session.session_id,
+        jobs=session.jobs,
+        target_role=session.target_role,
+        latency_ms=session.latency_ms,
+        error=session.error,
     )

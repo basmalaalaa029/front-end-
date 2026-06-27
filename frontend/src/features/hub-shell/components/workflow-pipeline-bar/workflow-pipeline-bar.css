@@ -1,0 +1,82 @@
+.workflow-pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.workflow-pipeline--inset {
+  padding: 16px 28px 0;
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.workflow-pipeline__item {
+  display: flex;
+  align-items: center;
+}
+
+.workflow-pipeline__sep {
+  width: 20px;
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0 8px;
+}
+
+.workflow-pipeline__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--fg-tertiary);
+  background: var(--bone-50);
+  border: 1px solid var(--border-subtle);
+}
+
+.workflow-pipeline__pill.is-active {
+  color: var(--purple-700);
+  background: var(--purple-50);
+  border-color: var(--purple-200);
+}
+
+.workflow-pipeline__pill.is-done {
+  color: var(--moss-700);
+  background: var(--moss-50);
+  border-color: var(--moss-200);
+}
+
+.workflow-next-card {
+  margin-top: 20px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--purple-200);
+  background: linear-gradient(135deg, var(--purple-50) 0%, var(--bone-50) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.workflow-next-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fg-secondary);
+}
+
+.workflow-next-card--improve {
+  border-color: var(--clay-200);
+  background: linear-gradient(135deg, var(--clay-50) 0%, var(--bone-50) 100%);
+}
+
+.workflow-next-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}

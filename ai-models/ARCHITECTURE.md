@@ -9,7 +9,7 @@ Complete guide to every file in `ai-models`: what it does, how slices connect, a
 
 | Package | API prefix | Role |
 |---------|------------|------|
-| `cv_analysis/` | `POST /cv-analysis/analyze`, `GET /cv-analysis/analyze/{job_id}` | ATS/HR analysis (GGUF + llama-server) |
+| `analysis/` | `POST /cv-analysis/analyze`, `GET /cv-analysis/analyze/{job_id}` | CV analysis (Modal fine-tuned endpoint) |
 | `cv_generator/` | `/generate`, `/generate-ai-cv`, `/status`, `/result` | CV generation (Gemini) |
 | `job_matcher/` | `/jobs/match`, `/jobs/results/{id}` | Job matching |
 | `interview/` | `/interview/*` | Mock interviews |
@@ -79,7 +79,7 @@ flowchart TB
 
 | Slice | Endpoints | Purpose |
 |-------|-----------|---------|
-| `cv_analysis/` | `POST /cv-analysis/analyze`, `GET /cv-analysis/analyze/{job_id}` | Async CV analysis (parsing → features → combined judge) |
+| `analysis/` | `POST /cv-analysis/analyze`, `GET /cv-analysis/analyze/{job_id}` | Async CV analysis (parse → Modal → validate) |
 | `cv_generator/` | `POST /generate`, `/generate-ai-cv`, `GET /status`, `/result` | Generate and refine a CV |
 | `job_matcher/` | `POST /jobs/match`, `GET /jobs/results/{id}` | Match CV to curated job listings |
 | `interview/` | `POST /interview/start`, `/answer`, `/evaluate` | Virtual interview Q&A |
@@ -182,58 +182,28 @@ Used by all feature slices. Safe to import from any module.
 
 ---
 
-## CV Analysis (`cv_agent/analysis/`)
+## CV Analysis (`analysis/`)
 
-**Purpose:** Score an existing CV against a job description.  
+**Purpose:** Score an uploaded CV via a fine-tuned Modal endpoint.  
 **Frontend route:** `/dashboard/analyzer` → `src/features/cv-analysis/`
 
-### 9-layer pipeline
-
-```mermaid
-flowchart LR
-    parse[1 text_pipeline] --> norm[2 normalization]
-    norm --> struct[3 structured_cv]
-    struct --> feat[4 feature_engine]
-    struct --> kw[5 keyword_engine]
-    feat --> rules[6 rule_engine]
-    kw --> rules
-    feat --> llm[7 llm_analysis]
-    kw --> llm
-    rules --> llm
-    llm --> issues[8 issues_from_judge in schemas]
-    issues --> result[9 AnalysisResult]
-```
-
-| File | Layer | Role |
-|------|-------|------|
-| `router.py` | API | FastAPI routes: `POST /analyze` (JSON body), `POST /analyze/upload` (multipart file), `POST /analyze/parse` (extract fields only, no scoring) |
-| `pipeline.py` | Orchestrator | `run_analysis_pipeline()` — runs layers 1–9; `prepare_cv_from_bytes/text()` for layers 1–5; `parse_cv_file()` for parse-only |
-| `service.py` | Facade | Thin `analyze_cv()` wrapper around `run_analysis_pipeline` |
-| `text_pipeline.py` | 1 | CV text parsing: canonical section headings, bullet normalization, `inject_section_breaks`, `prepare_cv_for_analysis`, `slice_section` |
-| `normalization.py` | 2 | Clean PDF extraction artifacts — ligatures, soft hyphens, bullet glyphs, whitespace |
-| `structured_cv.py` | 3 | Extract `StructuredCv` — sections, header block, email, phone, target role, company |
-| `feature_engine.py` | 4 | Build `CvFacts` — word/bullet/metric counts, sections present, contact info, skill tokens |
-| `keyword_engine.py` | 5 | `KeywordMatchResult` — per-keyword coverage %, missing keywords vs JD |
-| `rule_engine.py` | 6 | Deterministic `RuleEngine` — missing sections, weak bullets, no metrics, contact gaps |
-| `llm_analysis.py` | 7 | ATS + HR Qwen judges with facts-driven prompts; `run_ensemble()` blends scores |
-| `schemas.py` | 8–9 | `issues_from_judge()` builds UI cards from LLM output; `AnalysisResult`, `AnalysisIssue`, `StructuredCv`, `CvFacts` |
-| `heuristic_checks.py` | — | Fast granular checks without LLM (bullet lines, skill tokens) — used by feature engine and rules |
-| `rag.py` | — | JD keyword extraction — FAISS embedding retrieval + TF-IDF fallback + regex; produces `JDContext` |
-| `__init__.py` | — | Package marker |
+| Folder | Role |
+|--------|------|
+| `api/` | FastAPI routes (`/cv-analysis/*`), session store, pipeline orchestration |
+| `parsing/` | PDF/DOCX/TXT → plain text (`parse_resume_bytes`) — shared with `job_matcher` |
+| `model_client/` | `urllib` HTTP client to `MODAL_ENDPOINT_URL` |
+| `validation/` | `AnalysisResult` schema + defensive JSON coercion |
+| `cv_reader/` | Thin delegate to `parsing/` + optional identity extraction |
 
 ### Analysis data flow
 
 ```
-Upload PDF/DOCX/TXT or raw cv_text
-    → shared/file_parsing.parse_resume_bytes()     [layer 1]
-    → normalization.normalize_raw_text()             [layer 2]
-    → structured_cv.extract_structured_cv()          [layer 3]
-    → feature_engine.build_cv_facts()              [layer 4]
-    → rag.extract() + keyword_engine.match_keywords() [layers 5]
-    → rule_engine.evaluate_rules()                   [layer 6, feeds LLM context]
-    → llm_analysis.run_llm_analysis() via GPU queue [layer 7]
-    → schemas.issues_from_judge()                    [layer 8 — LLM weaknesses → UI cards]
-    → pipeline._result_from_judge() → AnalysisResult [layer 9]
+POST /cv-analysis/analyze (multipart file)
+    → parsing/file_parsing.parse_resume_bytes()
+    → background thread: model_client.call_analysis_model()
+    → validation/validate_result()
+    → GET /cv-analysis/analyze/{job_id} polls until ready
+    → { "ats", "hr" } wrapper for frontend mapper
 ```
 
 ---
@@ -310,7 +280,6 @@ POST /generate
 | `setup.sh` | One-time: create `.venv` and `pip install -r requirements.txt` |
 | `stop.sh` | Stop processes on port 8000 |
 | `download_models.py` | Pre-download all HuggingFace models (~20 GB, run once) |
-| `verify_models.py` | Test that writer, ATS judge, HR judge, and embeddings all load correctly |
 
 ---
 

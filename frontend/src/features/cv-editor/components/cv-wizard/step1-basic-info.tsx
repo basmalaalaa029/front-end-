@@ -8,11 +8,14 @@ import {
 
 type Props = {
   onNext: (data: WizardStep1Data) => void;
+  initialData?: WizardStep1Data;
 };
 
-export function Step1BasicInfo({ onNext }: Props) {
+export function Step1BasicInfo({ onNext, initialData }: Props) {
   const { t } = useI18n();
-  const [data, setData] = useState<WizardStep1Data>(createEmptyWizardStep1);
+  const [data, setData] = useState<WizardStep1Data>(
+    initialData ?? createEmptyWizardStep1,
+  );
 
   const updatePersonal =
     (field: keyof Pick<WizardStep1Data, "full_name" | "target_job" | "email" | "phone" | "location" | "linkedin" | "github">) =>

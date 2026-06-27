@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { HubHeader, HubIcon } from "@/features/hub-shell";
+import type { JobNavigationState } from "@/features/hub-shell/lib/workflow-pipeline";
+import { persistCvDataForPipeline } from "@/features/cv-analysis/lib/pipeline-cv";
 import { useI18n } from "@/features/i18n";
 import type { CvData } from "@/features/cv-editor/data/cv-types";
 import type { TemplateId } from "@/features/cv-editor/data/cv-templates";
@@ -75,6 +78,7 @@ export function Step3Review({
   onCvChange,
 }: Props) {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState("contact");
 
   const sectionDefs = useMemo(
@@ -105,6 +109,19 @@ export function Step3Review({
     toast.success(t("cvEditor.gen.exportOpened"));
   };
 
+  const handleContinueToJobs = () => {
+    const inputs = persistCvDataForPipeline(cvData, "");
+    if (!inputs) {
+      toast.error(t("workflow.needCvContent"));
+      return;
+    }
+    const nav: JobNavigationState = {
+      autoStart: true,
+      targetRole: inputs.targetRole,
+    };
+    navigate("/dashboard/jobs", { state: nav });
+  };
+
   const displayName =
     cvData.name.trim() ||
     generatedCv.personal_info?.full_name?.trim() ||
@@ -128,6 +145,10 @@ export function Step3Review({
             <button type="button" className="btn btn-primary" onClick={handleExport}>
               <HubIcon name="download" size={14} stroke={2} />
               {t("cvEditor.export")}
+            </button>
+            <button type="button" className="btn btn-ai" onClick={handleContinueToJobs}>
+              <HubIcon name="arrow-right" size={14} stroke={2} />
+              {t("workflow.continueToJobs")}
             </button>
           </>
         }

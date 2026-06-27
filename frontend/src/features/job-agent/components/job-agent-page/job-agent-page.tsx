@@ -1,14 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "@ui/ui_kits/job-agent/agent.css";
-import { getDraftAnalysisInputs } from "@/features/cv-analysis";
-import { HubHeader, HubIcon } from "@/features/hub-shell";
+import "@/features/hub-shell/components/workflow-pipeline-bar/workflow-pipeline-bar.css";
+import { getPipelineCvInputs } from "@/features/cv-analysis/lib/pipeline-cv";
+import {
+  HubHeader,
+  HubIcon,
+  WorkflowPipelineBar,
+  loadWorkflowCv,
+  saveWorkflowJobPick,
+  takePendingJobFile,
+  type InterviewNavigationState,
+  type JobNavigationState,
+} from "@/features/hub-shell";
 import {
   useJobMatch,
   useJobMatchUpload,
   useJobResults,
 } from "@/features/job-agent/hooks/use-job-match";
-import type { MatchedJob, ScoreBreakdown } from "@/features/job-agent/types";
+import type { JobMatchStatus, MatchedJob, ScoreBreakdown } from "@/features/job-agent/types";
 
 // ─── types ──────────────────────────────────────────────────────────────────
 
@@ -128,7 +139,7 @@ function CvUploadZone({
   const [targetRole, setTargetRole] = useState("");
   const [drag, setDrag] = useState(false);
 
-  const hasDraftCv = Boolean(getDraftAnalysisInputs()?.cvText);
+  const hasDraftCv = Boolean(getPipelineCvInputs()?.cvText);
 
   function handleFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -329,7 +340,13 @@ function AgentDrawer({ jobCount, loading }: { jobCount: number; loading: boolean
 
 // ─── Context / detail panel ───────────────────────────────────────────────────
 
-function ContextPanel({ job }: { job: JobCardData | null }) {
+function ContextPanel({
+  job,
+  onPracticeInterview,
+}: {
+  job: JobCardData | null;
+  onPracticeInterview: (job: JobCardData) => void;
+}) {
   if (!job) return null;
   const bd = job.score_breakdown;
   return (
@@ -362,6 +379,15 @@ function ContextPanel({ job }: { job: JobCardData | null }) {
             Apply now
           </a>
         )}
+        <button
+          type="button"
+          className="btn btn-ai"
+          style={{ marginTop: 12, width: "100%" }}
+          onClick={() => onPracticeInterview(job)}
+        >
+          <HubIcon name="mic" size={14} stroke={2} />
+          Practice interview for this role
+        </button>
       </div>
 
       <div className="context-section">
@@ -436,16 +462,24 @@ function ContextPanel({ job }: { job: JobCardData | null }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function JobAgentPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const autoStartedRef = useRef(false);
+
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [jobs, setJobs] = useState<JobCardData[]>([]);
   const [selected, setSelected] = useState<JobCardData | null>(null);
   const [started, setStarted] = useState(false);
+  const [matchStage, setMatchStage] = useState<string | null>(null);
+
+  const handleMatchStatus = useCallback((status: JobMatchStatus) => {
+    setMatchStage(status.stage ?? null);
+  }, []);
 
   const matchMutation = useJobMatch();
   const uploadMutation = useJobMatchUpload();
-  const resultsQuery = useJobResults(sessionId);
+  const resultsQuery = useJobResults(sessionId, handleMatchStatus);
 
-  // Called from upload zone — file=null means "use draft from editor"
   const handleStart = useCallback(
     async (file: File | null, targetRole: string) => {
       setStarted(true);
@@ -454,18 +488,19 @@ export default function JobAgentPage() {
         if (file) {
           resp = await uploadMutation.mutateAsync({ file, targetRole });
         } else {
-          const draft = getDraftAnalysisInputs();
+          const draft = getPipelineCvInputs();
           if (!draft?.cvText) {
-            toast.error("No CV found in editor. Please upload a file.");
+            toast.error("No CV found. Please upload a file or continue from CV editor / analysis.");
             setStarted(false);
             return;
           }
           resp = await matchMutation.mutateAsync({
             cvText: draft.cvText,
-            targetRole,
+            targetRole: targetRole || draft.targetRole,
           });
         }
         setSessionId(resp.session_id);
+        setMatchStage("parsing");
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Job match failed";
         toast.error(msg);
@@ -476,12 +511,59 @@ export default function JobAgentPage() {
   );
 
   useEffect(() => {
+    if (autoStartedRef.current) return;
+    const nav = location.state as JobNavigationState | null | undefined;
+    if (!nav?.autoStart) return;
+
+    autoStartedRef.current = true;
+    navigate(location.pathname, { replace: true, state: null });
+
+    const pendingFile = takePendingJobFile();
+    const wf = loadWorkflowCv();
+    const role = nav.targetRole || wf?.targetRole || "";
+
+    void handleStart(pendingFile, role);
+  }, [handleStart, location.pathname, location.state, navigate]);
+
+  const continueToInterview = useCallback(
+    (job: JobCardData) => {
+      saveWorkflowJobPick({
+        title: job.title,
+        company: job.company,
+        targetRole: job.title,
+      });
+      const nav: InterviewNavigationState = {
+        autoStart: true,
+        targetRole: job.title,
+      };
+      navigate("/dashboard/interview", { state: nav });
+    },
+    [navigate],
+  );
+
+  useEffect(() => {
     if (resultsQuery.data?.jobs) {
       const mapped = resultsQuery.data.jobs.slice(0, 10).map(toCardJob);
       setJobs(mapped);
       if (mapped.length && !selected) setSelected(mapped[0]);
     }
   }, [resultsQuery.data, selected]);
+
+  useEffect(() => {
+    if (!resultsQuery.isError) return;
+    const msg =
+      resultsQuery.error instanceof Error
+        ? resultsQuery.error.message
+        : "Job match failed";
+    toast.error(msg);
+    setStarted(false);
+    setSessionId(null);
+    setMatchStage(null);
+  }, [resultsQuery.isError, resultsQuery.error]);
+
+  const stageLabel = matchStage
+    ? matchStage.charAt(0).toUpperCase() + matchStage.slice(1)
+    : "Starting";
 
   const loading =
     matchMutation.isPending || uploadMutation.isPending || resultsQuery.isFetching;
@@ -492,6 +574,7 @@ export default function JobAgentPage() {
     return (
       <>
         <HubHeader title="Job Agent" sub="Upload your CV to find matching live roles" />
+        <WorkflowPipelineBar current="jobs" className="workflow-pipeline--inset" />
         <CvUploadZone onStart={handleStart} loading={loading} />
       </>
     );
@@ -504,20 +587,27 @@ export default function JobAgentPage() {
         title="Job Agent"
         sub={
           loading
-            ? "Matching your CV to live roles…"
+            ? `Matching your CV (${stageLabel})…`
             : `${jobs.length} roles · ${strongCount} strong matches`
         }
         right={
           <button
             type="button"
             className="btn btn-secondary"
-            onClick={() => { setStarted(false); setJobs([]); setSelected(null); setSessionId(null); }}
+            onClick={() => {
+              setStarted(false);
+              setJobs([]);
+              setSelected(null);
+              setSessionId(null);
+              setMatchStage(null);
+            }}
           >
             <HubIcon name="upload" size={14} stroke={2} />
             New CV
           </button>
         }
       />
+      <WorkflowPipelineBar current="jobs" className="workflow-pipeline--inset" />
       <div className="agent-layout">
         <div className="agent-main">
           <div className="results-head">
@@ -553,7 +643,7 @@ export default function JobAgentPage() {
           )}
         </div>
         <div className="agent-context">
-          <ContextPanel job={selected} />
+          <ContextPanel job={selected} onPracticeInterview={continueToInterview} />
         </div>
       </div>
     </>

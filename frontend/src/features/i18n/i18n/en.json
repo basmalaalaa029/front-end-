@@ -402,7 +402,7 @@
     "exampleWording": "Example you can use",
     "severityGap": "Important",
     "severityWarn": "Tip",
-    "ensembleHint": "Scored with Qwen ATS + HR judges — scores and recommendations come from the model.",
+    "ensembleHint": "Scored by the fine-tuned ATS CV analysis model — scores and recommendations come directly from the model.",
     "emptyState": "Upload a CV file or open Analysis from the CV editor, then click Run analysis.",
     "emptyStateHint": "We'll score your CV for ATS fit and give you tailored recommendations to improve it.",
     "targetRoleLabel": "Target role",
@@ -423,7 +423,19 @@
     "noFile": "No file found — choose a PDF or DOCX to upload.",
     "previousFailed": "Previous analysis failed. Run it again.",
     "sessionExpiredUpload": "Your previous analysis session expired. Upload your CV and run analysis again.",
-    "noIssuesReturned": "No issues or recommendations returned. Try adding a job description for richer feedback."
+    "noIssuesReturned": "No issues or recommendations returned. Try adding a job description for richer feedback.",
+    "lowScoreGenerateTitle": "Your score is below 70 — rebuild with AI",
+    "lowScoreGenerateLead": "You scored {{score}}/100. Use the AI CV creator to fix structure, impact, and ATS gaps, then analyze again.",
+    "generateCvWithAi": "Generate CV with AI"
+  },
+  "workflow": {
+    "needCvContent": "Add more CV content first (at least 50 characters), then continue.",
+    "continueToJobs": "Continue to job matching",
+    "nextJobsTitle": "Next step: job matching",
+    "nextJobsLead": "We'll rank live roles against your CV.",
+    "continueToInterview": "Practice interview",
+    "nextInterviewTitle": "Next step: interview practice",
+    "nextInterviewLead": "Practice behavioral questions for your selected role."
   },
   "login": {
     "back": "Back to home",

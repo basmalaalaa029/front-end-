@@ -41,14 +41,22 @@ GET /result/{id}/pdf  →  PDF download
 cd ai-models
 cp env.template .env
 ./scripts/setup.sh
-python scripts/download_gguf.py    # cv-analysis-Q4_K_M.gguf (~4.5 GB)
-./scripts/install_llama_server.sh  # prebuilt llama-server → bin/llama-server
+
+# Deploy CV analysis Modal endpoint (one-time + when model code changes)
+# Full guide: analysis/infra/modal/README.md
+#   ./scripts/deploy_modal_analysis.sh
+# Set MODAL_ENDPOINT_URL in .env to the URL your Modal app prints
+
 ./scripts/run.sh
 ```
 
-**CV analysis** uses a local `llama-server` on port **8080** with `models/gguf/cv-analysis-Q4_K_M.gguf`. First model load can take 30–60s on CPU; judging a CV typically takes 20–90s. Check `/health` — `analysis_ready` should be `true` before analyzing.
+**CV analysis** uses the fine-tuned model via **Modal HTTP** (`MODAL_ENDPOINT_URL`). Your laptop only runs the FastAPI app. Check `/health` — `analysis_ready` should be `true` when `MODAL_ENDPOINT_URL` is set.
 
+<<<<<<< Updated upstream
 If port 8000 is busy: `./scripts/stop.sh && ./scripts/run.sh` (also frees port 8080)
+=======
+If port 8000 is busy: `./scripts/stop.sh && ./scripts/run.sh`
+>>>>>>> Stashed changes
 
 ### 2. Configure environment
 
@@ -64,13 +72,7 @@ Edit `ai-models/.env`:
 .venv/bin/python3 scripts/download_models.py
 ```
 
-### 4. Verify models load correctly
-
-```bash
-.venv/bin/python3 scripts/verify_models.py
-```
-
-### 5. Start the server
+### 4. Start the server
 
 ```bash
 ./scripts/run.sh
@@ -171,9 +173,14 @@ ai-models/
 │   ├── gpu_queue.py        # Single-threaded GPU worker queue
 │   ├── file_parsing.py     # PDF/DOCX/TXT resume parsing
 │   └── utils.py            # Shared helpers
+├── analysis/               # CV analysis feature (/cv-analysis/*)
+│   ├── api/                # FastAPI routes + session orchestration
+│   ├── parsing/            # Shared PDF/DOCX/TXT resume parsing
+│   ├── model_client/       # Modal HTTP client
+│   └── validation/       # Result schema + coercion
 ├── scripts/
 │   ├── download_models.py  # Pre-download HuggingFace models
-│   └── verify_models.py    # Test all models load correctly
+│   └── setup.sh            # Create venv + install deps
 ├── tests/                  # Pytest test suite
 ├── main.py                 # Server entry point
 ├── requirements.txt

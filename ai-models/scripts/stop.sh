@@ -11,7 +11,7 @@ pkill -f "${REPO}/.venv/bin/python3 main.py" 2>/dev/null || true
 pkill -f "${REPO}/main.py" 2>/dev/null || true
 
 if command -v fuser >/dev/null 2>&1; then
-  for port in 8000 8001 8002 8080; do
+  for port in 8000 8001 8002; do
     fuser -k "${port}/tcp" 2>/dev/null || true
   done
 fi

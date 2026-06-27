@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List, Literal, Optional
 
+from cv_agent.shared.session_schemas import SessionStartResponse, SessionStatusResponse
 from pydantic import BaseModel, Field
 
 
@@ -44,16 +45,17 @@ class MatchRequest(BaseModel):
     min_salary: str = ""
 
 
-class MatchResponse(BaseModel):
-    session_id: str
-    status: str = "completed"
-    total_jobs: int = 0
-    message: str = ""
+class MatchStartResponse(SessionStartResponse):
+    """POST /jobs/match response."""
+
+
+class MatchStatusResponse(SessionStatusResponse):
+    stage: Optional[str] = None
 
 
 class MatchResultsResponse(BaseModel):
     session_id: str
-    status: str = "completed"
+    status: Literal["ready"] = "ready"
     jobs: List[MatchedJob] = Field(default_factory=list)
     target_role: str = ""
     latency_ms: int = 0

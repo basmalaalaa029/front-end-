@@ -32,7 +32,6 @@ if _FASTAPI_AVAILABLE:
         active_sessions: int
         cv_writer_ready: bool = False
         analysis_ready: bool = False
-        analysis_queue_size: int = 0
         features: Dict[str, bool]
 
     _generation_executor = ThreadPoolExecutor(
@@ -45,17 +44,14 @@ if _FASTAPI_AVAILABLE:
     )
 
     def create_app(default_cfg: Optional[PipelineConfig] = None) -> "FastAPI":
-        from cv_analysis.api.router import register_cv_analysis_routes
-        from cv_analysis.config import get_cv_analysis_config
-        from cv_analysis.judges.model_runtime import get_analysis_runtime
-        from cv_analysis.judges.queue import inference_queue
+        from analysis.api.router import register_analysis_routes
+        from analysis.config import analysis_endpoint_configured
         from cv_agent.app.auth import register_jwt_middleware
         from cv_generator.api.router import register_cv_routes
         from interview.api.router import register_interview_routes
         from job_matcher.api.router import register_job_match_routes
 
         _cfg = default_cfg or PipelineConfig()
-        _analysis_cfg = get_cv_analysis_config()
 
         app = FastAPI(
             title="CV Agent SaaS API",
@@ -81,6 +77,7 @@ if _FASTAPI_AVAILABLE:
                 path == "/health"
                 or path.startswith("/status/")
                 or path.startswith("/cv-analysis/analyze/")
+                or path.startswith("/jobs/status/")
             ):
                 return
             client_ip = (
@@ -114,7 +111,7 @@ if _FASTAPI_AVAILABLE:
         )
 
         @app.on_event("startup")
-        async def _startup_cv_analysis() -> None:
+        async def _startup_auth_check() -> None:
             from cv_agent.app.auth import _auth_disabled
 
             if not _auth_disabled() and not os.getenv("JWT_SECRET", "").strip():
@@ -123,33 +120,16 @@ if _FASTAPI_AVAILABLE:
                     "Use the same value as backend/.env."
                 )
 
-            if _analysis_cfg.warmup_on_startup:
-                runtime = get_analysis_runtime()
-                threading.Thread(
-                    target=runtime.start,
-                    args=(_analysis_cfg,),
-                    daemon=True,
-                    name="cv-analysis-llama-start",
-                ).start()
-                inference_queue.mark_ready()
-                inference_queue.start()
-
-        @app.on_event("shutdown")
-        async def _shutdown_cv_analysis() -> None:
-            get_analysis_runtime().stop()
-
         @app.get("/health", response_model=HealthResponse, tags=["system"])
         async def health() -> HealthResponse:
-            an_rt = get_analysis_runtime()
-            degraded = not inference_queue.is_alive
             gemini_ready = bool((_cfg.gemini_api_key or "").strip())
+            analysis_ready = analysis_endpoint_configured()
             return HealthResponse(
-                status="degraded" if degraded else "ok",
+                status="ok",
                 cache_stats=get_cv_cache(_cfg).stats(),
                 active_sessions=len(_session_manager.list_sessions()),
                 cv_writer_ready=gemini_ready,
-                analysis_ready=an_rt.ready,
-                analysis_queue_size=inference_queue.queue_size,
+                analysis_ready=analysis_ready,
                 features={
                     "faiss": _FAISS_AVAILABLE,
                     "sentence_transformers": _SENTENCE_AVAILABLE,
@@ -163,12 +143,10 @@ if _FASTAPI_AVAILABLE:
         @app.delete("/cache", tags=["system"])
         async def clear_cache() -> Dict[str, str]:
             get_cv_cache(_cfg).clear()
-            from cv_analysis.judges.cache import get_cache
-            get_cache().clear()
             return {"message": "Cache cleared."}
 
-        register_cv_analysis_routes(
-            app, cfg=_analysis_cfg, pipeline_executor=_analysis_executor,
+        register_analysis_routes(
+            app, pipeline_executor=_analysis_executor,
             check_rate_limit=_check_rate_limit,
         )
         register_cv_routes(

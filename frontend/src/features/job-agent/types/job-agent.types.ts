@@ -34,8 +34,16 @@ export interface JobMatchRequest {
 export interface JobMatchResponse {
   session_id: string;
   status: string;
-  total_jobs: number;
-  message: string;
+  total_jobs?: number;
+  message?: string;
+}
+
+export interface JobMatchStatus {
+  session_id: string;
+  status: "processing" | "ready" | "failed";
+  stage?: string | null;
+  elapsed_s?: number | null;
+  error?: string | null;
 }
 
 export interface JobMatchResults {

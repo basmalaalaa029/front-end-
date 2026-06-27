@@ -2,18 +2,22 @@
 
 from job_matcher.api import (
     MatchRequest,
-    MatchResponse,
     MatchResultsResponse,
+    MatchStartResponse,
+    MatchStatusResponse,
     MatchedJob,
     get_match_results,
-    run_job_match,
+    get_match_status,
+    start_job_match,
 )
 
 __all__ = [
     "MatchRequest",
-    "MatchResponse",
     "MatchResultsResponse",
+    "MatchStartResponse",
+    "MatchStatusResponse",
     "MatchedJob",
-    "run_job_match",
+    "start_job_match",
+    "get_match_status",
     "get_match_results",
 ]

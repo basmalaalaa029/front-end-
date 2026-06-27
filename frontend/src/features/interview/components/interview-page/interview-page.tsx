@@ -1,8 +1,16 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "@ui/ui_kits/interview-sim/sim.css";
-import { getDraftAnalysisInputs } from "@/features/cv-analysis";
-import { HubHeader, HubIcon } from "@/features/hub-shell";
+import "@/features/hub-shell/components/workflow-pipeline-bar/workflow-pipeline-bar.css";
+import { getPipelineCvInputs } from "@/features/cv-analysis/lib/pipeline-cv";
+import {
+  HubHeader,
+  HubIcon,
+  WorkflowPipelineBar,
+  loadWorkflowJobPick,
+  type InterviewNavigationState,
+} from "@/features/hub-shell";
 import {
   useEvaluateInterview,
   useStartInterview,
@@ -154,6 +162,10 @@ function FeedbackPanel({
 }
 
 export default function InterviewPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const bootedRef = useRef(false);
+
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -172,20 +184,22 @@ export default function InterviewPage() {
   const answerMutation = useSubmitInterviewAnswer();
   const evaluateMutation = useEvaluateInterview();
 
-  const startSession = useCallback(async () => {
-    const draft = getDraftAnalysisInputs();
+  const startSession = useCallback(async (roleOverride?: string) => {
+    const jobPick = loadWorkflowJobPick();
+    const draft = getPipelineCvInputs();
     if (!draft?.cvText) {
-      toast.error("Add CV content in the editor first (at least 50 characters).");
+      toast.error("No CV content available. Generate or analyze a CV first, then continue to interview.");
       return;
     }
+    const role = roleOverride || jobPick?.targetRole || draft.targetRole;
     try {
       const resp = await startMutation.mutateAsync({
         cvText: draft.cvText,
-        targetRole: draft.targetRole,
+        targetRole: role,
       });
       setSessionId(resp.session_id);
       setQuestions(resp.questions);
-      setTargetRole(draft.targetRole);
+      setTargetRole(role);
       setCurrentIdx(0);
       setTranscript([{ who: "ai", text: resp.questions[0]?.text ?? "Let's begin." }]);
       setStarted(true);
@@ -196,8 +210,17 @@ export default function InterviewPage() {
   }, [startMutation]);
 
   useEffect(() => {
-    if (!started) void startSession();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+
+    const nav = location.state as InterviewNavigationState | null | undefined;
+    if (nav?.autoStart) {
+      navigate(location.pathname, { replace: true, state: null });
+      void startSession(nav.targetRole);
+      return;
+    }
+    void startSession();
+  }, [location.pathname, location.state, navigate, startSession]);
 
   const submitAnswer = async () => {
     if (!sessionId || !questions[currentIdx]) return;
@@ -280,6 +303,7 @@ export default function InterviewPage() {
           </>
         }
       />
+      <WorkflowPipelineBar current="interview" className="workflow-pipeline--inset" />
       <div className="sim-layout">
         <div className="sim-stage">
           <InterviewerCard

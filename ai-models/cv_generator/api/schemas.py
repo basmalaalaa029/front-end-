@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Literal, Optional
 
+from cv_agent.shared.session_schemas import SessionStartResponse, SessionStatusResponse
 from pydantic import BaseModel, Field, field_validator
 
 from cv_generator.models.cv_schema import Education, Experience, Project
@@ -58,25 +59,19 @@ class GenerateRequest(BaseModel):
         return bool(self.experience) or bool(self.experiences) or bool(self.projects)
 
 
-class GenerateResponse(BaseModel):
-    session_id: str
-    status: str
-    message: str
+class GenerateResponse(SessionStartResponse):
+    message: str = ""
     template_cv: str = ""
 
 
-class StatusResponse(BaseModel):
-    session_id: str
-    status: str
-    created_at: str
-    updated_at: str
-    progress_msgs: List[str]
-    error: Optional[str] = None
+class StatusResponse(SessionStatusResponse):
+    created_at: str = ""
+    updated_at: str = ""
 
 
 class ResultResponse(BaseModel):
     session_id: str
-    status: str
+    status: str = "ready"
     candidate_name: str = ""
     target_role: str = ""
     total_iterations: int = 0

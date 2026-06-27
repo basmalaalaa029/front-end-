@@ -10,7 +10,7 @@ from cv_agent.app.config import PipelineConfig, _FASTAPI_AVAILABLE
 from cv_generator.api.schemas import GenerateRequest
 from cv_generator.models.cv_schema import CVData
 from cv_generator.services.cv_generator import run_enhancement_sync
-from cv_analysis.parsing.file_parsing import parse_resume_file
+from analysis.parsing.file_parsing import parse_resume_file
 
 
 def _build_cli():

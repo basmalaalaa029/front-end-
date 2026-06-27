@@ -97,7 +97,7 @@ def register_cv_routes(
 
         return GenerateResponse(
             session_id=sid,
-            status=SessionStatus.RUNNING,
+            status="processing",
             template_cv=template_md,
             message=f"Template ready. Poll GET /status/{sid} for AI enhancement.",
         )
@@ -139,37 +139,39 @@ def register_cv_routes(
         rec = _session_manager.get(session_id)
         if rec is None:
             raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found.")
+        from datetime import datetime
+
+        elapsed = None
+        try:
+            created = datetime.fromisoformat(rec.created_at)
+            elapsed = round((datetime.now() - created).total_seconds(), 1)
+        except ValueError:
+            pass
         return StatusResponse(
-            session_id=rec.session_id, status=rec.status,
-            created_at=rec.created_at, updated_at=rec.updated_at,
-            progress_msgs=rec.progress_msgs, error=rec.error,
+            session_id=rec.session_id,
+            status=map_internal_status(rec.status),
+            created_at=rec.created_at,
+            updated_at=rec.updated_at,
+            progress_msgs=rec.progress_msgs,
+            error=rec.error,
+            elapsed_s=elapsed,
         )
 
     @app.get("/result/{session_id}", response_model=ResultResponse, tags=["cv"])
     async def get_result(session_id: str) -> ResultResponse:
+        from cv_agent.shared.session_schemas import map_internal_status
+
         rec = _session_manager.get(session_id)
         if rec is None:
             raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found.")
         if rec.status == SessionStatus.FAILED:
-            return ResultResponse(
-                session_id=session_id,
-                status=rec.status,
-                template_cv=rec.template_cv,
-                error=rec.error,
-            )
+            raise HTTPException(status_code=400, detail=rec.error or "Session failed.")
         if rec.status != SessionStatus.COMPLETED:
-            return ResultResponse(
-                session_id=session_id,
-                status=rec.status,
-                template_cv=rec.template_cv,
-                final_cv=rec.template_cv,
-                candidate_name="",
-                target_role="",
-            )
+            raise HTTPException(status_code=404, detail="Result not ready.")
         r = rec.result
         assert r is not None
         return ResultResponse(
-            session_id=r.session_id, status=SessionStatus.COMPLETED,
+            session_id=r.session_id, status="ready",
             candidate_name=r.candidate_name, target_role=r.target_role,
             total_iterations=r.total_iterations, final_cv=r.final_cv,
             template_cv=r.template_cv or rec.template_cv,

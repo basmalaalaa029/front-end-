@@ -76,7 +76,7 @@ export interface CvAnalysisResult {
   extraction_word_count?: number;
   sections_detected?: string[];
   latency_ms?: number;
-  analysis_mode: "ensemble";
+  analysis_mode: "model" | "ensemble";
 }
 
 export interface AnalyzeCvInput {

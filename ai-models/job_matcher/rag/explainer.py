@@ -20,7 +20,7 @@ from ..cv_reader.parser import TECH_SKILLS
 log = logging.getLogger("job_matcher")
 
 GROQ_EXPLAIN_SYSTEM = """You are an expert technical recruiter helping a candidate evaluate job opportunities.
-Respond ONLY with a valid JSON object — no markdown fences, no explanation."""
+Respond ONLY with a valid JSON object - no markdown fences, no explanation."""
 
 GROQ_EXPLAIN_PROMPT = """A candidate is evaluating this job. Produce a concise, honest match analysis.
 
@@ -69,21 +69,24 @@ def _call_groq_explain(profile: dict, job: dict, score: int,
         score=score,
     )
 
-    body = json.dumps({
-        "model": model,
-        "messages": [
-            {"role": "system", "content": GROQ_EXPLAIN_SYSTEM},
-            {"role": "user", "content": prompt},
-        ],
-        "max_tokens": 600,
-        "temperature": 0.3,
-    }).encode()
+    body = json.dumps(
+        {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": GROQ_EXPLAIN_SYSTEM},
+                {"role": "user", "content": prompt},
+            ],
+            "max_tokens": 600,
+            "temperature": 0.3,
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
 
     req = urllib.request.Request(
         "https://api.groq.com/openai/v1/chat/completions",
         data=body,
         headers={
-            "Content-Type": "application/json",
+            "Content-Type": "application/json; charset=utf-8",
             "Authorization": f"Bearer {api_key}",
         },
         method="POST",

@@ -150,29 +150,12 @@ class PipelineConfig:
     mistral_model:      str  = field(default_factory=lambda: os.getenv("MISTRAL_MODEL",       "basmalaalaa029/cv-finetuned-mistral"))
     use_mistral_writer: bool = field(default_factory=lambda: os.getenv("USE_MISTRAL_WRITER",  "false").lower() == "true")
     use_mistral_judge:  bool = field(default_factory=lambda: os.getenv("USE_MISTRAL_JUDGE",   "false").lower() == "true")
-    # Standalone /analyze: defaults to Osama ATS (use_mistral_judge=false) unless set true
-    analysis_use_mistral_judge: bool = field(
-        default_factory=lambda: os.getenv("ANALYSIS_USE_MISTRAL_JUDGE", "false").lower() == "true"
-    )
     analysis_ensemble_timeout_s: int = field(
         default_factory=lambda: int(os.getenv("ANALYSIS_ENSEMBLE_TIMEOUT_S", "90"))
     )
-    # Per judge call on ModelQueue (0 = auto-scale from analysis_cpu_mode)
+    # Per judge call on ModelQueue
     analysis_judge_submit_timeout_s: int = field(
         default_factory=lambda: int(os.getenv("ANALYSIS_JUDGE_SUBMIT_TIMEOUT_S", "0"))
-    )
-    # GGUF judge output cap on CPU (scores + issues need ~800–1200 tokens)
-    analysis_judge_max_tokens_cpu: int = field(
-        default_factory=lambda: int(os.getenv("ANALYSIS_JUDGE_MAX_TOKENS_CPU", "1200"))
-    )
-    # Context window for analysis GGUF judge (8192 if model supports it)
-    analysis_judge_n_ctx: int = field(
-        default_factory=lambda: int(os.getenv("ANALYSIS_JUDGE_N_CTX", "8192"))
-    )
-    # CPU speed: auto → single_pass (one ATS model, one LLM call). GPU: full (parallel ATS+HR).
-    # Values: auto | single_pass | dual_reuse_ats | full
-    analysis_cpu_mode: str = field(
-        default_factory=lambda: os.getenv("ANALYSIS_CPU_MODE", "auto").lower()
     )
     # Fail stuck partial sessions after this many seconds (0 = no limit)
     analysis_partial_timeout_s: int = field(
@@ -206,8 +189,6 @@ class PipelineConfig:
     gguf_dir:          str   = field(default_factory=lambda: os.getenv("GGUF_DIR", "models/gguf"))
     # GGUF filenames/paths (resolved relative to gguf_dir when not absolute).
     phi3_gguf_path:    str   = field(default_factory=lambda: os.getenv("PHI3_GGUF_PATH",   "phi3-cv-Q4_K_M.gguf"))
-    # basmalaalaa029/cv-analysis-final-GGUF — fine-tuned Qwen ATS judge
-    ats_gguf_path:     str   = field(default_factory=lambda: os.getenv("ATS_GGUF_PATH",    "cv-analysis-Q4_K_M.gguf"))
     hr_gguf_path:      str   = field(default_factory=lambda: os.getenv("HR_GGUF_PATH",     "qwen2.5-7b-instruct-Q4_K_M.gguf"))
     writer_gguf_path:  str   = field(default_factory=lambda: os.getenv("WRITER_GGUF_PATH", "qwen2.5-7b-instruct-Q4_K_M.gguf"))
 
@@ -253,8 +234,31 @@ class PipelineConfig:
 
     # Per-feature preload
     cv_warmup_model: bool = field(default_factory=lambda: os.getenv("CV_WARMUP_MODEL", "true").lower() in ("1", "true", "yes"))
-    analysis_warmup_model: bool = field(default_factory=lambda: os.getenv("ANALYSIS_WARMUP_MODEL", "true").lower() in ("1", "true", "yes"))
     model_preload_mode: str = field(default_factory=lambda: os.getenv("MODEL_PRELOAD_MODE", "full"))
+
+    # CV analysis (Modal GPU) — formerly CVAnalysisConfig / CV_ANALYSIS_* env vars
+    analysis_llama_server_url: str = field(
+        default_factory=lambda: os.getenv("CV_ANALYSIS_LLAMA_SERVER_URL", "")
+    )
+    analysis_remote_api_key: str = field(
+        default_factory=lambda: os.getenv("CV_ANALYSIS_REMOTE_API_KEY", "")
+    )
+    analysis_remote_health_timeout_s: int = field(
+        default_factory=lambda: int(os.getenv("CV_ANALYSIS_REMOTE_HEALTH_TIMEOUT_S", "300"))
+    )
+    analysis_warmup_on_startup: bool = field(
+        default_factory=lambda: os.getenv("CV_ANALYSIS_WARMUP_ON_STARTUP", "true").lower()
+        in ("1", "true", "yes")
+    )
+    analysis_job_ttl_seconds: int = field(
+        default_factory=lambda: int(os.getenv("CV_ANALYSIS_JOB_TTL_SECONDS", "3600"))
+    )
+    analysis_job_max_sessions: int = field(
+        default_factory=lambda: int(os.getenv("CV_ANALYSIS_JOB_MAX_SESSIONS", "200"))
+    )
+
+    def resolve_analysis_inference_url(self) -> str:
+        return (self.analysis_llama_server_url or "").rstrip("/")
 
     def use_llama_cpp(self) -> bool:
         """True when the quantized GGUF (llama.cpp) backend should be used."""

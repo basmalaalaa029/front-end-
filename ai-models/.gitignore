@@ -44,3 +44,6 @@ htmlcov/
 .vscode/
 .idea/
 *.swp
+
+# Reference notebooks (may contain embedded secrets)
+notebooks/osamas_notebook*.ipynb

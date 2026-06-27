@@ -268,18 +268,21 @@ def _call_groq(prompt: str, api_key: str, model: str = "llama3-8b-8192",
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
-    body = _json.dumps({
-        "model": model,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "temperature": 0.1,
-    }).encode()
+    body = _json.dumps(
+        {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": 0.1,
+        },
+        ensure_ascii=False,
+    ).encode("utf-8")
 
     req = urllib.request.Request(
         "https://api.groq.com/openai/v1/chat/completions",
         data=body,
         headers={
-            "Content-Type": "application/json",
+            "Content-Type": "application/json; charset=utf-8",
             "Authorization": f"Bearer {api_key}",
         },
         method="POST",
