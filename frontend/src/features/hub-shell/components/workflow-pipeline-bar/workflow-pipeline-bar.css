@@ -13,6 +13,10 @@
   margin-right: auto;
 }
 
+.workflow-pipeline--full {
+  max-width: none;
+}
+
 .workflow-pipeline__item {
   display: flex;
   align-items: center;

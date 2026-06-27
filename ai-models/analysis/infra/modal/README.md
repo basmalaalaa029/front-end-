@@ -1,6 +1,9 @@
 # Deploy CV analysis model on Modal
 
-Serve the fine-tuned ATS model on GPU in your Modal workspace (e.g. `bosyalaa224`).
+Serve the fine-tuned ATS model on GPU in workspace **`myhywgxtj-arch`**.
+
+- **Dashboard:** https://modal.com/apps/myhywgxtj-arch/main
+- **Secrets:** https://modal.com/secrets/myhywgxtj-arch/main
 
 ## What gets deployed
 
@@ -26,46 +29,46 @@ pip install huggingface_hub
 huggingface-cli login
 
 # Option A — upload adapter only (base + LoRA on Modal)
-huggingface-cli upload bosyalaa224/cv-analysis-final-stage2 ./cv-analysis-final-stage2
+huggingface-cli upload <your-hf-user>/cv-analysis-final-stage2 ./cv-analysis-final-stage2
 
 # Option B — upload a fully merged model (single repo, faster load)
-huggingface-cli upload bosyalaa224/cv-analysis-merged ./merged-model-folder
+huggingface-cli upload <your-hf-user>/cv-analysis-merged ./merged-model-folder
 ```
 
-Use your repo names. The project defaults (Osama’s) are:
+Default model IDs (override in the Modal secret if you use your own HF repos):
 
 | Variable | Default |
 |----------|---------|
 | `ANALYSIS_BASE_MODEL_ID` | `OsamaHayba/qwen-ats-merged-stage1` |
 | `ANALYSIS_ADAPTER_MODEL_ID` | `OsamaHayba/cv-analysis-final-stage2` |
 
-Override these in the Modal secret if you use **your** HF repos.
-
-## 2. Switch to your Modal account
+## 2. Log in to your Modal workspace
 
 ```bash
 cd ai-models
-.venv/bin/pip3 install -r requirements-modal.txt
-.venv/bin/modal setup
+.venv/bin/python3 -m pip install -r requirements-modal.txt
+.venv/bin/python3 -m modal token new --profile myhywgxtj-arch --activate
 ```
-
-Dashboard: https://modal.com/apps/bosyalaa224/main
 
 ## 3. Create Modal secret (HF token + model IDs)
 
+Secret name must be **`cv-analysis-secrets`** (see `server.py`).
+
 ```bash
-modal secret create cv-analysis-secrets \
+.venv/bin/python3 -m modal profile activate myhywgxtj-arch
+
+.venv/bin/python3 -m modal secret create cv-analysis-secrets \
   HF_TOKEN=hf_xxxxxxxx \
   ANALYSIS_BASE_MODEL_ID=OsamaHayba/qwen-ats-merged-stage1 \
-  ANALYSIS_ADAPTER_MODEL_ID=bosyalaa224/cv-analysis-final-stage2
+  ANALYSIS_ADAPTER_MODEL_ID=OsamaHayba/cv-analysis-final-stage2
 ```
 
 For a **single merged** model repo:
 
 ```bash
-modal secret create cv-analysis-secrets \
+.venv/bin/python3 -m modal secret create cv-analysis-secrets \
   HF_TOKEN=hf_xxxxxxxx \
-  ANALYSIS_MERGED_MODEL_ID=bosyalaa224/cv-analysis-merged
+  ANALYSIS_MERGED_MODEL_ID=<your-hf-user>/cv-analysis-merged
 ```
 
 (`ANALYSIS_MERGED_MODEL_ID` skips base+adapter loading.)
@@ -80,13 +83,13 @@ chmod +x scripts/deploy_modal_analysis.sh
 Or manually:
 
 ```bash
-modal deploy analysis/infra/modal/server.py
+MODAL_PROFILE=myhywgxtj-arch .venv/bin/python3 -m modal deploy analysis/infra/modal/server.py
 ```
 
 Modal prints a URL like:
 
 ```text
-https://bosyalaa224--cv-analysis-cvanalysismodel-analyze.modal.run
+https://myhywgxtj-arch--cv-analysis-cvanalysismodel-analyze.modal.run
 ```
 
 ## 5. Wire local FastAPI
@@ -94,7 +97,7 @@ https://bosyalaa224--cv-analysis-cvanalysismodel-analyze.modal.run
 Edit `ai-models/.env`:
 
 ```env
-MODAL_ENDPOINT_URL=https://bosyalaa224--cv-analysis-cvanalysismodel-analyze.modal.run
+MODAL_ENDPOINT_URL=https://myhywgxtj-arch--cv-analysis-cvanalysismodel-analyze.modal.run
 MODAL_REQUEST_TIMEOUT=300
 ```
 
@@ -121,10 +124,11 @@ curl -X POST "$MODAL_ENDPOINT_URL" \
 
 | Issue | Fix |
 |-------|-----|
+| `workspace billing cycle spend limit reached` | Raise or reset spend limit in [Modal billing settings](https://modal.com/settings/billing) for `myhywgxtj-arch` |
 | `401` / model download failed | Check `HF_TOKEN` in secret; model repo must be public or token has access |
 | Cold start slow (1–3 min) | Normal on first request after idle; increase `scaledown_window` in `server.py` |
 | `parsed` is null | Model returned non-JSON; check `raw` in response |
-| Wrong workspace | `modal profile activate bosyalaa224` then redeploy |
+| Wrong workspace | `modal profile activate myhywgxtj-arch` then redeploy |
 
 ## Files
 

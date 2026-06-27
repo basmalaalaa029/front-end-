@@ -1,0 +1,38 @@
+[
+  {
+    "competency": "mlops_deployment",
+    "question_keywords": ["deploy", "model", "production", "serving", "mlops"],
+    "ideal_answer": "To deploy a model to production I containerize it with Docker, expose it via a REST API using FastAPI or Flask, and serve it behind a load balancer. I use MLflow or Weights & Biases to track experiments and register models. For serving I use TorchServe, TF Serving, or Triton Inference Server depending on the framework. I set up CI/CD pipelines with GitHub Actions to automate testing and deployment. I monitor model drift using statistical tests on incoming data distributions and track latency and throughput with Prometheus and Grafana. I also implement canary deployments or blue-green deployments to reduce rollout risk.",
+    "key_concepts": ["containerization", "REST API", "model registry", "CI/CD", "monitoring", "drift detection", "canary deployment"]
+  },
+  {
+    "competency": "model_evaluation",
+    "question_keywords": ["evaluate", "model", "metrics", "performance", "accuracy"],
+    "ideal_answer": "Model evaluation depends on the task. For classification I use precision, recall, F1-score, and ROC-AUC. For imbalanced datasets I prioritize F1 and precision-recall curves over accuracy. For regression I use RMSE, MAE, and R-squared. I always split data into train, validation, and test sets and use cross-validation to reduce variance in my estimates. I check for data leakage and ensure the test set reflects the production distribution. I also evaluate calibration using reliability diagrams and use SHAP values to explain individual predictions and validate the model is learning the right features.",
+    "key_concepts": ["precision", "recall", "F1", "ROC-AUC", "cross-validation", "data leakage", "SHAP", "calibration"]
+  },
+  {
+    "competency": "training_pipelines",
+    "question_keywords": ["training", "pipeline", "data", "preprocessing", "feature"],
+    "ideal_answer": "A training pipeline typically starts with data ingestion from a data lake or warehouse, then preprocessing: handling missing values with median or mode imputation, encoding categoricals with label or one-hot encoding, and scaling numerics with StandardScaler or MinMaxScaler. I use feature engineering to create domain-relevant features and apply feature selection to reduce dimensionality. The pipeline is orchestrated with Airflow or Prefect, and each step is logged. I use versioned datasets with DVC to ensure reproducibility. Hyperparameter tuning is done with Optuna or Ray Tune. The trained model is validated on a held-out set before being pushed to the model registry.",
+    "key_concepts": ["data ingestion", "preprocessing", "feature engineering", "orchestration", "DVC", "hyperparameter tuning", "model registry"]
+  },
+  {
+    "competency": "ml_fundamentals",
+    "question_keywords": ["overfitting", "bias", "variance", "regularization", "gradient"],
+    "ideal_answer": "Overfitting occurs when a model learns noise in the training data and fails to generalize. The bias-variance tradeoff describes this: high bias means underfitting, high variance means overfitting. To address overfitting I use regularization techniques like L1 (Lasso, which induces sparsity) and L2 (Ridge), dropout in neural networks, early stopping, and data augmentation. Cross-validation helps me detect overfitting early. Gradient descent optimizes the loss function by computing gradients and updating weights. Adam optimizer adapts the learning rate per parameter and is generally more robust than vanilla SGD.",
+    "key_concepts": ["bias-variance tradeoff", "overfitting", "L1 regularization", "L2 regularization", "dropout", "early stopping", "gradient descent", "Adam"]
+  },
+  {
+    "competency": "data_pipelines",
+    "question_keywords": ["data pipeline", "ETL", "streaming", "batch", "ingestion"],
+    "ideal_answer": "I design data pipelines depending on latency requirements. For batch processing I use Spark or dbt to transform large volumes of data in scheduled jobs. For streaming I use Kafka for event ingestion and Flink or Spark Streaming for real-time transformations. I ensure idempotency in pipeline steps so they can be safely retried. Data quality is enforced with Great Expectations or Deequ checks at each stage. Pipelines are orchestrated with Airflow DAGs with retry logic and alerting on failure. I version schemas and use schema registries to prevent breaking changes downstream.",
+    "key_concepts": ["batch processing", "streaming", "Kafka", "idempotency", "data quality", "Airflow", "schema registry"]
+  },
+  {
+    "competency": "model_optimization",
+    "question_keywords": ["optimize", "performance", "inference", "latency", "quantization"],
+    "ideal_answer": "To optimize model inference I first profile where the bottleneck is — GPU utilization, memory bandwidth, or CPU load. Techniques I use: quantization (INT8 or FP16) to reduce model size and speed up inference with minimal accuracy loss, pruning to remove low-importance weights, knowledge distillation to train a smaller student model from a larger teacher, and batching requests to improve GPU utilization. For deployment I use TensorRT or ONNX Runtime to optimize the computation graph. I also apply caching for repeated queries and use async inference to avoid blocking the main thread.",
+    "key_concepts": ["quantization", "pruning", "knowledge distillation", "batching", "TensorRT", "ONNX", "profiling"]
+  }
+]

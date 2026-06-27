@@ -52,6 +52,14 @@ def _verify_token(token: str) -> str:
     return str(sub)
 
 
+def _is_public_request(method: str, path: str) -> bool:
+    if path in _PUBLIC_PATHS or path.startswith("/health"):
+        return True
+    if method == "GET" and path in {"/", "/recruiter"}:
+        return True
+    return False
+
+
 def register_jwt_middleware(app: "FastAPI") -> None:
     from starlette.responses import JSONResponse
 
@@ -61,7 +69,7 @@ def register_jwt_middleware(app: "FastAPI") -> None:
             return await call_next(request)
 
         path = request.url.path
-        if path in _PUBLIC_PATHS or path.startswith("/health"):
+        if _is_public_request(request.method, path):
             return await call_next(request)
 
         if request.method == "OPTIONS":

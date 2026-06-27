@@ -1,0 +1,26 @@
+[
+  {
+    "competency": "ml_algorithms",
+    "question_keywords": ["algorithm", "model", "classification", "regression", "clustering"],
+    "ideal_answer": "I choose algorithms based on the problem type, data size, and interpretability requirements. For classification: logistic regression for interpretability, random forests for robustness, XGBoost for tabular data with best performance, and neural networks for complex patterns. For regression: linear regression as a baseline, gradient boosting for non-linear relationships. For clustering: K-Means for known k, DBSCAN for arbitrary shapes and noise. I always start with a simple baseline, then add complexity only when justified by metrics. I understand the assumptions of each algorithm and validate them on my data.",
+    "key_concepts": ["logistic regression", "random forest", "XGBoost", "baseline", "K-Means", "DBSCAN", "algorithm selection"]
+  },
+  {
+    "competency": "feature_engineering",
+    "question_keywords": ["feature", "engineering", "preprocessing", "transformation", "selection"],
+    "ideal_answer": "Feature engineering is often the highest-leverage activity in ML. I create features from domain knowledge — for time series data I extract lag features, rolling means, and seasonal components. For text I use TF-IDF, word embeddings, or sentence transformers. For categorical features with high cardinality I use target encoding or embeddings rather than one-hot encoding. I handle skewed distributions with log or Box-Cox transforms. I detect and remove highly correlated features with a correlation matrix. I use mutual information or permutation importance for feature selection to reduce dimensionality and improve generalization.",
+    "key_concepts": ["lag features", "target encoding", "log transform", "TF-IDF", "embeddings", "correlation", "mutual information", "permutation importance"]
+  },
+  {
+    "competency": "statistics",
+    "question_keywords": ["statistics", "hypothesis", "p-value", "distribution", "confidence"],
+    "ideal_answer": "Statistical thinking is central to data science. I use hypothesis testing to make data-driven decisions — t-tests for comparing means, chi-squared for categorical associations, and Mann-Whitney for non-normal distributions. I understand that p-value is the probability of the data under the null hypothesis, not the probability the hypothesis is true. I avoid p-hacking by setting alpha before the experiment. For A/B tests I calculate required sample size with a power analysis upfront. I use confidence intervals to communicate uncertainty and Bayesian methods when I want to incorporate prior knowledge or update beliefs incrementally.",
+    "key_concepts": ["t-test", "chi-squared", "p-value", "null hypothesis", "power analysis", "confidence intervals", "Bayesian inference"]
+  },
+  {
+    "competency": "model_evaluation",
+    "question_keywords": ["evaluate", "validation", "cross-validation", "metrics", "overfitting"],
+    "ideal_answer": "I use stratified k-fold cross-validation to get robust estimates of generalization performance, especially with imbalanced classes. I separate the test set completely and never touch it until final evaluation to avoid information leakage. For classification I report precision, recall, F1, and ROC-AUC. For imbalanced problems I use PR-AUC which is more informative than ROC-AUC. I check for overfitting by comparing train vs validation learning curves. Calibration is evaluated with reliability diagrams. I use SHAP or LIME for model explainability and to validate that the model is using features for the right reasons.",
+    "key_concepts": ["stratified k-fold", "train/test split", "ROC-AUC", "PR-AUC", "learning curves", "calibration", "SHAP", "LIME"]
+  }
+]

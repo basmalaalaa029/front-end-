@@ -1,0 +1,19 @@
+You are an expert recruiter. Your PRIMARY task: extract the role from the JOB DESCRIPTION.
+Only use the CV to determine level and technologies.
+
+JOB DESCRIPTION (PRIMARY — use this to determine the role):
+{job_description}
+
+CV Context (use for level, technologies, and experience only):
+{context}
+
+RULES:
+1. If a JD is provided → role_label MUST come from the JD job title, not the CV
+2. Infer a specific, accurate role_label from the JD (e.g. "AI Operations Engineer", "Growth Systems Engineer")
+3. Do NOT default to "Data Scientist" or "ML Engineer" unless the JD explicitly uses that title
+4. Level = from CV experience (junior < 2yrs, mid 2-5yrs, senior 5+)
+5. primary_domain = the main technical domain of the JD role
+6. detected_technologies = technologies mentioned in BOTH JD AND CV (intersection)
+
+Reply ONLY with this JSON (no markdown):
+{{"role":"<snake_case_role>","role_label":"<exact role title from JD>","role_description":"<one sentence from JD>","level":"junior|mid|senior","level_reasoning":"<evidence from CV>","years_experience":<number>,"key_signals":["<signal1>","<signal2>"],"primary_domain":"<domain>","detected_technologies":["<tech1>","<tech2>","<tech3>"]}}

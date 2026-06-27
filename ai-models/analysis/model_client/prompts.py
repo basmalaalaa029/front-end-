@@ -17,8 +17,18 @@ weaknesses,
 improvement_suggestions,
 rewrite_suggestions.
 
-Identify and list EVERY distinct weakness you can find in this resume — do not stop after one or two. Most resumes have several separate issues across clarity, structure, impact, skills relevance, and ATS readiness; find them all and list each as its own item.
-List All the strengths, improvement suggestions and rewrite suggestions in the resume.
+For strengths, weaknesses, improvement_suggestions, and rewrite_suggestions:
+- Each list must contain AT MOST 5 items. Quality and distinctness over quantity.
+- Every item must describe a DIFFERENT root cause. Before adding an item, check it is not a
+  rephrasing of one already in the list (e.g. "bullets lack metrics" and "bullets lack
+  quantitative impact" are the SAME issue — include it once, not twice).
+- If a single root cause affects multiple sections of the resume (e.g. inconsistent bullet
+  formatting appears in two jobs), report it ONCE and mention that it recurs, rather than
+  listing it once per occurrence.
+- Each item must be a complete, self-contained sentence. Never end an item mid-sentence or
+  mid-word.
+- Order items by importance, most important first, so the list is still useful if truncated.
+
 Scores must be integers between 0 and 100.
 Scores above 95 should be rare and reserved for exceptional resumes.
 Do NOT invent any metrics or percentages.

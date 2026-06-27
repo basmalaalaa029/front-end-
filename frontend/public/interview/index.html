@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CareerPilot — Interview Coach</title>
+<script src="./auth-bridge.js"></script>
+<script>if(new URLSearchParams(location.search).get('embedded')==='1')document.documentElement.classList.add('embedded');</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f9f8f6;--sur:#ffffff;--sur2:#f9f8f6;--sur3:#eeedfe;--bor:rgba(0,0,0,0.08);--bor2:rgba(0,0,0,0.12);--acc:#534ab7;--acc2:#3c3489;--grn:#0f6e56;--dan:#993c1d;--war:#ba7517;--txt:#1a1a1a;--txt2:#6b6b6b;--mut:#a0a0a0;--r:12px;--r2:8px;--font:'DM Sans',sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;--serif:'DM Serif Display',Georgia,serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:15px}body{background:var(--bg);color:var(--txt);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bor2);border-radius:4px}
+.outer-wrap{display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px;min-height:100vh;position:relative}
+.outer-wrap::before{content:'';position:fixed;top:-20vh;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(83,74,183,.07) 0%,transparent 70%);pointer-events:none;z-index:0}
+.brand-row{display:flex;align-items:center;gap:10px;margin-bottom:32px;position:relative;z-index:1}
+.brand-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.brand-name{font-weight:700;font-size:1rem;letter-spacing:-.02em}.brand-name em{font-style:normal;color:var(--acc)}
+.card{width:100%;max-width:860px;background:var(--sur);border:1px solid var(--bor);border-radius:var(--r);padding:28px 32px;margin-bottom:14px;position:relative;z-index:1;animation:fadeUp .5s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.card.hidden,.hidden{display:none!important}
+.step-bar{width:100%;max-width:860px;margin-bottom:20px;position:relative;z-index:1}
+.step-labels{display:flex;justify-content:space-between;margin-bottom:8px}
+.step-lbl{font-family:var(--mono);font-size:.58rem;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;transition:color .3s}
+.step-lbl.active{color:var(--acc)}.step-lbl.done{color:var(--grn)}
+.steps-track{display:flex;gap:4px}
+.step-seg{flex:1;height:2px;background:var(--bor2);border-radius:2px;transition:background .4s;position:relative;overflow:hidden}
+.step-seg.active{background:var(--acc)}.step-seg.active::after{content:'';position:absolute;inset:0;left:-100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:shimmer 1.6s infinite}
+.step-seg.done{background:var(--grn)}
+@keyframes shimmer{to{left:100%}}
+.stag{font-family:var(--mono);font-size:.58rem;font-weight:500;text-transform:uppercase;letter-spacing:.14em;color:var(--mut);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.stag::after{content:'';flex:1;height:1px;background:var(--bor)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:.78rem;font-weight:500;color:var(--txt2);margin-bottom:6px}
+.field .hint{font-weight:400;color:var(--mut)}
+.field input{width:100%;background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2);padding:10px 14px;font-family:var(--font);font-size:.88rem;color:var(--txt);outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--acc)}
+.dz{border:1.5px dashed var(--bor2);border-radius:var(--r);padding:28px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:16px;position:relative}
+.dz:hover{border-color:var(--acc);background:rgba(83,74,183,.04)}
+.dz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.dz-icon{font-size:1.8rem;margin-bottom:8px}.dz h3{font-size:.92rem;font-weight:600;margin-bottom:4px}.dz p{font-size:.76rem;color:var(--mut)}
+.dz.active{border-color:var(--acc);background:rgba(83,74,183,.06)}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mode-card{background:var(--sur2);border:1.5px solid var(--bor);border-radius:var(--r2);padding:14px 12px;cursor:pointer;transition:all .2s;text-align:center}
+.mode-card:hover{border-color:var(--bor2)}.mode-card.sel{border-color:var(--acc);background:rgba(83,74,183,.06)}
+.mode-card .ic{font-size:1.4rem;margin-bottom:6px}.mode-card .nm{font-size:.8rem;font-weight:600;margin-bottom:3px}.mode-card .ds{font-size:.7rem;color:var(--mut);line-height:1.4}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 22px;border-radius:var(--r2);font-family:var(--font);font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;letter-spacing:-.01em}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-p{background:var(--acc);color:#fff}.btn-p:hover:not(:disabled){background:#3a7de8}
+.btn-s{background:var(--sur2);border:1px solid var(--bor2);color:var(--txt2)}.btn-s:hover:not(:disabled){border-color:var(--acc);color:var(--acc)}
+.btn-g{background:rgba(45,212,160,.12);border:1px solid rgba(45,212,160,.3);color:var(--grn)}
+.btn-d{background:rgba(240,96,96,.12);border:1px solid rgba(240,96,96,.3);color:var(--dan)}
+.brief-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.bm-item{text-align:center;padding:12px 8px;background:var(--sur2);border-radius:var(--r2);border:1px solid var(--bor)}
+.bm-lbl{font-family:var(--mono);font-size:.56rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.bm-val{font-size:.9rem;font-weight:600}
+.skill-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.sc-chip{background:rgba(83,74,183,.1);border:1px solid rgba(83,74,183,.25);border-radius:100px;padding:3px 11px;font-family:var(--mono);font-size:.62rem;color:var(--acc)}
+.env-row{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--sur2);border-radius:var(--r2);border:1px solid var(--bor);margin-bottom:8px}
+.env-row .ico{font-size:1.2rem;width:26px;text-align:center}
+.env-row .env-name{font-size:.84rem;font-weight:500;margin-bottom:2px}.env-row .env-msg{font-size:.7rem;color:var(--mut)}
+.instr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.instr-block{background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2);padding:14px 16px}
+.instr-block h4{font-size:.78rem;font-weight:600;margin-bottom:10px}
+.instr-block ul{list-style:none;padding:0}
+.instr-block ul li{font-size:.75rem;color:var(--txt2);padding:3px 0;display:flex;align-items:flex-start;gap:7px;line-height:1.5}
+.instr-block ul li::before{content:'·';color:var(--acc);flex-shrink:0;font-size:1rem;line-height:1.2}
+.flow-steps{display:flex;align-items:center;gap:0;margin:14px 0;flex-wrap:wrap;gap:4px}
+.flow-step{background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2);padding:6px 12px;font-size:.72rem;color:var(--txt2);white-space:nowrap}
+.flow-arrow{color:var(--mut);font-size:.7rem;margin:0 2px}
+#s-int{display:none;position:fixed;inset:0;background:var(--bg);flex-direction:column;z-index:100}
+#s-int.visible{display:flex}
+.int-topbar{height:52px;min-height:52px;background:var(--sur);border-bottom:1px solid var(--bor);display:flex;align-items:center;padding:0 20px;z-index:10;flex-shrink:0;gap:12px}
+.int-brand{display:flex;align-items:center;gap:8px;min-width:110px}
+.int-brand-icon{width:26px;height:26px;background:linear-gradient(135deg,var(--acc),var(--acc2));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.int-brand-name{font-weight:700;font-size:.82rem;letter-spacing:-.01em}.int-brand-name em{font-style:normal;color:var(--acc)}
+.progress-dots{display:flex;align-items:center;gap:5px;flex:1;justify-content:center;overflow:hidden}
+.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--bor2);transition:all .4s;flex-shrink:0}
+.prog-dot.done{background:var(--grn)}.prog-dot.current{background:var(--acc);box-shadow:0 0 0 3px rgba(83,74,183,.25)}.prog-dot.practice{background:var(--war)}
+.prog-label{font-family:var(--mono);font-size:.56rem;color:var(--mut);margin:0 4px;white-space:nowrap}
+.topbar-right{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.62rem}
+.tb-phase{background:rgba(83,74,183,.1);border:1px solid rgba(83,74,183,.25);border-radius:100px;padding:3px 10px;color:var(--acc);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.tb-state{font-family:var(--mono);font-size:.55rem;color:var(--mut);letter-spacing:.04em;white-space:nowrap}
+.tb-time{color:var(--mut);white-space:nowrap}
+.tb-mute{background:none;border:1px solid var(--bor2);border-radius:6px;color:var(--mut);font-family:var(--mono);font-size:.62rem;padding:4px 9px;cursor:pointer;transition:all .2s}
+.tb-mute:hover{border-color:var(--acc);color:var(--acc)}
+.int-body{display:flex;flex:1;overflow:hidden;min-height:0}
+.panel-left{width:40%;min-width:290px;max-width:480px;background:var(--sur);border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.panel-left-inner{padding:22px 22px 18px;display:flex;flex-direction:column;flex:1}
+.q-meta{display:flex;align-items:center;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.q-num-badge{color:#fff;font-family:var(--mono);font-size:.6rem;font-weight:500;padding:3px 10px;border-radius:100px;background:var(--acc)}
+.q-cat-badge{background:var(--sur3);border:1px solid var(--bor2);color:var(--txt2);font-family:var(--mono);font-size:.58rem;padding:3px 9px;border-radius:100px}
+.q-fu-badge{background:rgba(245,183,49,.12);border:1px solid rgba(245,183,49,.3);color:var(--war);font-family:var(--mono);font-size:.58rem;padding:3px 9px;border-radius:100px}
+.q-practice-badge{background:rgba(124,92,191,.12);border:1px solid rgba(124,92,191,.3);color:#a78bfa;font-family:var(--mono);font-size:.58rem;padding:3px 9px;border-radius:100px}
+.q-int-label{font-family:var(--mono);font-size:.58rem;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
+.q-text{font-size:1rem;font-weight:500;line-height:1.75;color:var(--txt)}
+.prep-box{margin-top:16px;padding:15px 18px;background:rgba(83,74,183,.06);border:1px solid rgba(83,74,183,.18);border-radius:var(--r);text-align:center;display:none}
+.prep-label{font-family:var(--mono);font-size:.58rem;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px}
+.prep-count{font-family:var(--serif);font-size:2.6rem;font-weight:700;color:var(--acc);line-height:1;letter-spacing:-.04em;transition:color .3s}
+.prep-count.urgent{color:var(--war);animation:pulse-scale 1s ease-in-out infinite}
+.prep-count.critical{color:var(--dan)}
+.prep-sub{font-size:.7rem;color:var(--txt2);margin-top:6px}
+.prep-skip{margin-top:10px;background:none;border:1px solid var(--bor2);border-radius:6px;color:var(--mut);font-size:.7rem;padding:4px 12px;cursor:pointer;transition:all .2s;font-family:var(--font)}
+.prep-skip:hover{border-color:var(--acc);color:var(--acc)}
+.answer-timer-bar{margin-top:12px;padding:9px 14px;background:rgba(240,96,96,.06);border:1px solid rgba(240,96,96,.2);border-radius:var(--r2);display:none;align-items:center;justify-content:space-between}
+.rec-dot-row{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:.6rem;color:var(--dan)}
+.dot-pulse{width:7px;height:7px;border-radius:50%;background:var(--dan);animation:pulse 1.1s ease-in-out infinite}
+.ans-cd{font-family:var(--serif);font-size:1.1rem;font-weight:700}
+.min-warn{font-family:var(--mono);font-size:.56rem;color:var(--mut);margin-top:3px}
+.confirmed-panel{margin-top:14px;display:none}
+.confirmed-card{background:rgba(45,212,160,.06);border:1px solid rgba(45,212,160,.25);border-radius:var(--r);padding:12px 14px;display:flex;align-items:flex-start;gap:11px}
+.conf-check{font-size:1.3rem}
+.conf-label{font-size:.8rem;font-weight:600;color:var(--grn);margin-bottom:4px}
+.conf-transcript{font-size:.74rem;color:var(--txt2);line-height:1.5;font-style:italic}
+.comp-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:14px}
+.comp-tag{background:var(--sur3);border:1px solid var(--bor2);color:var(--mut);font-family:var(--mono);font-size:.56rem;padding:2px 8px;border-radius:100px;transition:all .2s}
+.comp-tag.current{background:rgba(83,74,183,.12);border-color:var(--acc);color:var(--acc)}
+.panel-right{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.panel-right-inner{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;gap:13px;overflow:hidden}
+.cam-outer{position:relative;width:100%;max-width:520px;border-radius:14px;overflow:hidden;background:var(--sur2);aspect-ratio:16/9;flex-shrink:0}
+.cam-outer::before{content:'';position:absolute;inset:-1px;border-radius:15px;border:1.5px solid var(--bor2);pointer-events:none;z-index:5;transition:all .4s}
+.cam-outer.recording::before{border-color:var(--dan);animation:border-pulse 1.5s ease-in-out infinite}
+@keyframes border-pulse{0%,100%{box-shadow:0 0 0 1px rgba(240,96,96,.3)}50%{box-shadow:0 0 0 4px rgba(240,96,96,.15)}}
+#cam-video{width:100%;height:100%;object-fit:cover;border-radius:12px;display:block}
+#cam-video.hidden{display:none}
+.cam-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--mut);font-size:.8rem}
+.cam-placeholder-icon{font-size:2rem;opacity:.5}
+.cam-rec-overlay{position:absolute;top:10px;left:10px;z-index:6;display:none;align-items:center;gap:6px;background:rgba(0,0,0,.65);border-radius:100px;padding:4px 10px;backdrop-filter:blur(8px)}
+.cam-rec-overlay.visible{display:flex}
+.cam-rec-dot{width:7px;height:7px;border-radius:50%;background:var(--dan);animation:pulse 1s ease-in-out infinite}
+.cam-rec-label{font-family:var(--mono);font-size:.6rem;color:var(--dan);letter-spacing:.08em}
+.cam-countdown-overlay{position:absolute;bottom:10px;left:0;right:0;z-index:6;display:none;flex-direction:column;align-items:center}
+.cam-countdown-overlay.visible{display:flex}
+.cam-cd-inner{background:rgba(0,0,0,.75);backdrop-filter:blur(12px);border-radius:10px;padding:8px 18px;text-align:center;border:1px solid rgba(255,255,255,.08)}
+.cam-cd-label{font-family:var(--mono);font-size:.54rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.12em}
+.cam-cd-num{font-family:var(--serif);font-size:1.9rem;font-weight:700;color:var(--acc);line-height:1;letter-spacing:-.04em;transition:color .3s}
+.cam-cd-num.urgent{color:var(--war)}.cam-cd-num.critical{color:var(--dan)}
+.mic-row{display:flex;align-items:center;gap:11px;width:100%;max-width:520px}
+.mic-status{font-family:var(--mono);font-size:.62rem;color:var(--mut);white-space:nowrap}
+.mic-status.active{color:var(--grn)}
+.waveform{display:flex;align-items:center;gap:3px;height:24px;flex:1}
+.waveform span{flex:1;background:var(--bor2);border-radius:2px;height:6px;transition:height .14s,background .14s;min-width:3px;max-width:6px}
+.waveform.active span{background:var(--acc);animation:wv .55s ease-in-out infinite alternate}
+.waveform.active span:nth-child(1){animation-delay:0s}.waveform.active span:nth-child(2){animation-delay:.08s}.waveform.active span:nth-child(3){animation-delay:.16s}.waveform.active span:nth-child(4){animation-delay:.24s}.waveform.active span:nth-child(5){animation-delay:.32s}.waveform.active span:nth-child(6){animation-delay:.16s}.waveform.active span:nth-child(7){animation-delay:.08s}
+@keyframes wv{from{height:4px}to{height:20px}}
+.speak-right-panel{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:28px;gap:18px}
+.speak-waveform-big{display:flex;align-items:center;gap:4px;height:56px}
+.speak-waveform-big span{flex:1;background:var(--bor2);border-radius:3px;height:10px;transition:height .11s ease,background .11s;min-width:5px;max-width:11px}
+.speak-waveform-big.active span{background:var(--acc);animation:wv .52s ease-in-out infinite alternate}
+.speak-waveform-big.active span:nth-child(1){animation-delay:0s}.speak-waveform-big.active span:nth-child(2){animation-delay:.06s}.speak-waveform-big.active span:nth-child(3){animation-delay:.12s}.speak-waveform-big.active span:nth-child(4){animation-delay:.18s}.speak-waveform-big.active span:nth-child(5){animation-delay:.24s}.speak-waveform-big.active span:nth-child(6){animation-delay:.18s}.speak-waveform-big.active span:nth-child(7){animation-delay:.12s}.speak-waveform-big.active span:nth-child(8){animation-delay:.06s}.speak-waveform-big.active span:nth-child(9){animation-delay:0s}
+.speak-status{font-family:var(--mono);font-size:.7rem;color:var(--mut);text-align:center}
+.speak-status.recording{color:var(--dan)}
+.speak-live-transcript{display:none!important}
+.slt-label{font-family:var(--mono);font-size:.55rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.slt-text{font-size:.8rem;color:var(--txt2);line-height:1.6;font-style:italic;min-height:18px}
+.speak-stats{display:flex;gap:16px;font-family:var(--mono);font-size:.62rem;color:var(--mut)}
+.speak-stats span{color:var(--txt2);font-weight:500}
+.prep-overlay{position:absolute;inset:0;background:var(--bg);z-index:25;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:32px}
+.prep-overlay.visible{display:flex}
+.prep-overlay-title{font-family:var(--mono);font-size:.66rem;color:var(--mut);text-transform:uppercase;letter-spacing:.14em}
+.prep-overlay-count{font-family:var(--serif);font-size:5rem;font-weight:800;color:var(--acc);line-height:1;letter-spacing:-.06em;transition:color .3s}
+.prep-overlay-count.urgent{color:var(--war);animation:pulse-scale 1s ease-in-out infinite}
+.prep-overlay-count.critical{color:var(--dan)}
+.prep-overlay-sub{font-size:.8rem;color:var(--txt2);text-align:center;line-height:1.6;max-width:320px}
+.prep-overlay-skip{background:none;border:1px solid var(--bor2);border-radius:8px;color:var(--mut);font-family:var(--font);font-size:.76rem;padding:8px 20px;cursor:pointer;transition:all .2s;margin-top:8px}
+.prep-overlay-skip:hover{border-color:var(--acc);color:var(--acc)}
+.text-right-panel{display:none;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:24px;gap:12px}
+.trp-header{font-family:var(--mono);font-size:.6rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;width:100%;max-width:520px}
+.trp-editor{width:100%;max-width:520px;background:var(--sur);border:1px solid var(--bor2);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.trp-editor textarea{width:100%;min-height:200px;flex:1;background:transparent;border:none;padding:17px 19px;font-family:var(--font);font-size:.93rem;color:var(--txt);resize:none;outline:none;line-height:1.8}
+.trp-footer{display:flex;align-items:center;justify-content:space-between;padding:9px 15px;background:var(--sur2);border-top:1px solid var(--bor);flex-shrink:0}
+.wc-badge{font-family:var(--mono);font-size:.6rem;color:var(--mut)}
+.trp-actions{display:flex;gap:7px}
+.trp-meta{width:100%;max-width:520px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:.58rem;color:var(--mut)}
+.processing-overlay{position:absolute;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:15px;z-index:20}
+.processing-overlay.visible{display:flex}
+.proc-circle{width:76px;height:76px;position:relative}
+.proc-circle svg{width:100%;height:100%;transform:rotate(-90deg)}
+.proc-circle circle{fill:none;stroke:var(--bor2);stroke-width:4}
+.proc-circle .prog-arc{stroke:var(--acc);stroke-linecap:round;stroke-dasharray:213;stroke-dashoffset:213;transition:stroke-dashoffset .3s ease}
+.proc-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.8rem;font-weight:500;color:var(--acc)}
+.proc-msgs{text-align:center}
+.proc-title{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.proc-sub{font-size:.72rem;color:var(--mut)}
+.review-panel{position:absolute;inset:0;bottom:52px;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:22px;gap:13px;z-index:20;overflow-y:auto}
+.review-panel.visible{display:flex}
+.review-title{font-size:.9rem;font-weight:600}
+.review-sub{font-size:.74rem;color:var(--txt2);text-align:center;max-width:400px;line-height:1.5}
+.review-actions{display:flex;gap:10px}
+.int-actions{padding:11px 18px;border-top:1px solid var(--bor);display:flex;align-items:center;justify-content:space-between;gap:9px;background:var(--sur);flex-shrink:0;position:relative;z-index:30}
+.int-actions-left{display:flex;align-items:center;gap:7px;flex:1}
+.int-actions-right{display:flex;align-items:center;gap:7px}
+.finish-early-hint{font-family:var(--mono);font-size:.58rem;color:var(--mut)}
+.transition-overlay{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;gap:13px}
+.transition-overlay.visible{display:flex}
+.trans-done{font-family:var(--mono);font-size:.6rem;color:var(--grn);text-transform:uppercase;letter-spacing:.14em;display:flex;align-items:center;gap:6px}
+.trans-done::before{content:'✓'}
+.trans-msg{font-size:1.1rem;font-weight:600}
+.trans-sub{font-size:.76rem;color:var(--mut)}
+.trans-dots{display:flex;gap:5px;margin-top:5px}
+.trans-dot{width:6px;height:6px;border-radius:50%;background:var(--bor2);animation:dotwave 1.4s ease-in-out infinite}
+.trans-dot:nth-child(2){animation-delay:.2s}.trans-dot:nth-child(3){animation-delay:.4s}
+@keyframes dotwave{0%,80%,100%{background:var(--bor2)}40%{background:var(--acc)}}
+#s-final-processing{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#s-final-processing.visible{display:flex}
+.fp-icon{font-size:2.2rem;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.fp-title{font-size:1.05rem;font-weight:600;text-align:center}
+.fp-steps{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.fp-step{display:flex;align-items:center;gap:9px;font-size:.76rem;color:var(--mut)}
+.fp-step.active{color:var(--txt2)}.fp-step.done{color:var(--grn)}
+.fp-step-dot{width:6px;height:6px;border-radius:50%;background:var(--bor2);flex-shrink:0}
+.fp-step.active .fp-step-dot{background:var(--acc);animation:pulse 1s ease-in-out infinite}
+.fp-step.done .fp-step-dot{background:var(--grn)}
+#s-final{display:none}#s-final.visible{display:block;min-height:100vh}
+.results-wrap{max-width:900px;margin:0 auto;padding:0 22px 80px}
+.sticky-strip{position:sticky;top:0;z-index:50;background:rgba(8,9,13,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--bor);padding:7px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.res-hero{background:var(--sur);border:1px solid var(--bor);border-radius:16px;padding:28px 32px;margin-bottom:16px;position:relative;overflow:hidden}
+.res-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;background:radial-gradient(ellipse,rgba(83,74,183,.08) 0%,transparent 70%);pointer-events:none}
+.res-score-row{display:flex;align-items:flex-start;gap:24px;margin-bottom:16px;flex-wrap:wrap}
+.res-score-num{font-family:var(--serif);font-size:4rem;font-weight:800;line-height:1;letter-spacing:-.04em}
+.res-score-denom{font-family:var(--mono);font-size:.76rem;color:var(--mut)}
+.rec-badge{padding:7px 15px;border-radius:8px;font-size:.86rem;font-weight:700;display:inline-flex;align-items:center;gap:7px}
+.rec-sh{background:rgba(45,212,160,.12);border:1px solid rgba(45,212,160,.3);color:var(--grn)}
+.rec-h{background:rgba(83,74,183,.12);border:1px solid rgba(83,74,183,.3);color:var(--acc)}
+.rec-lh{background:rgba(124,92,191,.12);border:1px solid rgba(124,92,191,.3);color:#a78bfa}
+.rec-ln{background:rgba(245,183,49,.12);border:1px solid rgba(245,183,49,.3);color:var(--war)}
+.rec-n{background:rgba(240,96,96,.12);border:1px solid rgba(240,96,96,.3);color:var(--dan)}
+.res-summary{font-size:.86rem;color:var(--txt2);line-height:1.7;max-width:600px}
+.res-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.res-panel{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:17px}
+.res-panel h3{font-size:.75rem;font-weight:600;margin-bottom:11px}
+.sbar{margin-bottom:8px}.sbar-hd{display:flex;justify-content:space-between;margin-bottom:3px;font-size:.72rem}
+.sbar-lbl{color:var(--txt2)}.sbar-val{font-family:var(--mono);font-weight:500}
+.sbar-track{height:3px;background:var(--bor2);border-radius:3px;overflow:hidden}
+.sbar-fill{height:100%;border-radius:3px;transition:width 1s .3s ease;width:0}
+.res-section{background:var(--sur);border:1px solid var(--bor);border-radius:12px;padding:17px 21px;margin-bottom:12px}
+.res-section h3{font-size:.78rem;font-weight:600;margin-bottom:11px}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.rtag{background:var(--sur2);border:1px solid var(--bor);border-radius:6px;padding:3px 10px;font-size:.7rem;color:var(--txt2)}
+.str-item,.wk-item{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid var(--bor);font-size:.79rem;color:var(--txt2);line-height:1.5}
+.str-item:last-child,.wk-item:last-child{border-bottom:none}
+.str-item::before{content:'✓';color:var(--grn);flex-shrink:0;margin-top:1px}
+.wk-item::before{content:'→';color:var(--war);flex-shrink:0;margin-top:1px}
+.qi-card{border:1px solid var(--bor);border-radius:var(--r2);margin-bottom:8px;overflow:hidden}
+.qi-hdr{display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;background:var(--sur2);transition:background .2s;user-select:none}
+.qi-hdr:hover{background:var(--sur3)}
+.qi-sc{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:.76rem;font-weight:700;flex-shrink:0}
+.sc-hi{background:rgba(45,212,160,.15);color:var(--grn)}.sc-md{background:rgba(83,74,183,.15);color:var(--acc)}.sc-lo{background:rgba(240,96,96,.15);color:var(--dan)}
+.qi-info{flex:1;min-width:0}
+.qi-q{font-size:.78rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi-meta{font-family:var(--mono);font-size:.56rem;color:var(--mut);margin-top:2px}
+.qi-arrow{color:var(--mut);font-size:.66rem}
+.qi-body{display:none;padding:13px;border-top:1px solid var(--bor)}
+.qi-body.open{display:block}
+.qi-sec{margin-bottom:10px}
+.qi-sec-lbl{font-family:var(--mono);font-size:.56rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+.qi-ans{font-size:.78rem;color:var(--txt2);line-height:1.6;background:var(--sur2);border-radius:6px;padding:9px 11px}
+.qi-fb{font-size:.78rem;color:var(--txt2);line-height:1.65}
+.qi-imps{padding-left:15px}
+.qi-imps li{font-size:.74rem;color:var(--txt2);margin-bottom:3px;line-height:1.5}
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.dim-item{background:var(--sur2);border-radius:6px;padding:7px 9px}
+.dim-lbl{font-family:var(--mono);font-size:.56rem;color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.dim-note{font-size:.72rem;color:var(--txt2);line-height:1.5}
+.ip-card{background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2);padding:13px;margin-bottom:8px}
+.ip-head{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.ip-area{font-size:.8rem;font-weight:600}
+.ip-pri{font-family:var(--mono);font-size:.58rem;padding:2px 8px;border-radius:100px}
+.ip-pri.pH{background:rgba(240,96,96,.12);color:var(--dan)}.ip-pri.pM{background:rgba(245,183,49,.12);color:var(--war)}.ip-pri.pL{background:rgba(45,212,160,.12);color:var(--grn)}
+.ip-issue{font-size:.74rem;color:var(--txt2);margin-bottom:6px;line-height:1.5}
+.ip-actions li{font-size:.72rem;color:var(--txt2);margin-bottom:2px;line-height:1.5}
+.toast-cont{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+.toast{background:var(--sur2);border:1px solid var(--bor2);border-radius:var(--r2);padding:9px 14px;font-size:.77rem;color:var(--txt2);max-width:270px;animation:fadeUp .3s ease;pointer-events:auto}
+.toast.success{border-color:rgba(45,212,160,.4);color:var(--grn)}.toast.error{border-color:rgba(240,96,96,.4);color:var(--dan)}.toast.warn{border-color:rgba(245,183,49,.4);color:var(--war)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes pulse-scale{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.int-body{flex-direction:column}.panel-left{width:100%;max-width:100%;border-right:none;border-bottom:1px solid var(--bor);max-height:46vh;min-width:0}.brief-meta{grid-template-columns:repeat(2,1fr)}.res-grid3{grid-template-columns:1fr 1fr}.instr-grid{grid-template-columns:1fr}.topbar-right .tb-time{display:none}}
+@media(max-width:560px){.panel-left-inner{padding:13px}.panel-right-inner,.speak-right-panel,.text-right-panel{padding:13px}.res-grid3{grid-template-columns:1fr}.int-topbar{padding:0 11px}.int-brand-name{display:none}.progress-dots{display:none}}
+</style>
+<link rel="stylesheet" href="./career-pilot-theme.css">
+</head>
+<body>
+<div class="outer-wrap" id="outer-wrap">
+  <div class="brand-row"><div class="brand-icon">🎯</div><div class="brand-name">Interview<em>AI</em></div></div>
+  <div class="step-bar">
+    <div class="step-labels">
+      <span class="step-lbl active" id="sl-1">Setup</span>
+      <span class="step-lbl" id="sl-2">Analysis</span>
+      <span class="step-lbl" id="sl-3">Interview</span>
+      <span class="step-lbl" id="sl-4">Results</span>
+    </div>
+    <div class="steps-track">
+      <div class="step-seg active" id="step-1"></div>
+      <div class="step-seg" id="step-2"></div>
+      <div class="step-seg" id="step-3"></div>
+      <div class="step-seg" id="step-4"></div>
+    </div>
+  </div>
+
+  <!-- ENV CHECK -->
+  <div class="card hidden" id="s-envcheck">
+    <div class="stag">Device Check</div>
+    <p style="font-size:.84rem;color:var(--txt2);margin-bottom:18px;line-height:1.6">We'll verify your browser, microphone, and camera before beginning.</p>
+    <div id="env-checks">
+      <div class="env-row"><span class="ico" id="env-browser-icon">⏳</span><div><div class="env-name">Browser</div><div class="env-msg" id="env-browser-msg">Checking...</div></div></div>
+      <div class="env-row" id="env-mic-row" style="display:none"><span class="ico" id="env-mic-icon">⏳</span><div><div class="env-name">Microphone</div><div class="env-msg" id="env-mic-msg">Requesting access...</div></div></div>
+      <div class="env-row hidden" id="env-cam-row"><span class="ico" id="env-cam-icon">⏳</span><div><div class="env-name">Camera</div><div class="env-msg" id="env-cam-msg">Requesting access...</div></div></div>
+      <div class="env-row"><span class="ico" id="env-spk-icon">⏳</span><div><div class="env-name">Audio Playback</div><div class="env-msg" id="env-spk-msg">Checking Web Audio...</div></div></div>
+    </div>
+    <div id="env-actions" style="margin-top:18px;display:none;flex-gap:10px">
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-s" onclick="goBack('s-briefing')" style="flex:1">← Back</button>
+        <button class="btn btn-p" id="btn-env-continue" onclick="continueFromEnvCheck()" style="flex:2" disabled>Checking...</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP -->
+  <div class="card" id="s-setup">
+    <div class="stag">Start Your Interview</div>
+    <div class="dz" id="dz">
+      <input type="file" id="cv-file" accept=".pdf">
+      <div class="dz-icon">📄</div>
+      <h3 id="dz-lbl">Drop your CV or click to browse</h3>
+      <p>PDF only · AI analyses your background and personalises your interview</p>
+    </div>
+    <div class="field">
+      <label>Your Name <span class="hint">(optional)</span></label>
+      <input type="text" id="candidate-name" placeholder="e.g. Ahmed, Sara...">
+    </div>
+    <div class="field">
+      <label>Job Description <span class="hint">(paste the full JD for targeted questions)</span></label>
+      <textarea id="jd" placeholder="Paste the full job description here — the AI will tailor every question to match this role's requirements and your CV..." style="width:100%;background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2);padding:10px 14px;font-family:var(--font);font-size:.85rem;color:var(--txt);outline:none;transition:border-color .2s;resize:vertical;min-height:160px;line-height:1.6" onfocus="this.style.borderColor='var(--acc)'" onblur="this.style.borderColor='var(--bor)'"></textarea>
+      <div style="margin-top:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-family:var(--mono);font-size:.58rem;color:var(--mut)">💡 The more detail you provide, the more specific and relevant your interview questions will be.</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Answer Mode</label>
+      <div class="mode-grid" id="mp">
+        <div class="mode-card sel" data-mode="text"><div class="ic">✏️</div><div class="nm">Type</div><div class="ds">Full answer workspace with word count.</div></div>
+        <div class="mode-card" data-mode="audio"><div class="ic">🎙️</div><div class="nm">Speak</div><div class="ds">Voice with live transcript display.</div></div>
+        <div class="mode-card" data-mode="video"><div class="ic">📹</div><div class="nm">Video <span style="font-size:.5rem;color:var(--war);font-family:var(--mono);font-weight:400">BETA</span></div><div class="ds">Full voice &amp; non-verbal analysis.</div></div>
+      </div>
+    </div>
+    <div style="margin-top:8px;text-align:right">
+      <button onclick="openRecruiter()" style="background:none;border:none;color:var(--mut);font-size:.66rem;cursor:pointer;font-family:var(--mono);letter-spacing:.04em">👔 Recruiter Dashboard ↗</button>
+    </div>
+    <div style="margin-top:16px"><button class="btn btn-p" id="btn-start" style="width:100%">Analyse My CV →</button></div>
+  </div>
+
+  <!-- BRIEFING -->
+  <div class="card hidden" id="s-briefing">
+    <div id="briefing-loading" style="text-align:center;padding:32px 0">
+      <div style="font-size:2rem;margin-bottom:12px;animation:spin 1.5s linear infinite;display:inline-block">⚙️</div>
+      <div style="font-size:.96rem;font-weight:600;margin-bottom:6px">Analysing your experience...</div>
+      <div style="font-size:.76rem;color:var(--mut)">Detecting role, level, strengths, and planning your interview</div>
+    </div>
+    <div id="briefing-results" style="display:none">
+      <div class="stag" style="margin-bottom:14px">AI CV Analysis Complete</div>
+      <div style="margin-bottom:14px">
+        <div style="font-size:1.1rem;font-weight:700" id="br-role">Loading...</div>
+        <div style="font-family:var(--mono);font-size:.64rem;color:var(--acc);margin-top:4px" id="br-level-badge"></div>
+      </div>
+      <div class="brief-meta">
+        <div class="bm-item"><div class="bm-lbl">Questions</div><div class="bm-val" id="br-questions">—</div></div>
+        <div class="bm-item"><div class="bm-lbl">Duration</div><div class="bm-val">~15–25 min</div></div>
+        <div class="bm-item"><div class="bm-lbl">Prep Time</div><div class="bm-val">120 sec</div></div>
+        <div class="bm-item"><div class="bm-lbl">Mode</div><div class="bm-val" id="br-mode">—</div></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="stag" style="margin-bottom:7px">Detected Skills</div>
+        <div class="skill-chips" id="br-skills"></div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="stag" style="margin-bottom:7px">Focus Areas</div>
+        <div style="font-size:.79rem;color:var(--txt2);line-height:1.8" id="br-focus"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div class="stag" style="margin-bottom:7px">Focus on anything specific?</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px" id="br-chips"></div>
+      </div>
+      <!-- JD GUIDE PANEL inside briefing -->
+      <div id="jd-guide-panel" style="display:none;margin-bottom:14px;padding:14px 16px;background:rgba(83,74,183,.06);border:1px solid rgba(83,74,183,.2);border-radius:var(--r2)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-family:var(--mono);font-size:.6rem;color:var(--acc);text-transform:uppercase;letter-spacing:.1em">📋 Job Description Loaded</div>
+          <button onclick="_el('jd-guide-body').style.display=_el('jd-guide-body').style.display==='none'?'block':'none'" style="background:none;border:none;color:var(--mut);font-size:.7rem;cursor:pointer;font-family:var(--mono)">toggle</button>
+        </div>
+        <div id="jd-guide-body">
+          <div style="font-size:.74rem;color:var(--txt2);line-height:1.6;max-height:80px;overflow:hidden;position:relative" id="jd-preview-text"></div>
+          <div style="font-size:.68rem;color:var(--mut);margin-top:5px;font-style:italic">Questions will be tailored to match this job description and your CV.</div>
+        </div>
+      </div>
+
+      <!-- INTERVIEW STATE GUIDE -->
+      <div style="margin-bottom:14px;padding:14px 16px;background:var(--sur2);border:1px solid var(--bor);border-radius:var(--r2)">
+        <div style="font-family:var(--mono);font-size:.6rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">📍 Interview Flow Guide</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;align-items:flex-start;gap:9px">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(124,92,191,.2);border:1px solid rgba(124,92,191,.4);display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;margin-top:1px">🎯</div>
+            <div><div style="font-size:.76rem;font-weight:600;margin-bottom:1px">Warm-up</div><div style="font-size:.68rem;color:var(--txt2);line-height:1.4">CV-based questions to build confidence. One practice question before scoring begins.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:9px">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(83,74,183,.2);border:1px solid rgba(83,74,183,.4);display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;margin-top:1px">⚡</div>
+            <div><div style="font-size:.76rem;font-weight:600;margin-bottom:1px">Technical Phase</div><div style="font-size:.68rem;color:var(--txt2);line-height:1.4">Role-specific and JD-targeted questions. Probes real implementations from your CV.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:9px">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(245,183,49,.2);border:1px solid rgba(245,183,49,.4);display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;margin-top:1px">🧠</div>
+            <div><div style="font-size:.76rem;font-weight:600;margin-bottom:1px">Deep Technical</div><div style="font-size:.68rem;color:var(--txt2);line-height:1.4">Tradeoffs, scaling, architecture decisions. Adaptive to your score trajectory.</div></div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:9px">
+            <div style="width:20px;height:20px;border-radius:50%;background:rgba(45,212,160,.2);border:1px solid rgba(45,212,160,.4);display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;margin-top:1px">💬</div>
+            <div><div style="font-size:.76rem;font-weight:600;margin-bottom:1px">Behavioral + Closing</div><div style="font-size:.68rem;color:var(--txt2);line-height:1.4">STAR-based scenarios, teamwork, ownership. Self-reflection and gap awareness.</div></div>
+          </div>
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--bor);font-size:.68rem;color:var(--mut);line-height:1.5">
+          ⚠️ Follow-up questions may appear when your answer needs more depth — they don't count as new questions.<br>
+          ✅ The interview ends automatically once all competency areas are covered.
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-s" onclick="goBack('s-setup')" style="flex:1">← Back</button>
+        <button class="btn btn-p" id="btn-go-device" style="flex:2" disabled>Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTRUCTIONS -->
+  <div class="card hidden" id="s-instructions">
+    <div class="stag">Interview Instructions</div>
+    <div class="flow-steps">
+      <div class="flow-step">🎯 Practice Q</div><div class="flow-arrow">→</div>
+      <div class="flow-step" id="instr-flow-mode">📹 Scored Questions</div><div class="flow-arrow">→</div>
+      <div class="flow-step">📊 Full Evaluation</div>
+    </div>
+    <div class="instr-grid">
+      <div class="instr-block">
+        <h4>📋 What to Expect</h4>
+        <ul>
+          <li>1 unscored practice question to warm up</li>
+          <li id="instr-q-count">Scored questions adaptive to your responses</li>
+          <li>AI voice reads each question aloud simultaneously</li>
+          <li>120 seconds preparation time per question</li>
+          <li id="instr-recording-note">No maximum recording limit — answer fully</li>
+        </ul>
+      </div>
+      <div class="instr-block" id="instr-rules-block">
+        <h4 id="instr-rules-title">⏱ Answer Rules</h4>
+        <ul id="instr-rules-list">
+          <li>Recording starts automatically when prep ends</li>
+          <li>You may skip prep and start early</li>
+          <li>Answer fully — finish early anytime</li>
+          <li>No maximum — stop when you are done</li>
+          <li>Practice question: unlimited retries</li>
+        </ul>
+      </div>
+      <div class="instr-block">
+        <h4 id="instr-env-title">🌐 Environment</h4>
+        <ul id="instr-env-list">
+          <li>Quiet room, no background noise</li>
+          <li>Stable internet connection</li>
+          <li>Speak clearly and at a natural pace</li>
+          <li id="instr-cam-note">Keep camera visible (video mode)</li>
+          <li>Do not switch browser tabs</li>
+        </ul>
+      </div>
+      <div class="instr-block">
+        <h4>📊 Evaluation Criteria</h4>
+        <ul>
+          <li>Technical depth and accuracy</li>
+          <li>Communication clarity and structure</li>
+          <li>Problem-solving approach</li>
+          <li>Confidence and delivery</li>
+          <li>Behavioural competency signals</li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:rgba(245,183,49,.06);border:1px solid rgba(245,183,49,.2);border-radius:var(--r2);padding:11px 15px;margin-bottom:16px;font-size:.76rem;color:var(--txt2);line-height:1.6">
+      ⚠ <strong style="color:var(--war)">Retry Policy:</strong> Practice question allows unlimited retries. Real questions cannot be retried once submitted.
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-s" onclick="goBack(_e.mode==='text'?'s-briefing':'s-envcheck')" style="flex:1">← Back</button>
+      <button class="btn btn-p" id="btn-start-practice" style="flex:2" disabled>Begin Practice Interview →</button>
+    </div>
+  </div>
+
+  <div id="s-final"></div>
+</div>
+
+<!-- SPLIT-SCREEN INTERVIEW -->
+<div id="s-int">
+  <div class="int-topbar">
+    <div class="int-brand">
+      <div class="int-brand-icon">🎯</div>
+      <div class="int-brand-name">Interview<em>AI</em></div>
+    </div>
+    <div class="progress-dots" id="progress-dots"></div>
+    <div class="topbar-right">
+      <span class="tb-phase" id="tb-phase">Practice</span>
+      <span class="tb-state" id="tb-state">PREP</span>
+      <span class="tb-time" id="tb-elapsed">00:00</span>
+      <button class="tb-mute" id="btn-mute" onclick="toggleMute()">🔊 ON</button>
+    </div>
+  </div>
+  <div class="int-body">
+    <!-- LEFT: Question -->
+    <div class="panel-left">
+      <div class="panel-left-inner">
+        <div class="q-meta">
+          <span class="q-num-badge" id="q-num-badge">Practice</span>
+          <span class="q-cat-badge" id="q-cat-badge">Warm-up</span>
+          <span class="q-fu-badge hidden" id="q-fu-badge">⚡ Follow-up</span>
+          <span class="q-practice-badge hidden" id="q-practice-badge">🎯 Not Scored</span>
+        </div>
+        <div class="q-int-label">AI Interviewer</div>
+        <div class="q-text" id="q-text">Loading...</div>
+        <!-- Prep countdown: right-panel overlay only -->
+        <div class="answer-timer-bar" id="answer-timer-bar">
+          <div>
+            <div class="rec-dot-row" id="rec-dot-row"><div class="dot-pulse"></div> <span id="ans-status-label">RECORDING</span></div>
+            <div class="min-warn" id="min-warn">Min 30 sec required</div>
+          </div>
+          <div class="ans-cd" id="ans-cd">0:00</div>
+        </div>
+        <div class="confirmed-panel" id="confirmed-panel">
+          <div class="confirmed-card">
+            <div class="conf-check">✅</div>
+            <div>
+              <div class="conf-label">Answer Submitted</div>
+              <div class="conf-transcript" id="conf-transcript"></div>
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <button class="btn btn-p" id="btn-next" style="width:100%">Next Question →</button>
+          </div>
+        </div>
+        <div class="comp-tags" id="comp-tags"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Mode-specific panels -->
+    <div class="panel-right">
+      <!-- VIDEO right -->
+      <div class="panel-right-inner" id="video-right" style="display:none">
+        <div class="cam-outer" id="cam-outer">
+          <div class="cam-placeholder" id="cam-placeholder"><div class="cam-placeholder-icon">📹</div><div id="cam-placeholder-txt">Camera off</div></div>
+          <video id="cam-video" autoplay muted playsinline class="hidden"></video>
+          <div class="cam-rec-overlay" id="cam-rec-overlay"><div class="cam-rec-dot"></div><span class="cam-rec-label">REC</span></div>
+          <div class="cam-countdown-overlay" id="cam-countdown-overlay">
+            <div class="cam-cd-inner"><div class="cam-cd-label">Preparation</div><div class="cam-cd-num" id="cam-cd-num">2:00</div></div>
+          </div>
+        </div>
+        <div class="mic-row">
+          <span class="mic-status" id="mic-status">● Standby</span>
+          <div class="waveform" id="waveform"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <span id="mode-badge" style="font-family:var(--mono);font-size:.6rem;color:var(--mut)"></span>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;justify-content:center">
+          <button class="btn btn-d" id="btn-stop-video-inline" onclick="stopRecordingNow()" style="padding:8px 20px;font-size:.8rem">■ Stop Recording</button>
+        </div>
+      </div>
+
+      <!-- SPEAK right -->
+      <div class="speak-right-panel" id="speak-right">
+        <div class="speak-waveform-big" id="speak-waveform"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div id="speak-vol-bar" style="width:200px;height:5px;background:var(--bor);border-radius:3px;overflow:hidden;margin-top:8px;display:none">
+          <div id="speak-vol-fill" style="height:100%;width:0%;background:var(--grn);border-radius:3px;transition:width 0.08s"></div>
+        </div>
+        <div id="speak-vol-label" style="font-size:.65rem;color:var(--mut);margin-top:3px;display:none">Mic level</div>
+        <div class="speak-status" id="speak-status">Microphone standby</div>
+        <div class="speak-live-transcript">
+          <div class="slt-label">Live Transcript</div>
+          <div class="slt-text" id="slt-text">Your words will appear here as you speak...</div>
+        </div>
+        <div class="speak-stats">
+          <div>Duration: <span id="spk-dur">0:00</span></div>
+          <div id="spk-status-text" style="color:var(--acc);font-family:var(--mono)">Recording active</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px;justify-content:center">
+          <button class="btn btn-d" id="btn-stop-inline" onclick="stopRecordingNow()" style="padding:8px 20px;font-size:.8rem">■ Stop Recording</button>
+        </div>
+      </div>
+
+      <!-- TEXT right -->
+      <div class="text-right-panel" id="text-right">
+        <div class="trp-header">Answer Workspace</div>
+        <div class="trp-editor">
+          <textarea id="ta-right" placeholder="Type your answer here... Keep it focused and specific. Max 150 words."></textarea>
+          <div class="trp-footer">
+            <span class="wc-badge" id="wc-right">0 words</span>
+            <div class="trp-actions">
+              <button class="btn btn-s" onclick="clearAnswer()" style="padding:7px 13px;font-size:.76rem">Clear</button>
+              <button class="btn btn-p" id="btn-txt-right" style="padding:7px 17px;font-size:.76rem">Submit →</button>
+            </div>
+          </div>
+        </div>
+        <div class="trp-meta">
+          <span id="autosave-right" style="color:var(--grn)">● Autosaved</span>
+          <span id="prep-time-right" style="color:var(--acc)"></span>
+        </div>
+      </div>
+
+      <!-- PREPARATION OVERLAY — covers right panel during prep for ALL modes -->
+      <div class="prep-overlay" id="prep-overlay">
+        <div class="prep-overlay-title">Preparation Time Remaining</div>
+        <div class="prep-overlay-count" id="prep-overlay-count">2:00</div>
+        <div class="prep-overlay-sub" id="prep-overlay-sub">Read the question carefully.<br>Recording begins automatically when the timer ends.</div>
+        <button class="prep-overlay-skip" onclick="skipPrep()">I'm ready — Start now →</button>
+      </div>
+
+      <!-- Processing overlay -->
+      <div class="processing-overlay" id="processing-overlay">
+        <div class="proc-circle">
+          <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="34"/><circle class="prog-arc" id="proc-arc" cx="40" cy="40" r="34"/></svg>
+          <div class="proc-pct" id="proc-pct">0%</div>
+        </div>
+        <div class="proc-msgs">
+          <div class="proc-title" id="proc-title">Processing Response...</div>
+          <div class="proc-sub" id="proc-sub">Analysing your answer</div>
+        </div>
+      </div>
+
+      <!-- Review panel -->
+      <div class="review-panel" id="review-panel">
+        <div class="review-title">Review Your Recording</div>
+        <div class="review-sub" id="review-sub">Listen back before submitting.</div>
+        <video id="review-video" controls style="display:none;width:100%;max-width:440px;border-radius:10px;max-height:248px"></video>
+        <audio id="review-audio" controls style="display:none;width:100%;max-width:360px"></audio>
+        <!-- Transcript preview — shown when transcription completes via server -->
+        <div id="review-transcript-box" style="display:none;width:100%;max-width:440px;background:var(--sur2);border:1px solid var(--bor);border-radius:8px;padding:10px 14px;margin-top:6px">
+          <div style="font-size:.65rem;color:var(--mut);letter-spacing:.05em;margin-bottom:4px">TRANSCRIPTION PREVIEW</div>
+          <div id="review-transcript-text" style="font-size:.78rem;color:var(--txt2);font-style:italic;line-height:1.5">Transcribing...</div>
+        </div>
+        <div class="review-actions">
+          <div id="review-duration" style="font-size:.75rem;color:var(--mut);text-align:center;margin-bottom:6px"></div>
+          <button class="btn btn-d" id="btn-retry">↩ Re-record</button>
+          <button class="btn btn-g" id="btn-accept">✓ Submit Answer</button>
+        </div>
+      </div>
+
+      <!-- Bottom action bar -->
+      <div class="int-actions">
+        <div class="int-actions-left">
+          <button class="btn btn-d hidden" id="btn-action-stop" onclick="stopRecordingNow()">■ Stop Recording</button>
+          <button class="btn btn-p hidden" id="btn-action-submit" onclick="submitAnswer()">Submit →</button>
+          <button class="btn btn-g hidden" id="btn-action-accept" onclick="acceptReview()">✓ Submit Answer</button>
+          <button class="btn btn-s hidden" id="btn-action-retry" onclick="retryRecording()">↩ Re-record</button>
+        </div>
+        <div class="int-actions-right">
+          <span class="finish-early-hint" id="finish-early-hint"></span>
+          <button class="btn btn-s" id="btn-finish-early" onclick="finishEarly()">✓ Finish Early</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="transition-overlay" id="transition-overlay">
+  <div class="trans-done" id="trans-done">Complete</div>
+  <div class="trans-msg" id="trans-msg">Preparing Next Question...</div>
+  <div class="trans-sub" id="trans-sub"></div>
+  <div class="trans-dots"><div class="trans-dot"></div><div class="trans-dot"></div><div class="trans-dot"></div></div>
+</div>
+
+<div id="s-final-processing">
+  <div class="fp-icon">🧠</div>
+  <div class="fp-title">Generating Your Evaluation Report</div>
+  <div class="fp-steps">
+    <div class="fp-step" id="fps-1"><div class="fp-step-dot"></div> Finalising interview session</div>
+    <div class="fp-step" id="fps-2"><div class="fp-step-dot"></div> Analysing response patterns</div>
+    <div class="fp-step" id="fps-3"><div class="fp-step-dot"></div> Evaluating competency coverage</div>
+    <div class="fp-step" id="fps-4"><div class="fp-step-dot"></div> Computing overall recommendation</div>
+    <div class="fp-step" id="fps-5"><div class="fp-step-dot"></div> Building full candidate report</div>
+  </div>
+</div>
+
+<div class="toast-cont" id="toast-cont"></div>
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  INTERVIEW ENGINE v19 — Single Central Controller
+//  One stage at a time. One timer at a time. Backend is source of truth.
+// ═══════════════════════════════════════════════════════════════════════
+
+// ── DEBUG ───────────────────────────────────────────────────────────────
+function log(...a) { console.log('[IV]', ...a); }
+
+// ── GLOBAL ERROR HANDLER ─────────────────────────────────────────────────
+window.onerror = function(msg, src, line, col, err) {
+  const short = ((err && err.message) || msg || 'Unknown error').toString().slice(0, 150);
+  console.error('GLOBAL JS ERROR:', msg, 'at line', line);
+  if (typeof toast === 'function') {
+    toast('JS Error: ' + short + ' (see console)', 'error');
+  }
+  const qt = document.getElementById('q-text');
+  if (qt && (qt.textContent === 'Loading...' || !qt.textContent.trim())) {
+    qt.textContent = 'Error loading question: ' + short + ' — Refresh the page (F5)';
+    qt.style.color = '#f06060';
+  }
+  return false;
+};
+
+// ── STAGES ──────────────────────────────────────────────────────────────
+const STAGE = {
+  IDLE:'IDLE', SETUP:'SETUP', CV_ANALYSIS:'CV_ANALYSIS',
+  DEVICE_CHECK:'DEVICE_CHECK', INSTRUCTIONS:'INSTRUCTIONS',
+  // Interview stages — only one active at a time
+  MEDIA_INIT:'MEDIA_INIT',      // camera/mic warming up silently
+  PREP:'PREP',                   // countdown — answer locked
+  ANSWERING:'ANSWERING',         // textarea focused / recording live
+  SUBMITTING:'SUBMITTING',       // uploading + AI evaluation
+  REVIEW:'REVIEW',               // review recording before submit
+  TRANSITION:'TRANSITION',       // between questions
+  FINAL_PROCESSING:'FINAL_PROCESSING',
+  RESULTS:'RESULTS',
+};
+let _stage = STAGE.IDLE;
+
+function setStage(s) {
+  log(`STAGE: ${_stage} → ${s}`);
+  _stage = s;
+  const el = _el('tb-state');
+  if (el) el.textContent = s;
+  // Lock all inputs during non-answering stages
+  const locked = [STAGE.SUBMITTING, STAGE.TRANSITION, STAGE.FINAL_PROCESSING].includes(s);
+  _e.interviewLocked = locked;
+  _syncActionBar();
+}
+
+/** Keep primary actions visible in the bottom bar (embedded dashboard clips inline buttons). */
+function _syncActionBar() {
+  const stop = _el('btn-action-stop');
+  const submit = _el('btn-action-submit');
+  const accept = _el('btn-action-accept');
+  const retry = _el('btn-action-retry');
+  [stop, submit, accept, retry].forEach(b => b?.classList.add('hidden'));
+
+  if (_stage === STAGE.ANSWERING) {
+    if (_e.mode === 'text') submit?.classList.remove('hidden');
+    else stop?.classList.remove('hidden');
+  } else if (_stage === STAGE.REVIEW) {
+    accept?.classList.remove('hidden');
+    if (_e.isPractice) retry?.classList.remove('hidden');
+  }
+}
+
+function acceptReview() {
+  _el('btn-accept')?.click();
+}
+
+function retryRecording() {
+  _el('btn-retry')?.click();
+}
+
+// ── SESSION ──────────────────────────────────────────────────────────────
+const _e = {
+  uid: null, mode: 'text',
+  scoredQIndex: 0, totalQ: 8, currentDisplayQ: 1,
+  currentQ: '', candidateName: '', roleLabel: '',
+  competencyPlan: [], startData: null,
+  interviewLocked: false,
+  submitting: false,
+  // Media
+  stream: null, mr: null, recBlob: null, recChunks: [],
+  recElapsed: 0, mediaReady: false,
+};
+
+// ── SINGLE OWNED TIMER ──────────────────────────────────────────────────
+const TIMER = {
+  _id: null, _elapsed: 0,
+  start(duration, onTick, onEnd) {
+    this.stop();
+    this._elapsed = 0;
+    onTick(duration, 0); // immediate first render
+    this._id = setInterval(() => {
+      this._elapsed++;
+      onTick(duration, this._elapsed);
+      if (duration > 0 && this._elapsed >= duration) {
+        this.stop();
+        if (onEnd) onEnd();
+      }
+    }, 1000);
+  },
+  stop() { if (this._id) { clearInterval(this._id); this._id = null; } },
+  elapsed() { return this._elapsed; },
+};
+
+// ── DOM HELPERS ──────────────────────────────────────────────────────────
+function _el(id) { return document.getElementById(id); }
+function _show(id) { const e = _el(id); if (e) e.style.display = 'flex'; }
+function _showBlock(id) { const e = _el(id); if (e) e.style.display = 'block'; }
+function _hide(id) { const e = _el(id); if (e) e.style.display = 'none'; }
+function _setText(id, v) { const e = _el(id); if (e) e.textContent = v; }
+function _addClass(id, c) { _el(id)?.classList.add(c); }
+function _remClass(id, c) { _el(id)?.classList.remove(c); }
+
+function toast(msg, type='info') {
+  const c = _el('toast-cont'); if (!c) return;
+  const t = document.createElement('div');
+  t.className = `toast ${type}`; t.textContent = msg; c.appendChild(t);
+  setTimeout(() => t.remove(), 5000);
+}
+function setStep(n) {
+  [1,2,3,4].forEach(i => {
+    _el('step-'+i)?.setAttribute('class','step-seg'+(i<n?' done':i===n?' active':''));
+    _el('sl-'+i)?.setAttribute('class','step-lbl'+(i<n?' done':i===n?' active':''));
+  });
+}
+
+// ── MODE PICKER ──────────────────────────────────────────────────────────
+_el('mp')?.addEventListener('click', e => {
+  const mc = e.target.closest('.mode-card'); if (!mc) return;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
+  mc.classList.add('sel'); _e.mode = mc.dataset.mode;
+});
+
+// ── DROP ZONE ────────────────────────────────────────────────────────────
+const dz = _el('dz');
+if (dz) {
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('active'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('active'));
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('active'); const f = e.dataTransfer.files[0]; if (f) _handleFile(f); });
+}
+_el('cv-file')?.addEventListener('change', e => { if (e.target.files[0]) _handleFile(e.target.files[0]); });
+function _handleFile(f) {
+  if (!f.name.toLowerCase().endsWith('.pdf')) { toast('Please upload a PDF.', 'error'); return; }
+  _e.cvFile = f;
+  _setText('dz-lbl', '✓ ' + f.name); dz?.classList.add('active');
+  const input = _el('cv-file');
+  if (input) {
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(f);
+      input.files = dt.files;
+    } catch (err) {
+      log('DataTransfer not supported, using _e.cvFile fallback');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SETUP FLOW
+// ══════════════════════════════════════════════════════════════════════
+
+// ── Start: CV Analysis ───────────────────────────────────────────────────
+_el('btn-start')?.addEventListener('click', async () => {
+  // Use stored file if available (needed for audio/video second-click flow)
+  const file = _el('cv-file')?.files[0] || _e.cvFile;
+  if (!file) { toast('Please select a PDF first.', 'error'); return; }
+  // Always store the file so it survives device-check navigation
+  if (_el('cv-file')?.files[0]) _e.cvFile = _el('cv-file').files[0];
+  _e.candidateName = _el('candidate-name')?.value.trim() || _e.candidateName || '';
+  const btn = _el('btn-start');
+  btn.disabled = true; btn.textContent = '⏳ Analysing...';
+  setStage(STAGE.CV_ANALYSIS);
+
+  // All modes go straight to /start — device check happens from briefing page
+
+  _el('s-setup').classList.add('hidden');
+  _el('s-briefing').classList.remove('hidden');
+  _el('briefing-loading').style.display = 'block';
+  _el('briefing-results').style.display = 'none';
+  setStep(2);
+
+  const fd = new FormData();
+  fd.append('file', _e.cvFile || file);
+  fd.append('interview_mode', _e.mode);
+  fd.append('job_description', _el('jd')?.value.trim() || '');
+
+  try {
+    const r = await fetch('/start', { method:'POST', body:fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Failed');
+
+    _e.uid = d.user_id;
+    _e.currentQ = d.question || d.practice_question || '';
+    _e.startData = d; _e.scoredQIndex = 0;
+    _e.practiceQ = d.practice_question || d.question || '';
+    log(`[start] question="${_e.practiceQ.slice(0,60)}" uid=${_e.uid}`);
+    const b = d.interview_briefing || {};
+    const lvl = d.level || 'mid';
+    const lvlL = {junior:'Junior', mid:'Mid-Level', senior:'Senior'};
+    _e.roleLabel = b.role_label || 'Professional';
+    _e.totalQ = parseInt(b.estimated_questions) || 8;
+    // Always show exactly 8 scored questions
+    _e.totalQ = 8;
+    _e.competencyPlan = d.competency_plan || [];
+
+    _setText('br-role', (_e.roleLabel) + ' Interview');
+    _setText('br-level-badge', `${lvlL[lvl]||'Mid-Level'} · ${b.primary_domain||'Technology'}`);
+    _setText('br-questions', '8 questions + up to 4 follow-ups');
+    _setText('br-mode', _e.mode === 'text' ? 'Text' : _e.mode === 'audio' ? 'Voice' : 'Video');
+
+    const techs = b.detected_technologies || [];
+    _el('br-skills').innerHTML = techs.length
+      ? techs.map(t => `<span class="sc-chip">✓ ${t}</span>`).join('')
+      : '<span style="color:var(--mut);font-size:.78rem">Analysing skills...</span>';
+    _el('br-focus').innerHTML = (b.focus_areas||[]).map(f=>`✦ ${f}`).join('<br>') || 'Core skills';
+
+    const chips = [...(b.focus_areas||[]), ...techs].slice(0,10);
+    _el('br-chips').innerHTML = chips.map(c =>
+      `<span onclick="toggleChip(this,'${c}')" style="cursor:pointer;background:var(--sur2);border:1px solid var(--bor2);border-radius:100px;padding:4px 11px;font-size:.68rem;color:var(--txt2);font-family:var(--mono);transition:all .2s">${c}</span>`
+    ).join('');
+
+    _el('briefing-loading').style.display = 'none';
+    _el('briefing-results').style.display = 'block';
+    // Only NOW enable the device check button — startData is confirmed valid
+    const goDevBtn = _el('btn-go-device');
+    if (goDevBtn) {
+      goDevBtn.disabled = false;
+      if (_e.mode === 'text') {
+        // Text mode: skip device check, go straight to instructions
+        goDevBtn.textContent = 'Continue to Instructions →';
+        goDevBtn.onclick = () => {
+          _el('s-briefing').classList.add('hidden');
+          _el('s-instructions').classList.remove('hidden');
+          continueFromEnvCheck();
+        };
+      } else {
+        goDevBtn.textContent = 'Check Device →';
+      }
+    }
+    toast(`${_e.roleLabel} · ${lvlL[lvl]||'Mid-Level'} detected`, 'success');
+    if (_e.candidateName) pushName(d.user_id, _e.candidateName);
+    // Show JD guide if JD was provided
+    const jdVal = _el('jd')?.value.trim();
+    if (jdVal && jdVal.length > 10) {
+      _el('jd-guide-panel').style.display = 'block';
+      _el('jd-preview-text').textContent = jdVal.slice(0, 220) + (jdVal.length > 220 ? '...' : '');
+    }
+  } catch(err) {
+    toast(err.message, 'error');
+    _el('s-briefing').classList.add('hidden');
+    _el('s-setup').classList.remove('hidden');
+    setStep(1);
+  }
+  btn.disabled = false; btn.textContent = 'Analyse My CV →';
+});
+
+function toggleChip(el, val) {
+  if (!_e.sf) _e.sf = [];
+  const i = _e.sf.indexOf(val);
+  if (i > -1) { _e.sf.splice(i,1); el.style.cssText='background:var(--sur2);border-color:var(--bor2);color:var(--txt2)'; }
+  else { _e.sf.push(val); el.style.cssText='background:rgba(83,74,183,.12);border-color:var(--acc);color:var(--acc)'; }
+}
+
+// ── Device check ─────────────────────────────────────────────────────────
+_el('btn-go-device')?.addEventListener('click', () => {
+  _el('s-briefing').classList.add('hidden');
+  _el('s-envcheck').classList.remove('hidden');
+  setStage(STAGE.DEVICE_CHECK); setStep(3); runEnvCheck();
+});
+
+async function runEnvCheck() {
+  const ok = (k,msg,col) => {
+    _el(`env-${k}-icon`).textContent = col==='grn'?'✅':col==='war'?'⚠️':'❌';
+    const e = _el(`env-${k}-msg`); if(e){e.textContent=msg;e.style.color=`var(--${col})`;}
+  };
+  let allOk = true;
+  ok('browser', navigator.mediaDevices?'Browser supports media APIs':'Use Chrome or Firefox', navigator.mediaDevices?'grn':'dan');
+  if (!navigator.mediaDevices) allOk = false;
+  if (_e.mode === 'audio' || _e.mode === 'video') {
+    _el('env-mic-row').style.display = 'flex';
+    try { const s = await navigator.mediaDevices.getUserMedia({audio:true}); s.getTracks().forEach(t=>t.stop()); ok('mic','Microphone ready','grn'); }
+    catch(e) { ok('mic', e.name==='NotAllowedError'?'Mic denied — allow in settings':'No mic found','dan'); allOk=false; }
+  }
+  if (_e.mode === 'video') {
+    _el('env-cam-row').classList.remove('hidden');
+    try { const s = await navigator.mediaDevices.getUserMedia({video:true}); s.getTracks().forEach(t=>t.stop()); ok('cam','Camera ready','grn'); }
+    catch(e) { ok('cam', e.name==='NotAllowedError'?'Camera denied — audio-only mode':'No camera found','war'); }
+  }
+  ok('spk', (window.AudioContext||window.webkitAudioContext)?'Audio ready':'Limited audio','grn');
+  const ea = _el('env-actions'), bc = _el('btn-env-continue');
+  if (ea) ea.style.display = 'block';
+  if (bc) { bc.disabled = false; bc.textContent = allOk?'Continue to Instructions →':'Some checks failed — continue anyway'; }
+}
+
+function continueFromEnvCheck() {
+  _el('s-envcheck').classList.add('hidden');
+  _el('s-instructions').classList.remove('hidden');
+  setStage(STAGE.INSTRUCTIONS);
+  // Verify startData is still valid before enabling the start button
+  const practBtn = _el('btn-start-practice');
+  if (practBtn) {
+    if (_e.startData && _e.startData.user_id) {
+      practBtn.disabled = false;
+      practBtn.textContent = 'Begin Practice Interview →';
+    } else {
+      practBtn.disabled = true;
+      practBtn.textContent = 'Session expired — go back and re-upload CV';
+      toast('Session expired. Please go back to Setup and re-upload your CV.', 'error');
+    }
+  }
+  const el = _el('instr-q-count');
+  if (el && _e.totalQ) el.textContent = `${_e.totalQ} scored questions, adaptive to your answers`;
+
+  const isText = _e.mode === 'text';
+
+  // Update "What to Expect" recording note
+  const recNote = _el('instr-recording-note');
+  if (recNote) {
+    recNote.textContent = isText
+      ? 'Type your answers — no time limit, no recording needed'
+      : 'No maximum recording limit — answer fully';
+  }
+
+  // Replace the entire "Recording Rules" block for text mode
+  const rulesTitle = _el('instr-rules-title');
+  const rulesList  = _el('instr-rules-list');
+  if (isText) {
+    if (rulesTitle) rulesTitle.textContent = '✏️ Text Answer Rules';
+    if (rulesList) rulesList.innerHTML = `
+      <li>Your text area unlocks after prep time (or skip prep)</li>
+      <li>No time limit — write as much as you need</li>
+      <li>No minimum length enforced — but be thorough</li>
+      <li>Click Submit when you are done</li>
+      <li>Practice question: unlimited retries</li>`;
+  } else {
+    if (rulesTitle) rulesTitle.textContent = '⏱ Recording Rules';
+    if (rulesList) rulesList.innerHTML = `
+      <li>Recording starts automatically when prep ends</li>
+      <li>You may skip prep and start early</li>
+      <li>Answer fully — finish early anytime</li>
+      <li>No maximum — stop when you are done</li>
+      <li>Practice question: unlimited retries</li>`;
+  }
+
+  // Update environment block for text mode
+  const envTitle = _el('instr-env-title');
+  const envList  = _el('instr-env-list');
+  if (isText && envTitle) {
+    envTitle.textContent = '🌐 Environment';
+    if (envList) {
+      // Remove mic/camera requirements for text mode
+      Array.from(envList.querySelectorAll('li')).forEach(li => {
+        const t = li.textContent.toLowerCase();
+        if (t.includes('microphone') || t.includes('camera') || t.includes('headphone')) {
+          li.style.display = 'none';
+        }
+      });
+    }
+  }
+
+  // Update flow step icon for text mode
+  const flowMode = _el('instr-flow-mode');
+  if (flowMode) flowMode.textContent = isText ? '✏️ Scored Questions' : '📹 Scored Questions';
+
+  // Hide the "camera visible" instruction for text mode
+  const camNote = _el('instr-cam-note');
+  if (camNote) camNote.style.display = isText ? 'none' : '';
+}
+function goBack(id) {
+  ['s-setup','s-briefing','s-envcheck','s-instructions'].forEach(sid => _el(sid)?.classList.add('hidden'));
+  _el(id)?.classList.remove('hidden');
+}
+
+// ── Begin practice ────────────────────────────────────────────────────────
+_el('btn-start-practice')?.addEventListener('click', () => {
+  try {
+  // Unlock speechSynthesis on first user gesture
+  TTS.unlock();
+  _el('s-int').classList.add('visible');
+  setTimeout(() => { _el('outer-wrap').style.display = 'none'; }, 50);
+  const d = _e.startData;
+  if (!d || !d.user_id) {
+    alert('Session data lost. Please refresh the page and start again.');
+    location.reload();
+    return;
+  }
+  _setText('mode-badge', _e.mode==='text'?'✏️ Text':_e.mode==='audio'?'🎙️ Voice':'📹 Video');
+  buildProgressDots(_e.totalQ || 8, -1, true);
+  _updatePhase(d.interview_phase || 'warmup');
+  _updateCompTracker(_e.competencyPlan, d.current_competency || '');
+  // Right panel: show the correct layout for this mode
+  _setupRightPanel();
+  // Welcome TTS
+  const wName = _e.candidateName ? `, ${_e.candidateName}` : '';
+  const lvlLabel = {junior:'junior',mid:'mid-level',senior:'senior'}[d.level||'mid']||'mid-level';
+  TTS.speak(`Welcome${wName}. I'm your AI interviewer, calibrated at the ${lvlLabel} level. We'll start with a practice question.`, {rate:0.95});
+  // Show first question and enter prep
+  _e.isPractice = true;
+  const _pq = _e.practiceQ || (d && d.question) || '';
+  if (!_pq) {
+    toast('Question failed to load. Please try refreshing and starting again.', 'error');
+    log('ERROR: practiceQ and d.question both empty');
+  }
+  _showQuestion(_pq, false, 0, true);
+  // Backup: force q-text update after DOM settles
+  setTimeout(() => {
+    const qt = _el('q-text');
+    if (qt && (!qt.textContent || qt.textContent === 'Loading...')) {
+      qt.textContent = _pq;
+      log('Backup q-text set applied');
+    }
+  }, 200);
+  _enterPrep();
+  _startElapsed();
+  _saveSession();
+  setStep(3);
+  // Watchdog: if q-text still shows "Loading..." after 3s, something went wrong
+  setTimeout(() => {
+    const qt = _el('q-text');
+    if (qt && (qt.textContent === 'Loading...' || !qt.textContent.trim())) {
+      toast('Question display issue — please refresh the page and try again.', 'warn');
+      log('WARN: q-text still Loading after 3s');
+    }
+  }, 3000);
+  } catch(err) {
+    console.error('PRACTICE START ERROR:', err);
+    _el('s-int').classList.remove('visible');
+    _el('outer-wrap').style.display = 'flex';
+    alert('Error starting interview: ' + err.message + '\nPlease refresh and try again.');
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════
+//  RIGHT PANEL SETUP — called once, sets up the correct layout
+// ══════════════════════════════════════════════════════════════════════
+function _setupRightPanel() {
+  _hide('video-right'); _hide('speak-right'); _hide('text-right');
+  // For video: show panel now so webcam preview is visible during prep
+  if (_e.mode === 'video') { _show('video-right'); }
+  // Register text submit
+  const btnTxt = _el('btn-txt-right');
+  if (btnTxt) btnTxt.onclick = submitAnswer;
+  // Word count + 150-word limit
+  const ta = _el('ta-right');
+  const MAX_ANSWER_WORDS = 150;
+  if (ta) ta.addEventListener('input', () => {
+    const words = ta.value.trim().split(/\s+/).filter(Boolean);
+    const wc = words.length;
+    const wcEl = _el('wc-right');
+    if (wc > MAX_ANSWER_WORDS) {
+      // Hard truncate to 150 words
+      ta.value = words.slice(0, MAX_ANSWER_WORDS).join(' ');
+      if (wcEl) { wcEl.textContent = MAX_ANSWER_WORDS + ' / ' + MAX_ANSWER_WORDS + ' words (max)'; wcEl.style.color = 'var(--dan)'; }
+    } else {
+      if (wcEl) { wcEl.textContent = wc + ' / ' + MAX_ANSWER_WORDS + ' words'; wcEl.style.color = wc >= 120 ? 'var(--war)' : 'var(--txt2)'; }
+    }
+    _setText('autosave-right', '● Autosaved');
+  });
+  // Finish Early always visible
+  _el('btn-finish-early')?.classList.remove('hidden');
+  _setText('finish-early-hint', 'Ready to finish anytime');
+  _syncActionBar();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  STAGE: PREP — covers right panel, shows countdown
+// ══════════════════════════════════════════════════════════════════════
+function _enterPrep() {
+  setStage(STAGE.PREP);
+  TIMER.stop(); // kill any previous timer
+  // Video mode: show camera during prep (preview only, not recording)
+  if (_e.mode === 'video') {
+    const vp = _el('video-right');
+    if (vp) vp.style.display = 'flex';
+    if (!_e.stream) {
+      _initMedia().catch(()=>{});
+      // _initMedia sets srcObject and plays — no need to do it again
+    } else {
+      const pv = _el('cam-video');
+      if (pv && pv.srcObject !== _e.stream) {
+        pv.srcObject = _e.stream;
+        pv.play().catch(()=>{});
+      }
+      if (pv) { pv.classList.remove('hidden'); _hide('cam-placeholder'); }
+    }
+    // Show a "prepare" overlay on the camera during prep time
+    _setText('cam-rec-status', '⏸ Preparing...');
+  }
+  // Update prep sub-text based on mode
+  const subEl = _el('prep-overlay-sub');
+  if (subEl) {
+    subEl.innerHTML = _e.mode === 'text'
+      ? 'Read the question carefully.<br>Your text workspace will unlock when ready.'
+      : _e.mode === 'video'
+        ? 'Read the question carefully.<br>Camera is active. Recording begins automatically when ready.'
+        : 'Read the question carefully.<br>Recording begins automatically when the timer ends.';
+  }
+
+  // Lock answer area
+  const ta = _el('ta-right');
+  if (ta) { ta.disabled = true; ta.value = ''; ta.placeholder = 'Preparing — answer unlocks automatically...'; }
+  _el('btn-txt-right')?.setAttribute('disabled', '');
+  if (_el('btn-rec-audio')) _el('btn-rec-audio').disabled = true;
+  if (_el('btn-rec-video')) _el('btn-rec-video').disabled = true;
+
+  // Show prep overlay on right side
+  _addClass('prep-overlay', 'visible');
+
+  // For video: init camera silently so it's ready when recording starts
+  if (_e.mode === 'video' && !_e.mediaReady) {
+    _initMedia().then(() => { _e.mediaReady = true; log('Media ready for recording'); });
+  }
+
+  // Count down 120s → auto-transition to ANSWERING
+  const PREP_SEC = 120;
+  TIMER.start(PREP_SEC,
+    (total, elapsed) => {
+      const rem = total - elapsed;
+      const m = Math.floor(rem/60), s = rem%60;
+      const t = `${m}:${s.toString().padStart(2,'0')}`;
+      _setText('prep-overlay-count', t);
+      _setText('cam-cd-num', t);
+      // Urgency colors
+      const cls = rem<=10?'critical':rem<=20?'urgent':'';
+      const oc = _el('prep-overlay-count');
+      if (oc) oc.className = `prep-overlay-count${cls?' '+cls:''}`;
+      const cc = _el('cam-cd-num');
+      if (cc) cc.className = `cam-cd-num${cls?' '+cls:''}`;
+      // Show camera countdown overlay only for video
+      if (_e.mode === 'video') _addClass('cam-countdown-overlay','visible');
+    },
+    () => {
+      log('Prep timer ended — auto-entering answering stage');
+      _enterAnswering();
+    }
+  );
+}
+
+function skipPrep() {
+  log('Prep skipped by user');
+  TIMER.stop();
+  _enterAnswering();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  STAGE: ANSWERING — unlock answer area, start recording if needed
+// ══════════════════════════════════════════════════════════════════════
+async function _enterAnswering() {
+  setStage(STAGE.ANSWERING);
+
+  // Show Finish Early immediately — no minimum time in any mode
+  _el('btn-finish-early')?.classList.remove('hidden');
+  _setText('finish-early-hint', 'Ready to finish anytime');
+
+  // Hide prep overlay
+  _remClass('prep-overlay', 'visible');
+  _remClass('cam-countdown-overlay', 'visible');
+
+  if (_e.mode === 'text') {
+    // Show text workspace and re-enable it for the new question
+    const trPanel = _el('text-right');
+    if (trPanel) trPanel.style.display = 'flex';
+    const ta = _el('ta-right');
+    if (ta) {
+      ta.value = '';
+      ta.disabled = false;
+      ta.placeholder = 'Type your answer here...';
+      setTimeout(() => ta.focus(), 50);
+    }
+    _setText('wc-right', '0 words');
+    _el('btn-txt-right')?.removeAttribute('disabled');
+    // Text mode: hide recording indicator
+    _hide('answer-timer-bar');
+
+  } else if (_e.mode === 'audio') {
+    // Show speak panel
+    const spkPanel = _el('speak-right');
+    if (spkPanel) { spkPanel.style.display = 'flex'; }
+    // Reset displays
+    _setText('slt-text', '🎙 Preparing microphone...');
+    _setText('spk-dur', '0:00');
+    _setText('speak-status', 'Microphone standby');
+    if (_el('speak-status')) _el('speak-status').className = 'speak-status';
+    _el('speak-waveform')?.classList.remove('active');
+    if (_el('btn-rec-audio')) _el('btn-rec-audio').disabled = false;
+    // Show stop button immediately (not hidden)
+    const stopInlineBtn = _el('btn-stop-inline');
+    if (stopInlineBtn) stopInlineBtn.classList.remove('hidden');
+    await _startAudioRecording();
+
+  } else if (_e.mode === 'video') {
+    // Show video panel (camera stream already active from prep)
+    const vPanel = _el('video-right');
+    if (vPanel) vPanel.style.display = 'flex';
+    if (_el('btn-rec-video')) _el('btn-rec-video').disabled = false;
+    // Camera already streaming — don't reset srcObject (causes media error)
+    const camVid = _el('cam-video');
+    if (camVid) { camVid.classList.remove('hidden'); _hide('cam-placeholder'); }
+    // Auto-start recording
+    await _startVideoRecording();
+  }
+
+  // Show answer timer (counts up) — only for audio/video modes
+  if (_e.mode !== 'text') {
+    _el('answer-timer-bar').style.display = 'flex';
+  }
+  TIMER.start(0, // 0 = count up indefinitely
+    (_, elapsed) => {
+      _e.recElapsed = elapsed;
+      const m = Math.floor(elapsed/60), s = elapsed%60;
+      _setText('ans-cd', `${m}:${s.toString().padStart(2,'0')}`);
+      if (_el('ans-cd')) _el('ans-cd').style.color = elapsed<30?'var(--mut)':'var(--dan)';
+      // Show finish-early hint after 30s
+      // (finish early always visible from start)
+      // Speak mode: update stats
+      if (_e.mode === 'audio') {
+        _setText('spk-dur', `${m}:${s.toString().padStart(2,'0')}`);
+        // Word count comes from actual transcript, not time estimate
+      }
+    },
+    null // no automatic end — user controls when to stop
+  );
+}
+
+function stopRecordingNow() {
+  // Dedicated stop button: robust stop for audio/video regardless of mr.state
+  if (_stage !== STAGE.ANSWERING) return;
+  // No minimum time — user can stop recording whenever they want
+  if (_e.mode === 'audio') {
+    // Stop speech recognition first
+    try { if (_e.sr) { _e.sr.stop(); _e.sr = null; } } catch(e) {}
+    if (_e.mr) {
+      try {
+        if (_e.mr.state === 'recording') _e.mr.stop();
+        else {
+          // mr exists but isn't in recording state — manually trigger review
+          _e.recBlob = _e.recChunks?.length ? new Blob(_e.recChunks, {type:'audio/webm'}) : null;
+          TIMER.stop(); _el('answer-timer-bar').style.display = 'none';
+          _showReview();
+        }
+      } catch(e) { log('mr stop err:', e); _showReview(); }
+    }
+  } else if (_e.mode === 'video') {
+    try {
+      if (_e.mr?.state === 'recording') _e.mr.stop();
+      else _showReview();
+    } catch(e) { _showReview(); }
+  }
+}
+
+function finishEarly() {
+  // Prep stage: skip prep countdown and start answering immediately
+  if (_stage === STAGE.PREP) { skipPrep(); return; }
+  // Any active stage: end the entire session now
+  _forceEndSession();
+}
+
+// End the session immediately in all 3 modes — remaining questions score 0
+async function _forceEndSession() {
+  if (_stage === STAGE.RESULTS || _stage === STAGE.FINAL_PROCESSING) return;
+
+  // 1. Stop any active recording cleanly (don't wait for onstop)
+  if (_e.mr && _e.mr.state === 'recording') {
+    try { _e.mr.onstop = null; _e.mr.stop(); } catch(e) {}
+  }
+  // 2. Kill stream tracks
+  if (_e.stream) {
+    try { _e.stream.getTracks().forEach(t => t.stop()); _e.stream = null; } catch(e) {}
+  }
+  // 3. Stop speech recognition
+  try { if (_e.sr) { _e.sr.stop(); _e.sr = null; } } catch(e) {}
+  // 4. Cancel any TTS
+  try { TTS.stop(); } catch(e) {}
+
+  setStage(STAGE.FINAL_PROCESSING);
+  _showProcessing();
+
+  try {
+    const resp = await fetch(`/session/${_e.uid}/finish_early`, { method: 'POST' });
+    if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+    const data = await resp.json();
+    _hideProcessing();
+    _startFinalProcessing(data);
+  } catch(e) {
+    log('_forceEndSession error:', e);
+    _hideProcessing();
+    toast('Could not end session — please try again.', 'error');
+    setStage(STAGE.ANSWERING);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  MEDIA INITIALIZATION — called during prep for audio/video
+// ══════════════════════════════════════════════════════════════════════
+async function _initMedia() {
+  if (!navigator.mediaDevices) { toast('Browser does not support media. Use Chrome.','error'); return false; }
+  try {
+    if (_e.stream) { _e.stream.getTracks().forEach(t=>t.stop()); _e.stream = null; }
+    // echoCancellation:false — prevents Linux/PulseAudio from silencing the mic
+    // when TTS audio is playing simultaneously. noiseSuppression:false — avoids
+    // over-aggressive filtering that can mute soft voices.
+    const _audioConstraints = { echoCancellation:false, noiseSuppression:false, autoGainControl:true };
+    const constraints = _e.mode === 'video'
+      ? { video:{width:{ideal:1280},height:{ideal:720},facingMode:'user'}, audio:_audioConstraints }
+      : { audio:_audioConstraints };
+    try {
+      _e.stream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch(_gumErr) {
+      // Fall back to minimal constraints if the browser rejects our specific ones
+      log('getUserMedia with constraints failed, trying basic:', _gumErr.message);
+      _e.stream = await navigator.mediaDevices.getUserMedia(
+        _e.mode === 'video' ? { video:true, audio:true } : { audio:true }
+      );
+    }
+    if (_e.mode === 'video') {
+      const pv = _el('cam-video');
+      if (pv && pv.srcObject !== _e.stream) {
+        pv.srcObject = _e.stream;
+        pv.classList.remove('hidden'); _hide('cam-placeholder');
+        pv.play().catch(() => {}); // suppress AbortError on rapid load
+      } else if (pv) {
+        pv.classList.remove('hidden'); _hide('cam-placeholder');
+      }
+    }
+    log('Media initialized:', _e.mode);
+    return true;
+  } catch(err) {
+    const msg = err.name==='NotAllowedError' ? `${_e.mode==='video'?'📷':'🎤'} Permission denied — allow in browser settings.` :
+                err.name==='NotFoundError'  ? `${_e.mode==='video'?'📷':'🎤'} Device not found — check connections.` :
+                `Media error: ${err.message}`;
+    toast(msg, 'error'); log('Media init error:', err.name, err.message);
+    return false;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  AUDIO RECORDING
+// ══════════════════════════════════════════════════════════════════════
+async function _startAudioRecording() {
+  const stopInline = _el('btn-stop-inline');
+  if (stopInline) stopInline.classList.remove('hidden');
+  if (_e.mr?.state === 'recording') return;
+  if (!_e.stream) { const ok = await _initMedia(); if (!ok) return; }
+  _e.recChunks = [];
+  try {
+    // Pick best supported audio mime type up front
+    const _bestAudioMime = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg',''].find(
+      m => m === '' || MediaRecorder.isTypeSupported(m)
+    );
+    _e.mr = _bestAudioMime ? new MediaRecorder(_e.stream, {mimeType:_bestAudioMime}) : new MediaRecorder(_e.stream);
+    _e.mr.ondataavailable = e => { if (e.data?.size > 0) _e.recChunks.push(e.data); };
+    _e.mr.onstop = () => {
+      // Stop the stream tracks HERE (after all chunks are flushed), not before
+      if (_e.stream) { _e.stream.getTracks().forEach(t => t.stop()); _e.stream = null; }
+      // Try best supported audio format, fall back to generic webm
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg';
+      _e.recBlob = new Blob(_e.recChunks, {type: mimeType});
+      log('Audio blob ready:', _e.recBlob.size, 'bytes, type:', mimeType);
+      if (_e.recBlob.size < 100) {
+        toast('Recording was empty — please try again.', 'error');
+        _e.recBlob = null; _e.recChunks = [];
+        setStage(STAGE.ANSWERING);
+        return;
+      }
+      _e.recFinalDuration = _el('spk-dur')?.textContent || '0:00';
+      TIMER.stop();
+      _el('answer-timer-bar').style.display = 'none';
+      _showReview();
+    };
+    _e.mr.start(250); // collect chunks every 250ms
+    _setText('btn-rec-audio','⏹ Stop');
+    if (_el('btn-rec-audio')) _el('btn-rec-audio').className = 'btn btn-d';
+    _el('waveform')?.classList.add('active');
+    _setText('mic-status','● Recording'); if (_el('mic-status')) _el('mic-status').className='mic-status active';
+    _el('speak-waveform')?.classList.add('active');
+    _setText('speak-status','Recording — speak clearly'); if (_el('speak-status')) _el('speak-status').className='speak-status recording';
+    log('Audio recording started');
+    // Start real-time volume meter so user can verify mic is capturing
+    (function _startVolumeMeter() {
+      try {
+        const volCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src  = volCtx.createMediaStreamSource(_e.stream);
+        const anal = volCtx.createAnalyser();
+        anal.fftSize = 512; anal.smoothingTimeConstant = 0.8;
+        src.connect(anal);
+        const buf = new Uint8Array(anal.frequencyBinCount);
+        const bar  = _el('speak-vol-bar');  const fill = _el('speak-vol-fill');
+        const lbl  = _el('speak-vol-label');
+        if (bar)  bar.style.display  = 'block';
+        if (lbl)  lbl.style.display  = 'block';
+        let silent_frames = 0;
+        _e._volMeter = setInterval(() => {
+          if (!_e.mr || _e.mr.state !== 'recording') {
+            clearInterval(_e._volMeter);
+            if (bar) bar.style.display = 'none';
+            if (lbl) lbl.style.display = 'none';
+            try { volCtx.close(); } catch(_) {}
+            return;
+          }
+          anal.getByteFrequencyData(buf);
+          const vol = buf.reduce((a,b)=>a+b,0) / buf.length;
+          const pct = Math.min(100, (vol / 128) * 100 * 3);
+          if (fill) fill.style.width = pct + '%';
+          if (fill) fill.style.background = pct > 5 ? 'var(--grn)' : 'var(--dan)';
+          if (pct < 1) silent_frames++; else silent_frames = 0;
+          if (silent_frames > 60 && lbl) lbl.textContent = '⚠ No mic input detected';
+          else if (lbl) lbl.textContent = `Mic level: ${pct > 30 ? 'good ✓' : pct > 5 ? 'low' : 'silent ⚠'}`;
+        }, 100);
+      } catch(e) { log('Volume meter error:', e); }
+    })();
+
+    // Real-time transcript using Web Speech API + animated fallback
+    _setText('slt-text', '🎙 Recording — speak clearly...');
+    _setText('speak-status', 'Recording — speak clearly');
+    if (_el('speak-status')) _el('speak-status').className = 'speak-status recording';
+    setTimeout(() => {
+      try {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) throw new Error('SpeechRecognition not supported');
+        _e.sr = new SR();
+        _e.sr.continuous = true; _e.sr.interimResults = true; _e.sr.lang = 'en-US';
+        let finalText = '';
+        let srWorking = false;
+        _e.sr.onresult = (event) => {
+          srWorking = true;
+          let interim = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const t = event.results[i][0].transcript;
+            if (event.results[i].isFinal) finalText += t + ' ';
+            else interim = t;
+          }
+          const display = (finalText + interim).trim();
+          _setText('slt-text', display || '🎙 Listening...');
+          const wc = finalText.trim().split(/\s+/).filter(Boolean).length;
+          if (wc > 0) _setText('spk-words', wc);
+        };
+        _e.sr.onerror = (e) => {
+          log('SR error:', e.error);
+          if (e.error === 'not-allowed') {
+            _setText('slt-text', '⚠ Microphone access denied for transcript. Recording still active.');
+          } else if (e.error !== 'no-speech' && e.error !== 'aborted') {
+            // Try to restart SR on recoverable errors
+            try { _e.sr.stop(); } catch(_) {}
+            setTimeout(() => {
+              try { if (_e.sr && _e.mr?.state==='recording') _e.sr.start(); } catch(_) {}
+            }, 500);
+          }
+        };
+        _e.sr.onend = () => {
+          // Auto-restart SR while recording is still active (handles timeout)
+          if (_e.mr?.state === 'recording') {
+            setTimeout(() => {
+              try { if (_e.sr) _e.sr.start(); } catch(_) {}
+            }, 200);
+          }
+        };
+        _e.sr.start();
+        _e._srFinalText = () => finalText;
+      } catch(e) {
+        log('SR not available:', e.message);
+        // live transcript not available in this context — waveform shown instead
+        _e._srFinalText = () => '';
+      }
+    }, 400);
+  } catch(err) { toast('Recording start failed: ' + err.message, 'error'); log('MediaRecorder error:', err); }
+}
+
+function toggleAudioRecording() {
+  if (_e.mr?.state === 'recording') _stopAudioRecording();
+  else if (_stage === STAGE.ANSWERING) _startAudioRecording();
+}
+
+function _stopAudioRecording() {
+  const stopInline = _el('btn-stop-inline');
+  if (stopInline) stopInline.classList.add('hidden');
+  // No minimum — user can stop any time
+  clearInterval(window._ltSim);
+  // Stop speech recognition
+  try { if (_e.sr) { _e.sr.stop(); _e.sr = null; } } catch(e) {}
+  if (_e.mr?.state === 'recording') { _e.mr.stop(); }  // stream stopped in onstop handler after flush
+  _el('waveform')?.classList.remove('active'); _setText('mic-status','● Standby'); if (_el('mic-status')) _el('mic-status').className='mic-status';
+  _el('speak-waveform')?.classList.remove('active'); _setText('speak-status','Processing...'); if (_el('speak-status')) _el('speak-status').className='speak-status';
+  _setText('btn-rec-audio','🎙️ Re-record'); if (_el('btn-rec-audio')) _el('btn-rec-audio').className='btn btn-s';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  VIDEO RECORDING
+// ══════════════════════════════════════════════════════════════════════
+async function _startVideoRecording() {
+  if (_e.mr?.state === 'recording') return;
+  if (!_e.stream || !_e.stream.active) { const ok = await _initMedia(); if (!ok) return; }
+  const src = _el('cam-video')?.srcObject;
+  if (!src) { toast('Camera not ready. Please wait.','error'); return; }
+  _e.recChunks = [];
+  try {
+    const opts = { mimeType:'video/webm', videoBitsPerSecond:1500000 };
+    _e.mr = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? new MediaRecorder(src, {...opts, mimeType:'video/webm;codecs=vp9'})
+      : new MediaRecorder(src, opts);
+    _e.mr.ondataavailable = e => { if (e.data?.size>0) _e.recChunks.push(e.data); };
+    _e.mr.onstop = () => {
+      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
+        ? 'video/webm;codecs=vp9,opus'
+        : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+      _e.recBlob = new Blob(_e.recChunks, {type: mimeType});
+      log('Video blob ready:', _e.recBlob.size, 'bytes, type:', mimeType);
+      if (_e.recBlob.size < 100) {
+        toast('Video recording was empty — please try again.', 'error');
+        _e.recBlob = null; _e.recChunks = [];
+      }
+      TIMER.stop(); _el('answer-timer-bar').style.display='none';
+      // Stop stream AFTER blob is created (ensures all data is captured)
+      if (_e.stream) { _e.stream.getTracks().forEach(t=>t.stop()); _e.stream=null; }
+      _el('cam-video')?.classList.add('hidden'); _show('cam-placeholder'); _el('cam-outer')?.classList.remove('recording'); _remClass('cam-rec-overlay','visible');
+      _showReview();
+    };
+    _e.mr.start(250);
+    _setText('btn-rec-video','⏹ Stop'); if (_el('btn-rec-video')) _el('btn-rec-video').className='btn btn-d';
+    const videoStopBtn = _el('btn-stop-video-inline');
+    if (videoStopBtn) videoStopBtn.classList.remove('hidden');
+    _el('cam-outer')?.classList.add('recording'); _addClass('cam-rec-overlay','visible');
+    _el('waveform')?.classList.add('active'); _setText('mic-status','● Recording'); if (_el('mic-status')) _el('mic-status').className='mic-status active';
+    log('Video recording started');
+  } catch(err) { toast('Video recording failed: '+err.message,'error'); log('Video error:',err); }
+}
+
+function toggleVideoRecording() {
+  if (_e.mr?.state==='recording') _stopVideoRecording();
+  else if (_stage===STAGE.ANSWERING) _startVideoRecording();
+}
+
+function _stopVideoRecording() {
+  // No minimum — user can stop any time
+  const videoStopBtn = _el('btn-stop-video-inline');
+  if (videoStopBtn) videoStopBtn.classList.add('hidden');
+  if (_e.mr?.state==='recording') _e.mr.stop();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  REVIEW SCREEN
+// ══════════════════════════════════════════════════════════════════════
+function _showReview() {
+  setStage(STAGE.REVIEW);
+  _addClass('review-panel','visible');
+  // Show final recording duration in review
+  if (_e.recFinalDuration) {
+    const durEl = _el('review-duration');
+    if (durEl) durEl.textContent = 'Duration: ' + _e.recFinalDuration;
+  }
+  const rv = _el('review-video'), ra = _el('review-audio');
+  if (_e.mode==='video'&&_e.recBlob) { rv.src=URL.createObjectURL(_e.recBlob); rv.style.display='block'; if(ra) ra.style.display='none'; }
+  else if (_e.mode==='audio'&&_e.recBlob) { ra.src=URL.createObjectURL(_e.recBlob); ra.style.display='block'; if(rv) rv.style.display='none'; }
+  // Show transcript preview — kick off background transcription immediately
+  const rtBox = _el('review-transcript-box');
+  const rtTxt = _el('review-transcript-text');
+  if (rtBox && (_e.mode === 'audio' || _e.mode === 'video')) {
+    rtBox.style.display = 'block';
+    _setText('review-transcript-text', '🔄 Transcribing your answer...');
+    // Fire-and-forget: transcribe in background so user can read it before submitting
+    (async () => {
+      try {
+        const fd = new FormData();
+        fd.append('file', _e.recBlob, _e.mode === 'video' ? 'preview.webm' : 'preview.webm');
+        const r = await fetch('/transcribe', { method: 'POST', body: fd });
+        if (r.ok) {
+          const d = await r.json();
+          const tr = (d.transcript || '').trim();
+          // Only update if the review panel is still showing (user hasn't submitted yet)
+          const rtTxtNow = _el('review-transcript-text');
+          if (rtTxtNow) {
+            _setText('review-transcript-text',
+              tr || '⚠️ No speech detected — check your microphone.');
+          }
+          // Cache so submitAnswer can use it to skip re-transcription delay
+          _e._previewTranscript = tr;
+        }
+      } catch(e) {
+        const rtTxtNow = _el('review-transcript-text');
+        if (rtTxtNow) _setText('review-transcript-text', 'Transcript preview unavailable.');
+      }
+    })();
+  }
+  _setText('review-sub', _e.isPractice
+    ? 'Practice question — retry as many times as you like.'
+    : 'Real question — listen back, then submit.');
+  if (_el('btn-retry')) _el('btn-retry').style.display = _e.isPractice ? '' : 'none';
+  _el('btn-retry').onclick = () => {
+    _remClass('review-panel','visible');
+    _e.recBlob=null; _e.recChunks=[]; _e.recElapsed=0; _e._previewTranscript = null;
+    // Clear transcript preview for new recording
+    const _rtBox = _el('review-transcript-box'); if (_rtBox) _rtBox.style.display='none';
+    const _rtTxt = _el('review-transcript-text'); if (_rtTxt) _setText('review-transcript-text','Transcribing...');
+    if (_e.mode==='video') { _el('cam-video')?.classList.remove('hidden'); _hide('cam-placeholder'); }
+    _enterPrep();
+  };
+  _el('btn-accept').onclick = () => { _remClass('review-panel','visible'); submitAnswer(); };
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SUBMIT ANSWER
+// ══════════════════════════════════════════════════════════════════════
+async function submitAnswer() {
+  if (_e.submitting || _e.interviewLocked) { toast('Processing...','warn'); return; }
+  if (_stage !== STAGE.ANSWERING && _stage !== STAGE.REVIEW) return;
+
+  if (_e.mode === 'text') {
+    const ta = _el('ta-right');
+    const a = ta?.value.trim() || '';
+    if (!a) { toast('Please type your answer.','error'); return; }
+    if (a.split(/\s+/).filter(Boolean).length < 5) { toast('Answer is too short — please elaborate.','error'); return; }
+  } else {
+    if (!_e.recBlob) { toast('No recording found.','error'); return; }
+  }
+
+  // Capture answer text BEFORE clearing the textarea
+  let _capturedTextAnswer = '';
+  if (_e.mode === 'text') {
+    const ta = _el('ta-right');
+    _capturedTextAnswer = ta?.value.trim() || '';
+  }
+
+  _e.submitting = true;
+  setStage(STAGE.SUBMITTING);
+  _showProcessing();
+
+  // NOW clear the textarea (answer already captured above)
+  if (_e.mode === 'text') {
+    const ta = _el('ta-right');
+    if (ta) { ta.value = ''; ta.disabled = true; }
+    _setText('wc-right', '0 words');
+    // Hide the right panel so only the left confirmed panel remains
+    _hide('text-right');
+  }
+
+  try {
+    const fd = new FormData();
+    fd.append('user_id', _e.uid);
+    fd.append('is_practice', _e.isPractice ? 'true' : 'false');
+    let d;
+    if (_e.mode === 'text') {
+      fd.append('answer', _capturedTextAnswer);
+      d = await _post(fd, '/answer/text');
+    } else if (_e.mode === 'audio') {
+      fd.append('file', _e.recBlob, 'answer.webm');
+      d = await _post(fd, '/answer/audio');
+    } else {
+      fd.append('file', _e.recBlob, 'answer.webm');
+      d = await _post(fd, '/answer/video');
+    }
+    _hideProcessing();
+    _e.submitting = false;
+    if (_e.isPractice) _handlePracticeResult(d);
+    else _handleScoredResult(d);
+  } catch(err) {
+    _hideProcessing(); _e.submitting = false;
+    setStage(STAGE.ANSWERING);
+    const msg = err.message.includes('rate')||err.message.includes('429') ? 'AI service busy — please retry.' :
+                err.message.includes('connection') ? 'Connection lost — check internet.' : err.message.slice(0,120);
+    toast(msg, 'error');
+  }
+}
+
+async function _post(fd, ep) {
+  const r = await fetch(ep, { method:'POST', body:fd });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.detail || 'Server error');
+  return d;
+}
+
+// ── Processing overlay ────────────────────────────────────────────────────
+const _procMsgs = [
+  ['Uploading response...','Sending to AI engine'],['Analysing communication...','Measuring clarity and structure'],
+  ['Processing speech...','Running transcription pipeline'],['Evaluating answer depth...','Scoring against rubric'],
+  ['Generating follow-up...','Adapting next question to your response'],
+];
+let _procInt = null;
+function _showProcessing() {
+  _addClass('processing-overlay','visible');
+  let pct=0,step=0;
+  const arc=_el('proc-arc'); const C=2*Math.PI*34;
+  const adv=()=>{pct=Math.min(pct+(Math.random()*12+4),95);if(arc)arc.style.strokeDashoffset=C-(C*pct/100);_setText('proc-pct',Math.round(pct)+'%');const s=_procMsgs[Math.min(step,_procMsgs.length-1)];_setText('proc-title',s[0]);_setText('proc-sub',s[1]);step++;};
+  adv();_procInt=setInterval(adv,700);
+  // Safety timeout: force-hide after 120s (final eval takes longer)
+  _procTimeout=setTimeout(()=>{
+    _hideProcessing();
+    if(_e.submitting){_e.submitting=false;setStage(STAGE.ANSWERING);
+  _setText('finish-early-hint','Ready to finish anytime');
+  _el('btn-finish-early')?.classList.remove('hidden');toast('Response is taking too long. Please try submitting again.','warn');}
+  },120000);
+}
+function _hideProcessing() {
+  clearInterval(_procInt);
+  clearTimeout(_procTimeout);
+  const arc=_el('proc-arc');if(arc)arc.style.strokeDashoffset=0;_setText('proc-pct','100%');
+  setTimeout(()=>_remClass('processing-overlay','visible'),350);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RESULT HANDLERS
+// ══════════════════════════════════════════════════════════════════════
+function _handlePracticeResult(d) {
+  _e.isPractice = false; _e.scoredQIndex = 0; _e.currentDisplayQ = 1;
+  const tr = d.transcription || (_e.mode==='text'?_el('ta-right')?.value.trim():'');
+  _setText('conf-transcript', tr ? `"${tr.slice(0,250)}${tr.length>250?'...':`"`}"` : 'Practice complete.');
+  if (tr && _e.mode !== 'text') {
+    const rtBox = _el('review-transcript-box');
+    const rtTxt = _el('review-transcript-text');
+    if (rtBox && rtTxt) { rtBox.style.display = 'block'; _setText('review-transcript-text', tr); }
+    _setText('slt-text', tr.slice(0,200));
+  }
+  // Hide recording panels after submit
+  if (_e.mode === 'audio') { _hide('speak-right'); }
+  if (_e.mode === 'video') { _hide('video-right'); }
+  _el('confirmed-panel').style.display = 'block';
+  _el('confirmed-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  buildProgressDots(_e.totalQ, 0, false);
+  const nb = _el('btn-next');
+  nb.textContent = 'Start Real Interview →';
+  nb.onclick = () => {
+    _el('confirmed-panel').style.display = 'none';
+    _updatePhase(d.interview_phase || 'technical');
+    if (d.current_competency) _updateCompTracker(_e.competencyPlan, d.current_competency);
+    _showTransition('Practice Complete', `Question 1 of ${_e.totalQ}`, 'Entering scored interview...', () => {
+      _e.currentQ = d.next_question || _e.currentQ;
+      _e.currentDisplayQ = 1;
+      _showQuestion(_e.currentQ, false, 1, false);
+      _resetAnswerArea();
+      _enterPrep();
+      _saveSession();
+    });
+  };
+}
+
+function _handleScoredResult(d) {
+  // Use backend main_question_index as single source of truth
+  if (d.main_question_index !== undefined) _e.scoredQIndex = d.main_question_index;
+  else _e.scoredQIndex++;
+  // question_number from backend = next question to display (main_qi + 1)
+  _e.currentDisplayQ = d.question_number || (_e.scoredQIndex + 1);
+  log('ScoredResult: qi='+_e.scoredQIndex+' nextDisplayQ='+_e.currentDisplayQ+' complete='+d.interview_complete+' has_eval='+(!!d.final_evaluation));
+
+  const tr = d.transcription || (_e.mode==='text'?_el('ta-right')?.value.trim():'');
+  _setText('conf-transcript', tr ? `"${tr.slice(0,250)}${tr.length>250?'...':`"`}"` : 'Answer submitted.');
+  // Show transcript in the review box if visible
+  if (tr && _e.mode !== 'text') {
+    const rtBox = _el('review-transcript-box');
+    const rtTxt = _el('review-transcript-text');
+    if (rtBox && rtTxt) { rtBox.style.display = 'block'; _setText('review-transcript-text', tr); }
+    _setText('slt-text', tr.slice(0,200));
+  }
+  // Hide recording panels after submit — re-shown in _enterAnswering
+  if (_e.mode === 'audio') { _hide('speak-right'); }
+  if (_e.mode === 'video') { _hide('video-right'); }
+  _el('confirmed-panel').style.display = 'block';
+  _el('confirmed-panel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  _updatePhase(d.interview_phase || 'technical');
+  if (d.current_competency) _updateCompTracker(_e.competencyPlan, d.current_competency);
+  buildProgressDots(_e.totalQ, Math.min(_e.scoredQIndex, _e.totalQ), false);
+  // Update category badge
+  const catBdg = _el('q-cat-badge');
+  if (catBdg) {
+    const phaseMap = {'warmup':'Warm-up','technical':'Technical','deep_technical':'Deep Tech','behavioral':'Behavioral','closing':'Closing','wrap_up':'Wrap-up'};
+    catBdg.textContent = phaseMap[d.interview_phase] || d.interview_phase || 'Technical';
+  }
+
+  const nb = _el('btn-next');
+  // Also trigger final if we've reached totalQ (even if backend didn't mark complete)
+  const forceEnd = !d.interview_complete && _e.currentDisplayQ > _e.totalQ;
+  if (d.interview_complete || forceEnd) {
+    nb.textContent = '📊 See Full Evaluation →';
+    nb.style.background = 'var(--grn)';
+    nb.onclick = () => {
+      _el('confirmed-panel').style.display = 'none';
+      _startFinalProcessing(d);
+    };
+  } else {
+    const nextN = d.question_number || _e.scoredQIndex + 1;
+    nb.textContent = 'Next Question →';
+    nb.onclick = () => {
+      _e.currentQ = d.next_question;
+      _el('confirmed-panel').style.display = 'none';
+      // Follow-ups: instant swap (no transition screen)
+      if (d.next_action === 'followup') {
+        _showQuestion(_e.currentQ, true, _e.currentDisplayQ, false);
+        _resetAnswerArea();
+        _enterPrep();
+        _saveSession();
+      } else {
+        const safeDisplayQ = Math.min(_e.currentDisplayQ, _e.totalQ);
+        _showTransition(`Question ${Math.min(_e.scoredQIndex, _e.totalQ)} Complete`, `Question ${safeDisplayQ} of ${_e.totalQ}`, '', () => {
+          _showQuestion(_e.currentQ, false, safeDisplayQ, false);
+          _resetAnswerArea();
+          _enterPrep();
+          _saveSession();
+        });
+      }
+    };
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  SHOW QUESTION — left panel only, no timer here
+// ══════════════════════════════════════════════════════════════════════
+function _showQuestion(q, isFU, n, isPractice) {
+  _e.isPractice = !!isPractice;
+  _setText('q-text', q || '');
+  // Use the explicitly passed 'n' as the question number
+  const rawDisplayN = isPractice ? null : (n || _e.currentDisplayQ || (_e.scoredQIndex + 1));
+  const displayN = rawDisplayN ? Math.min(rawDisplayN, _e.totalQ) : rawDisplayN;
+  const nb = _el('q-num-badge');
+  if (nb) {
+    nb.textContent = isPractice ? 'Practice' : isFU ? `Q ${displayN} ↩` : `Q ${displayN}`;
+    nb.style.background = isPractice ? 'var(--acc2)' : isFU ? 'var(--war)' : 'var(--acc)';
+  }
+  _setText('tb-q', isPractice ? 'Practice' : isFU ? `Q ${displayN} / ${_e.totalQ} ↩ follow-up` : `Q ${displayN} / ${_e.totalQ}`);
+  // Update category badge with current phase
+  const phase = document.querySelector('.tb-phase');
+  if (phase && !isPractice) {
+    // category badge in left panel
+  }
+  _el('q-fu-badge')?.classList[isFU?'remove':'add']('hidden');
+  _el('q-practice-badge')?.classList[isPractice?'remove':'add']('hidden');
+  // Progress bar — driven by scoredQIndex only (never by follow-ups)
+  const pf = _el('int-progress');
+  if (pf) pf.style.width = isPractice ? '3%' : Math.min(5+(_e.scoredQIndex+1)*(90/Math.max(_e.totalQ,1)),95)+'%';
+  // TTS reads question aloud
+  const prefix = isPractice?'Practice question. ':isFU?'Follow-up. ':`Question ${_e.scoredQIndex+1}. `;
+  TTS.speak(prefix + q, {rate:0.97});
+  // Update phase badge in left panel
+  const catBadge = _el('q-cat-badge');
+  if (catBadge) {
+    if (isPractice) catBadge.textContent = 'Warm-up';
+    else if (isFU) catBadge.textContent = 'Follow-up';
+    // Phase is updated by _updatePhase() separately
+  }
+  _e._welcomeDone = true;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RESET ANSWER AREA — called between questions
+// ══════════════════════════════════════════════════════════════════════
+function _resetAnswerArea() {
+  TIMER.stop();
+  // Stop any active recording
+  if (_e.mr?.state === 'recording') { try { _e.mr.stop(); } catch(e){} }
+  if (_e.stream) { try { _e.stream.getTracks().forEach(t=>t.stop()); } catch(e){} _e.stream=null; _e.mediaReady=false; }
+  _e.mr=null; _e.recBlob=null; _e.recChunks=[]; _e.recElapsed=0;
+  // Hide all content panels
+  _hide('text-right'); _hide('speak-right');
+  // Video: keep panel for webcam but reset indicators
+  _el('cam-outer')?.classList.remove('recording'); _remClass('cam-rec-overlay','visible');
+  _el('cam-video')?.classList.remove('hidden');
+  // Reset waveform
+  _el('waveform')?.classList.remove('active'); _el('speak-waveform')?.classList.remove('active');
+  _setText('mic-status','● Standby'); if(_el('mic-status'))_el('mic-status').className='mic-status';
+  _setText('speak-status','Microphone standby'); if(_el('speak-status'))_el('speak-status').className='speak-status';
+  _el('answer-timer-bar').style.display='none'; _setText('ans-cd','0:00');
+  _setText('finish-early-hint','');
+  // Clear transcript review box for next recording
+  const _rtBox2 = _el('review-transcript-box'); if (_rtBox2) _rtBox2.style.display='none';
+  const _rtTxt2 = _el('review-transcript-text'); if (_rtTxt2) _setText('review-transcript-text','Transcribing...');
+  // Reset text area
+  const ta = _el('ta-right'); if(ta){ta.value='';ta.disabled=true;ta.placeholder='Preparing...';}
+  _setText('wc-right','0 words');
+  // Re-init camera for video mode
+  if (_e.mode==='video') setTimeout(()=>_initMedia().then(()=>{_e.mediaReady=true;}),300);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TRANSITION SCREEN
+// ══════════════════════════════════════════════════════════════════════
+function _showTransition(done, msg, sub, cb) {
+  setStage(STAGE.TRANSITION);
+  _setText('trans-done', done); _setText('trans-msg', msg); _setText('trans-sub', sub);
+  _addClass('transition-overlay','visible');
+  setTimeout(() => { _remClass('transition-overlay','visible'); cb&&cb(); }, 2000);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  FINAL PROCESSING
+// ══════════════════════════════════════════════════════════════════════
+async function _startFinalProcessing(d) {
+  TTS.stop(); TIMER.stop(); _clearSession();
+  _el('s-int').classList.remove('visible');
+  setStage(STAGE.FINAL_PROCESSING);
+  _addClass('s-final-processing','visible');
+  const steps=['fps-1','fps-2','fps-3','fps-4','fps-5'];
+  steps.forEach(id=>{const e=_el(id);if(e)e.className='fp-step';});
+  let si=0;
+
+  // If final_evaluation is missing, fetch from the dedicated /results endpoint
+  let finalData = d;
+  if (!finalData.final_evaluation && _e.uid) {
+    try {
+      // Try /results first (re-runs eval if missing), fallback to /session
+      let r = await fetch(`/results/${_e.uid}`);
+      if (!r.ok) r = await fetch(`/session/${_e.uid}`);
+      if (r.ok) {
+        const sd = await r.json();
+        finalData = {...d, ...sd};
+      }
+    } catch(e) { log('Failed to fetch results:', e); }
+    // If still no final_evaluation after fetch, build from turns data we have
+    if (!finalData.final_evaluation) {
+      const scoredT = (finalData.all_turns || []).filter(t => !t.is_practice && t.score != null);
+      const avgScore = scoredT.length ? +(scoredT.reduce((a,b) => a + (b.score||0), 0) / scoredT.length).toFixed(1) : 5.0;
+      const rec = avgScore >= 7 ? 'Hire' : avgScore >= 5 ? 'Maybe' : 'No';
+      finalData.final_evaluation = {
+        overall_score: avgScore,
+        hiring_recommendation: rec,
+        summary_paragraph: `Interview completed with ${scoredT.length} scored answer(s). Average score: ${avgScore}/10. The detailed AI analysis could not be loaded — scores are computed from individual question ratings.`,
+        strengths: scoredT.filter(t => t.score >= 7).map(t => t.feedback || '').filter(Boolean).slice(0, 3),
+        weak_areas: scoredT.filter(t => t.score < 5).map(t => ({area: t.competency_tag || '?', score: t.score, feedback: t.feedback || ''})).slice(0, 3),
+        competency_scores: (() => {
+          const m = {}; scoredT.forEach(t => { if(t.competency_tag) { m[t.competency_tag] = m[t.competency_tag] ? (m[t.competency_tag] + t.score)/2 : t.score; } }); return m;
+        })(),
+        soft_skills: { communication: 5, confidence: 5, problem_solving: 5, honesty: 5 },
+        improvement_plan: [],
+        interview_consistency: 'stable', growth_potential: 'medium',
+      };
+    }
+  }
+
+  const adv=()=>{if(si>0){const p=_el(steps[si-1]);if(p)p.className='fp-step done';}if(si<steps.length){const c=_el(steps[si]);if(c)c.className='fp-step active';si++;setTimeout(adv,1300+Math.random()*500);}else{setTimeout(()=>{_remClass('s-final-processing','visible');showFinal(finalData);},700);}};
+  adv();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  RESULTS PAGE
+// ══════════════════════════════════════════════════════════════════════
+function sBar(lbl,val){const v=+(val||0).toFixed(1);const pct=Math.min((v/10)*100,100);const col=v>=7?'var(--grn)':v>=5?'var(--acc)':'var(--dan)';return`<div class="sbar"><div class="sbar-hd"><span class="sbar-lbl">${lbl}</span><span class="sbar-val" style="color:${col}">${v}</span></div><div class="sbar-track"><div class="sbar-fill" style="width:${pct}%;background:${col}"></div></div></div>`;}
+function qsc(s){return s>=7?'sc-hi':s>=5?'sc-md':'sc-lo';}
+function catL(c){return{technical:'Technical',behavioral:'Behavioral',scenario:'Scenario',problem_solving:'Problem Solving',project:'Project'}[c]||c||'General';}
+function _s(str){if(!str)return'';return String(str).replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function showFinal(d) {
+  setStage(STAGE.RESULTS);
+  window._ev=d.final_evaluation||{}; window._turns=d.all_turns||[];
+  _el('outer-wrap').style.display='flex';
+  ['s-setup','s-briefing','s-envcheck','s-instructions'].forEach(id=>_el(id)?.classList.add('hidden'));
+  setStep(4); window.scrollTo({top:0,behavior:'smooth'});
+  const wName=_e.candidateName?` ${_e.candidateName}`:'';
+  setTimeout(()=>TTS.speak(`Thank you${wName}. Your interview is complete. Your full evaluation is ready.`,{rate:0.95}),400);
+  const ev=d.final_evaluation;
+  if(!ev){_el('s-final').innerHTML='<div style="padding:40px;color:var(--mut);text-align:center">No evaluation data received.</div>';_el('s-final').classList.add('visible');return;}
+  const ov=+(ev.overall_score||0).toFixed(1);
+  const rec=ev.hiring_recommendation||'Maybe';
+  const rmap={'Strong Hire':['rec-sh','🌟 Strong Hire'],'Hire':['rec-h','✅ Hire'],'Lean Hire':['rec-lh','👍 Lean Hire'],'Lean No Hire':['rec-ln','👎 Lean No Hire'],'No Hire':['rec-n','❌ No Hire'],'Strong Yes':['rec-sh','🌟'],'Yes':['rec-h','✅'],'Maybe':['rec-lh','🤔'],'No':['rec-n','❌']};
+  const[rcl,rlbl]=rmap[rec]||['rec-lh','🤔'];
+  const recLabel=typeof rlbl==='string'&&rlbl.includes(' ')?rlbl:`${rlbl} ${rec}`;
+  const sc=ov>=7?'var(--grn)':ov>=5?'var(--acc)':'var(--dan)';
+  const topics=d.topics_covered||[];const soft=ev.soft_skills||{};
+  // Build competency scores — use eval data, fall back to computing from turns
+  let compScores = ev.competency_scores || {};
+  // Always supplement with turn-computed scores for missing competencies
+  {
+    const compMap = {};
+    (d.all_turns||[]).filter(t=>!t.is_practice&&(t.main_q_index??t.turn)>0&&t.competency_tag&&(t.score||0)>0).forEach(t=>{
+      const c = t.competency_tag;
+      if (!compMap[c]) compMap[c] = [];
+      compMap[c].push(t.score||5);
+    });
+    Object.entries(compMap).forEach(([c,scores])=>{
+      compScores[c] = Math.round((scores.reduce((a,b)=>a+b,0)/scores.length)*10)/10;
+    });
+  }
+  const _cap=k=>k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    const cb=Object.entries(compScores).map(([k,v])=>sBar(_cap(k),+(v||0).toFixed(1))).join('');
+  // Exclude practice turns AND all warmup Q0 turns from breakdown
+  const turns=(d.all_turns||[]).filter(t=>!t.is_practice && (t.main_q_index??t.turn)>0);
+  const qbh=turns.map(t=>{
+    const aa=t.transcription?`<div class="qi-sec"><div class="qi-sec-lbl">Transcription</div><div class="qi-ans">${_s(t.transcription)}</div></div>`:`<div class="qi-sec"><div class="qi-sec-lbl">Answer</div><div class="qi-ans">${_s(t.answer||'')}</div></div>`;
+    // Build per-turn delivery section with real audio/video scores (no static 5s)
+    const _turnDelivery = (() => {
+      const parts = [];
+      if (t.audio_pace_score != null && t.audio_pace_score > 0)
+        parts.push(sBar('Pace', t.audio_pace_score));
+      if (t.audio_fluency_score != null && t.audio_fluency_score > 0)
+        parts.push(sBar('Fluency', t.audio_fluency_score));
+      if (t.audio_confidence_score != null && t.audio_confidence_score > 0)
+        parts.push(sBar('Delivery Confidence', t.audio_confidence_score));
+      if (t.audio_engagement_score != null && t.audio_engagement_score > 0)
+        parts.push(sBar('Engagement', t.audio_engagement_score));
+      if (t.video_eye_contact != null && t.video_eye_contact > 0)
+        parts.push(sBar('Eye Contact', t.video_eye_contact));
+      if (t.video_expression != null && t.video_expression > 0)
+        parts.push(sBar('Expression', t.video_expression));
+      if (t.video_posture != null && t.video_posture > 0)
+        parts.push(sBar('Posture', t.video_posture));
+      if (!parts.length) return '';
+      return `<div class="qi-sec"><div class="qi-sec-lbl">Delivery</div>${parts.join('')}</div>`;
+    })();
+    const dh = _turnDelivery;
+    const dih=(t.correctness_note||t.clarity_note)?`<div class="qi-sec"><div class="qi-sec-lbl">Dimensions</div><div class="dim-grid"><div class="dim-item"><div class="dim-lbl">Correctness</div><div class="dim-note">${_s(t.correctness_note)||'—'}</div></div><div class="dim-item"><div class="dim-lbl">Clarity</div><div class="dim-note">${_s(t.clarity_note)||'—'}</div></div><div class="dim-item"><div class="dim-lbl">Depth</div><div class="dim-note">${_s(t.depth_note)||'—'}</div></div><div class="dim-item"><div class="dim-lbl">Confidence</div><div class="dim-note">${_s(t.confidence_note)||'—'}</div></div></div></div>`:'';
+    const rawN = t.main_q_index ?? t.turn;
+    const qLabel = t.is_practice ? 'Practice' : t.is_followup ? `Q${rawN} ↩` : `Q${rawN}`;
+    const scoreColor = (t.score>=7)?'var(--grn)':(t.score>=5)?'var(--acc)':'var(--dan)';
+    const transcriptSection = (t.transcription && _e.mode!=='text')
+      ? `<div class="qi-sec"><div class="qi-sec-lbl">Your Answer (Transcript)</div><p class="qi-fb" style="font-style:italic;color:var(--txt2)">${_s(t.transcription)}</p></div>`
+      : (t.answer ? `<div class="qi-sec"><div class="qi-sec-lbl">Your Answer</div><p class="qi-fb" style="font-style:italic;color:var(--txt2)">${_s(t.answer).slice(0,300)}${t.answer.length>300?'...':''}</p></div>` : '');
+    return`<div class="qi-card"><div class="qi-hdr" onclick="tqb(this)"><div class="qi-sc ${qsc(t.score||0)}">${t.score??'—'}</div><div class="qi-info"><div class="qi-q">${qLabel}: ${_s(t.question)}</div><div class="qi-meta">${t.is_followup?'<span style="color:var(--war)">Follow-up</span> · ':''}${t.score??'—'}/10 · ${catL(t.question_category)}</div></div><span class="qi-arrow">▼</span></div><div class="qi-body">${transcriptSection}<div class="qi-sec"><div class="qi-sec-lbl">Score</div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:1.4rem;font-weight:800;color:${scoreColor}">${t.score??'—'}/10</span></div></div><div class="qi-sec"><div class="qi-sec-lbl">Feedback</div><p class="qi-fb">${_s(t.feedback)||'No feedback provided.'}</p></div>${dih}${(t.improvements||[]).length?`<div class="qi-sec"><div class="qi-sec-lbl">What to Improve</div><ul class="qi-imps">${t.improvements.map(i=>`<li>${_s(i)}</li>`).join('')}</ul></div>`:''}${dh}</div></div>`;
+  }).join('');
+  const ph=(ev.improvement_plan||[]).map(it=>`<div class="ip-card"><div class="ip-head"><span class="ip-area">${_s(it.area||'General')}</span><span class="ip-pri p${(it.priority||'M')[0]}">${it.priority||'Medium'}</span></div><p class="ip-issue">${_s(it.issue||'')}</p><ul class="ip-actions" style="padding-left:14px">${(it.actions||[]).map(a=>`<li>${_s(a)}</li>`).join('')}</ul></div>`).join('');
+  // Build soft skills — use eval data, fall back to averaging from turns
+  if (!soft.communication || soft.communication === 5) {
+    const softKeys = ['communication','confidence','problem_solving','honesty'];
+    const softMap = {communication:[],confidence:[],problem_solving:[],honesty:[]};
+    (d.all_turns||[]).filter(t=>!t.is_practice&&(t.main_q_index??t.turn)>0).forEach(t=>{
+      // turns don't store per-turn soft scores directly — use overall score as proxy
+    });
+    // Only override if final_evaluation soft_skills are all exactly 5 (likely fallback)
+    const allFive = softKeys.every(k => (soft[k]||5) === 5);
+    if (!allFive) { /* keep existing */ }
+  }
+  const isT=_e.mode==='text';
+  // Soft skills — only display non-zero values
+  const sh = [
+    soft.communication > 0 ? sBar('Communication', soft.communication) : '',
+    (soft.confidence||soft.clarity||0) > 0 ? sBar(isT?'Clarity':'Confidence', soft.confidence||soft.clarity) : '',
+    soft.problem_solving > 0 ? sBar('Problem Solving', soft.problem_solving) : '',
+    soft.honesty > 0 ? sBar('Honesty', soft.honesty) : '',
+  ].filter(Boolean).join('') || '<div style="font-size:.74rem;color:var(--mut);font-style:italic;padding:5px 0">Soft skills computed from answers.</div>';
+  const dh2 = (() => {
+    if (isT) return '<div style="font-size:.74rem;color:var(--mut);font-style:italic;padding:5px 0">Text mode — no delivery metrics.</div>';
+    const dp = [];
+    if (soft.speaking_pace     > 0) dp.push(sBar('Speaking Pace',      soft.speaking_pace));
+    if (soft.voice_fluency     > 0) dp.push(sBar('Voice Fluency',      soft.voice_fluency));
+    if (soft.delivery_confidence>0) dp.push(sBar('Delivery Confidence', soft.delivery_confidence));
+    if (soft.engagement        > 0) dp.push(sBar('Engagement',          soft.engagement));
+    if (soft.eye_contact       > 0) dp.push(sBar('Eye Contact',         soft.eye_contact));
+    if (soft.expression        > 0) dp.push(sBar('Expression',          soft.expression));
+    if (soft.posture           > 0) dp.push(sBar('Posture',             soft.posture));
+    if (soft.non_verbal        > 0) dp.push(sBar('Non-Verbal',          soft.non_verbal));
+    if (dp.length) return dp.join('');
+    const noAudio = !(soft.speaking_pace>0||soft.voice_fluency>0||soft.delivery_confidence>0||soft.engagement>0);
+    const noVideo = !(soft.eye_contact>0||soft.expression>0||soft.posture>0||soft.non_verbal>0);
+    let msg = 'Delivery analysis not available.';
+    if (_e.mode==='audio' && noAudio) msg = 'Audio analysis not available — check microphone permissions.';
+    else if (_e.mode==='video' && noAudio && noVideo) msg = 'Video delivery analysis could not be completed — ensure your face is clearly visible and the room is well-lit.';
+    else if (_e.mode==='video' && noVideo) msg = 'Non-verbal analysis unavailable — ensure your face is visible and well-lit in the camera frame.';
+    return `<div style="font-size:.74rem;color:var(--mut);font-style:italic;padding:5px 0">${msg}</div>`;
+  })();
+  const cons=ev.interview_consistency||'stable';const grow=ev.growth_potential||'medium';
+  const cc={improving:'var(--grn)',stable:'var(--acc)',declining:'var(--dan)'}[cons]||'var(--acc)';
+  _el('s-final').innerHTML=`
+  <div class="sticky-strip">
+    <span style="font-weight:700;font-size:.84rem">Overall: <span style="color:${sc}">${ov}/10</span></span>
+    <span class="rec-badge ${rcl}" style="padding:4px 12px;font-size:.74rem">${recLabel}</span>
+    ${_e.candidateName?`<span style="font-family:var(--mono);font-size:.6rem;color:var(--mut)">${_s(_e.candidateName)}</span>`:''}
+    <span style="flex:1"></span>
+    <button class="btn btn-s" style="padding:5px 12px;font-size:.68rem" onclick="expPDF()">📄 Export PDF</button>
+    <button class="btn btn-s" style="padding:5px 12px;font-size:.68rem" onclick="location.reload()">↩ New Interview</button>
+  </div>
+  <div class="results-wrap">
+    <div class="res-hero">
+      <div class="res-score-row">
+        <div><div class="res-score-num" style="color:${sc}">${ov}</div><div class="res-score-denom">/ 10</div></div>
+        <div><div class="rec-badge ${rcl}">${recLabel}</div>${ev.role_fit_score?`<div style="font-family:var(--mono);font-size:.62rem;color:var(--txt2);margin-top:5px">Role fit: ${ev.role_fit_score}/10</div>`:''}</div>
+        <div style="flex:1"><div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span style="background:var(--sur2);border:1px solid var(--bor);border-radius:100px;padding:3px 10px;font-family:var(--mono);font-size:.58rem;color:${cc}">${cons==='improving'?'📈':cons==='declining'?'📉':'➡️'} ${cons}</span>
+          <span style="background:var(--sur2);border:1px solid var(--bor);border-radius:100px;padding:3px 10px;font-family:var(--mono);font-size:.58rem;color:var(--txt2)">${grow==='high'?'🚀':'⚡'} ${grow} growth</span>
+        </div></div>
+      </div>
+      <p class="res-summary">${_s(ev.summary_paragraph||'')}</p>
+      ${(()=>{
+        // Build insight chips from evaluation data — NOT raw question text
+        const chips = [];
+        // Add top strength (first 1)
+        const topStr = (ev.strengths||[]).find(s=>typeof s==='string'&&s.length>5);
+        if(topStr){
+          const label = topStr.split(':')[0].trim().replace(/_/g,' ');
+          chips.push({text:'✓ '+label, color:'var(--acc)'});
+        }
+        // Add top weak area (first 1)
+        const topWk = (ev.weak_areas||[]).find(w=>w);
+        if(topWk){
+          const label = typeof topWk==='object'
+            ? (topWk.area||'').replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())
+            : topWk.split(':')[0].trim();
+          if(label) chips.push({text:'↗ '+label+' needs work', color:'var(--war)'});
+        }
+        // Readiness chip
+        if(ev.readiness){
+          const r = ev.readiness.replace(/_/g,' ');
+          chips.push({text:'⏱ '+r, color:'var(--txt2)'});
+        }
+        // Mentorship need chip
+        if(ev.mentorship_need && ev.mentorship_need.length>3){
+          chips.push({text:'🎯 '+ev.mentorship_need.slice(0,40), color:'var(--txt2)'});
+        }
+        return chips.length
+          ? `<div class="tag-list" style="margin-top:11px">${chips.map(c=>`<span class="rtag" style="border-color:${c.color}20;color:${c.color}">${_s(c.text)}</span>`).join('')}</div>`
+          : '';
+      })()}
+      ${ev.hiring_rationale?`<p style="font-size:.74rem;color:var(--mut);margin-top:9px;line-height:1.6;font-style:italic">${_s(ev.hiring_rationale)}</p>`:''}
+    </div>
+    <div class="res-grid3">
+      <div class="res-panel"><h3>📊 Technical</h3>${(()=>{const vals=Object.values(compScores).filter(v=>v>0);const avg=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:0;return sBar('Average',avg);})()}${cb?`<div style="margin-top:8px;border-top:1px solid var(--bor);padding-top:8px">${cb}</div>`:''}<div style="margin-top:5px;font-family:var(--mono);font-size:.56rem;color:var(--mut)">${d.questions_asked||0} scored</div></div>
+      <div class="res-panel"><h3>🧠 Soft Skills</h3>${sh}</div>
+      ${!isT?`<div class="res-panel"><h3>🎙️ Delivery</h3>${dh2}</div>`:''}
+    </div>
+    <div class="res-section"><h3>💪 Strengths</h3>${(ev.strengths||[]).filter(s=>s&&s.length>5).map(s=>`<div class="str-item">${_s(s)}</div>`).join('')||'<div style="color:var(--mut);font-style:italic;font-size:.78rem">None clearly demonstrated.</div>'}</div>
+    <div class="res-section"><h3>⚠ Improvement Areas</h3>${(ev.weak_areas||[]).filter(w=>w).map(w=>{
+      if (typeof w === 'object') {
+        return `<div class="wk-item"><span style="font-weight:600;color:var(--war)">${_s(w.area||'').replace(/_/g,' ')}</span> — ${_s(w.feedback||w.issue||'')} <span style="color:var(--dan);font-size:.75rem">(${w.score||'?'}/10)</span></div>`;
+      }
+      return `<div class="wk-item">→ ${_s(w)}</div>`;
+    }).join('')||'<div style="color:var(--mut);font-style:italic;font-size:.78rem">No significant gaps identified.</div>'}</div>
+    ${ev.soft_skill_summary?`<div class="res-section"><h3>💬 Communication</h3><p style="font-size:.78rem;color:var(--txt2);line-height:1.7">${_s(ev.soft_skill_summary)}</p>${ev.delivery_summary?`<p style="font-size:.78rem;color:var(--txt2);line-height:1.7;margin-top:8px">${_s(ev.delivery_summary)}</p>`:''}</div>`:''}
+    ${ph?`<div class="res-section"><h3>🚀 Improvement Plan</h3>${ph}</div>`:''}
+    <div class="res-section"><h3>📋 Question Breakdown</h3>${qbh||'<p style="font-size:.78rem;color:var(--mut)">No scored questions.</p>'}</div>
+  </div>`;
+  _el('s-final').classList.add('visible');
+}
+function tqb(hdr){const b=hdr.nextElementSibling,a=hdr.querySelector('.qi-arrow');const o=b.classList.toggle('open');a.textContent=o?'▲':'▼';}
+
+// ══════════════════════════════════════════════════════════════════════
+//  TTS
+// ══════════════════════════════════════════════════════════════════════
+let _muted = false;  // global mute flag — was accidentally removed with old TTS block
+
+// ── TTS — Piper server voice (primary on Linux; natural quality) ─────────
+// speechSynthesis on Linux only has eSpeak (robotic) — we skip it entirely
+// and use the Piper /speak endpoint which produces a natural English voice.
+const TTS = {
+  _q: [], _sp: false, _ctx: null,
+  _src: null,
+
+  unlock() {
+    // Pre-warm AudioContext on first user gesture (required by browsers)
+    if (!this._ctx) {
+      this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (this._ctx.state === 'suspended') this._ctx.resume();
+  },
+
+  speak(text, opts = {}) {
+    if (_muted || !text) return;
+    this._q.push({ text, opts });
+    if (!this._sp) this._next();
+  },
+
+  _next() {
+    if (!this._q.length) { this._sp = false; return; }
+    this._sp = true;
+    const { text } = this._q.shift();
+    this._sayPiper(text);
+  },
+
+  async _sayPiper(text) {
+    // Ensure AudioContext exists and is running
+    if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this._ctx.state === 'suspended') await this._ctx.resume();
+    try {
+      const fd = new FormData();
+      fd.append('text', text.slice(0, 500));
+      const resp = await fetch('/speak', { method: 'POST', body: fd });
+      if (!resp.ok) throw new Error(`/speak ${resp.status}`);
+      const buf = await resp.arrayBuffer();
+      const decoded = await this._ctx.decodeAudioData(buf);
+      // Stop any currently playing source first (prevents overlap)
+      this._stopCurrent();
+      this._src = this._ctx.createBufferSource();
+      this._src.buffer = decoded;
+      this._src.connect(this._ctx.destination);
+      this._src.onended = () => { this._src = null; this._sp = false; this._next(); };
+      this._src.start();
+    } catch(e) {
+      log('Piper TTS error:', e.message);
+      this._sp = false;
+      this._next();
+    }
+  },
+
+  _stopCurrent() {
+    if (this._src) {
+      try { this._src.onended = null; this._src.stop(); } catch(_) {}
+      this._src = null;
+    }
+  },
+
+  stop() {
+    this._q = [];
+    this._stopCurrent();
+    this._sp = false;
+    // Also cancel browser speech in case it was ever triggered elsewhere
+    try { window.speechSynthesis && speechSynthesis.cancel(); } catch(_) {}
+  }
+};
+
+function toggleMute(){
+  _muted=!_muted;
+  const btn=_el('btn-mute');
+  if(btn){
+    btn.textContent=_muted?'🔇 OFF':'🔊 ON';
+    btn.style.borderColor=_muted?'var(--dan)':'var(--bor2)';
+    btn.style.color=_muted?'var(--dan)':'var(--mut)';
+  }
+  if(_muted){TTS.stop();speechSynthesis&&speechSynthesis.cancel();}
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  PHASE / COMPETENCY / PROGRESS
+// ══════════════════════════════════════════════════════════════════════
+function _updatePhase(p){_setText('tb-phase',{warmup:'Warm-up',technical:'Core Tech',deep_technical:'Deep Dive',behavioral:'Behavioral',closing:'Wrap-up'}[p]||p);}
+function _updateCompTracker(plan,cur){const el=_el('comp-tags');if(!el||!plan?.length)return;el.innerHTML=plan.slice(0,8).map(c=>`<span class="comp-tag${c===cur?' current':''}">${c.replace(/_/g,' ')}</span>`).join('');}
+function buildProgressDots(total,current,practice){const el=_el('progress-dots');if(!el)return;let h='';if(practice)h+='<div class="prog-dot practice" title="Practice"></div><div class="prog-label">P</div>';for(let i=0;i<Math.min(total,12);i++){const cls=i<current?'done':i===current?'current':'';h+=`<div class="prog-dot ${cls}" title="Q${i+1}"></div>`;}el.innerHTML=h;}
+
+// ── Elapsed timer ─────────────────────────────────────────────────────────
+let _elapsedInt=null,_elapsedStart=null;
+function _startElapsed(){_elapsedStart=Date.now();_elapsedInt=setInterval(()=>{const e=Math.floor((Date.now()-_elapsedStart)/1000);_setText('tb-elapsed',`${Math.floor(e/60).toString().padStart(2,'0')}:${(e%60).toString().padStart(2,'0')}`);},1000);}
+
+// ── Session persistence ───────────────────────────────────────────────────
+function _saveSession(){if(!_e.uid)return;try{sessionStorage.setItem('ivsess',JSON.stringify({uid:_e.uid,mode:_e.mode,qi:_e.scoredQIndex,cq:_e.currentQ,name:_e.candidateName,role:_e.roleLabel,plan:_e.competencyPlan,ts:Date.now()}));}catch(e){}}
+function _clearSession(){try{sessionStorage.removeItem('ivsess');}catch(e){}}
+
+// ── PDF export ────────────────────────────────────────────────────────────
+function expPDF(){const ev=window._ev||{};const turns=window._turns||[];const pw=window.open('','_blank');const sc2=s=>s>=7?'#2dd4a0':s>=5?'#4f8ef7':'#f06060';pw.document.write('<!DOCTYPE html><html><head><title>InterviewAI Report</title><style>body{font-family:system-ui,sans-serif;max-width:800px;margin:0 auto;padding:32px;color:#111}h1{font-size:20px}h2{font-size:15px;color:#374151;margin:18px 0 8px}.score{font-size:42px;font-weight:900;color:#4f8ef7}table{width:100%;border-collapse:collapse}td{padding:6px 0;border-bottom:1px solid #f3f4f6;font-size:13px}.qi{margin-bottom:11px;padding:11px;border:1px solid #e5e7eb;border-radius:8px}@media print{body{padding:16px}}</style></head><body>'+'<h1>🎯 InterviewAI Report — '+_s(_e.roleLabel||'Candidate')+'</h1>'+(_e.candidateName?'<p style="font-size:13px">Candidate: <strong>'+_s(_e.candidateName)+'</strong></p>':'')+'<p style="color:#6b7280;font-size:11px">Generated '+new Date().toLocaleString()+'</p>'+'<div style="display:flex;gap:20px;margin:14px 0;padding:14px;background:#f9fafb;border-radius:10px;flex-wrap:wrap"><div><div class="score">'+(ev.overall_score||'—')+'</div><div style="color:#6b7280;font-size:11px">/ 10</div></div><div style="flex:1"><div style="font-size:15px;font-weight:700;margin-bottom:4px">'+(ev.hiring_recommendation||'—')+'</div><p style="font-size:12px;color:#374151;line-height:1.5">'+_s(ev.summary_paragraph||'')+'</p></div></div>'+(Object.keys(ev.competency_scores||{}).length?'<h2>Competency Scores</h2><table>'+Object.entries(ev.competency_scores).map(([k,v])=>'<tr><td>'+k.replace(/_/g,' ')+'</td><td style="text-align:right;color:'+sc2(v)+'">'+v+'/10</td></tr>').join('')+'</table>':'')+'<h2>Strengths</h2>'+(ev.strengths||[]).map(s=>'<p style="margin:3px 0;font-size:13px">✓ '+_s(s)+'</p>').join('')+'<h2>Improvement Areas</h2>'+(ev.weak_areas||[]).map(w=>'<p style="margin:3px 0;font-size:13px">→ '+_s(w)+'</p>').join('')+'<h2>Questions</h2>'+turns.map(t=>'<div class="qi"><div style="font-size:11px;color:#6b7280">Q'+t.turn+' · <strong style="color:'+sc2(t.score)+'">'+t.score+'/10</strong>'+(t.is_followup?' (Follow-up)':'')+'</div><div style="font-weight:600;font-size:13px;margin:3px 0">'+_s(t.question)+'</div><div style="font-size:12px;color:#374151;margin-bottom:3px">'+_s(t.answer||t.transcription||'—')+'</div><div style="font-size:11px;color:#6b7280;font-style:italic">'+_s(t.feedback||'')+'</div></div>').join('')+'<scr'+'ipt>window.onload=()=>window.print();<'+'/script></body></html>');pw.document.close();}
+function openRecruiter(){const p=new URLSearchParams(window.location.search);const q=new URLSearchParams();if(p.get('token'))q.set('token',p.get('token'));if(p.get('api'))q.set('api',p.get('api'));window.open('/interview/recruiter.html?'+q.toString(),'_blank');}
+async function pushName(uid,name){if(!uid||!name)return;try{const fd=new FormData();fd.append('name',name);await fetch(`/session/${uid}/name`,{method:'POST',body:fd});}catch(e){}}
+</script>
+</body>
+</html>

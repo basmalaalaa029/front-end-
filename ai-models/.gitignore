@@ -22,16 +22,12 @@ env/
 .cache/
 models/
 
-# GGUF models + llama.cpp prebuilt server (huge — never commit)
-*.gguf
-.llama.cpp/
-vendor/llama-server/
-vendor/llama-prebuilt/
-bin/llama-server
-
 # Runtime outputs
 output/
 logs/
+career_interview/uploads/
+career_interview/interview_system.log
+vendor/ffmpeg-static/
 *.db
 *.sqlite
 

@@ -31,4 +31,10 @@ if [[ ! -f .env ]]; then
   exit 1
 fi
 
+# Bundled ffmpeg (./scripts/install_ffmpeg.sh) — no sudo required
+FFMPEG_DIR="$(pwd)/vendor/ffmpeg-static"
+if [[ -x "$FFMPEG_DIR/ffmpeg" ]]; then
+  export PATH="$FFMPEG_DIR:$PATH"
+fi
+
 exec "$PY" main.py

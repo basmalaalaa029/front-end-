@@ -15,6 +15,7 @@ import json
 import logging
 from typing import Optional
 
+from ..config import GROQ_MODEL
 from ..cv_reader.parser import TECH_SKILLS
 
 log = logging.getLogger("job_matcher")
@@ -51,7 +52,7 @@ Return ONLY this JSON (no markdown):
 
 
 def _call_groq_explain(profile: dict, job: dict, score: int,
-                        api_key: str, model: str = "llama3-8b-8192") -> Optional[dict]:
+                        api_key: str, model: str = GROQ_MODEL) -> Optional[dict]:
     """Call Groq to generate a job match explanation. Returns dict or None."""
     import urllib.request
 

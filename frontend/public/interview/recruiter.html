@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>CareerPilot — Recruiter Dashboard</title>
+<script src="./auth-bridge.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050508;--sur:#0d0d14;--sur2:#13131e;--sur3:#1a1a28;--bor:#1f1f32;--bor2:#2a2a42;--acc:#7b6ef6;--acc2:#e879f9;--acc3:#38bdf8;--grn:#34d399;--dan:#f87171;--war:#fbbf24;--txt:#e2e2f0;--txt2:#b0b0cc;--mut:#6e6e8a;--r:14px;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;min-height:100vh;display:flex;}
+/* Sidebar */
+.sidebar{width:220px;background:var(--sur);border-right:1px solid var(--bor);padding:24px 0;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto;}
+.logo{padding:0 20px 24px;border-bottom:1px solid var(--bor);margin-bottom:16px;}
+.logo h2{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;color:var(--txt);}
+.logo span{color:var(--acc);}
+.logo p{font-size:.65rem;color:var(--mut);margin-top:2px;font-family:'JetBrains Mono',monospace;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:.82rem;color:var(--txt2);cursor:pointer;transition:all .2s;border-left:2px solid transparent;}
+.nav-item:hover{background:rgba(123,110,246,.06);color:var(--txt);}
+.nav-item.active{color:var(--acc);border-left-color:var(--acc);background:rgba(123,110,246,.08);}
+.nav-icon{font-size:1rem;width:20px;text-align:center;}
+.nav-section{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;padding:16px 20px 6px;}
+/* Main */
+.main{margin-left:220px;flex:1;padding:32px;min-height:100vh;}
+.page{display:none;}.page.active{display:block;}
+/* Cards */
+.card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r);padding:24px;margin-bottom:16px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px;}
+.page-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;}
+.page-sub{font-size:.8rem;color:var(--mut);margin-top:3px;}
+/* Stats grid */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r);padding:20px;}
+.stat-num{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:4px;}
+.stat-lbl{font-size:.72rem;color:var(--mut);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.08em;}
+/* Table */
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{font-family:'JetBrains Mono',monospace;font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);padding:10px 14px;border-bottom:1px solid var(--bor);text-align:left;}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--bor);font-size:.82rem;color:var(--txt2);}
+.tbl tr:hover td{background:rgba(255,255,255,.02);}
+/* Badges */
+.badge{display:inline-flex;align-items:center;border-radius:100px;padding:2px 10px;font-size:.65rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;}
+.b-sh{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:var(--grn);}
+.b-h{background:rgba(123,110,246,.1);border:1px solid rgba(123,110,246,.3);color:var(--acc);}
+.b-lh{background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:var(--acc3);}
+.b-lnh{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);color:var(--war);}
+.b-nh{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--dan);}
+.b-pend{background:rgba(110,110,138,.1);border:1px solid rgba(110,110,138,.3);color:var(--mut);}
+/* Score ring */
+.ring{width:36px;height:36px;border-radius:50%;border:2px solid var(--bor2);display:inline-flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-p{background:linear-gradient(135deg,var(--acc),#6c5ce7);color:#fff;box-shadow:0 4px 14px rgba(123,110,246,.3);}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(123,110,246,.4);}
+.btn-s{background:var(--sur2);color:var(--txt2);border:1px solid var(--bor2);}
+.btn-s:hover{border-color:var(--acc);color:var(--acc);}
+.btn-d{background:rgba(248,113,113,.08);color:var(--dan);border:1px solid rgba(248,113,113,.25);}
+/* Detail panel */
+.detail-panel{position:fixed;right:0;top:0;height:100vh;width:480px;background:var(--sur);border-left:1px solid var(--bor);padding:24px;overflow-y:auto;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:100;}
+.detail-panel.open{transform:translateX(0);}
+.detail-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--mut);font-size:1.2rem;cursor:pointer;}
+/* Score bars */
+.sbar{margin-bottom:10px;}
+.sbar-l{display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:4px;color:var(--txt2);}
+.sbar-l span:last-child{font-family:'JetBrains Mono',monospace;color:var(--acc);}
+.sbar-t{height:4px;background:var(--bor2);border-radius:3px;overflow:hidden;}
+.sbar-f{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width 1s ease;}
+/* Charts */
+.chart-bar{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.chart-bar-label{width:120px;font-size:.75rem;color:var(--txt2);text-align:right;flex-shrink:0;}
+.chart-bar-track{flex:1;height:6px;background:var(--bor2);border-radius:3px;overflow:hidden;}
+.chart-bar-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.chart-bar-val{width:36px;font-size:.72rem;font-family:'JetBrains Mono',monospace;color:var(--acc);}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--sur);border:1px solid var(--bor);border-radius:var(--r);padding:28px;width:500px;max-width:90vw;position:relative;}
+.modal h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:16px;}
+.form-field{margin-bottom:16px;}
+.form-field label{display:block;font-size:.75rem;color:var(--txt2);margin-bottom:6px;}
+.form-field input,.form-field select,.form-field textarea{width:100%;background:var(--sur2);border:1px solid var(--bor2);border-radius:8px;color:var(--txt);font-family:'Inter',sans-serif;font-size:.875rem;padding:10px 12px;outline:none;}
+.form-field input:focus,.form-field select:focus{border-color:var(--acc);}
+/* Transcript */
+.transcript-bubble{background:var(--sur2);border-radius:10px;padding:12px 14px;margin-bottom:10px;border-left:3px solid var(--bor2);}
+.transcript-bubble.q{border-left-color:var(--acc);}
+.transcript-bubble.a{border-left-color:var(--grn);}
+.tb-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.tb-label.q{color:var(--acc);}
+.tb-label.a{color:var(--grn);}
+.tb-text{font-size:.82rem;line-height:1.6;color:var(--txt2);}
+.tb-score{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--mut);margin-top:4px;}
+/* Toast */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--sur2);border:1px solid var(--bor2);border-radius:8px;padding:10px 18px;font-size:.82rem;opacity:0;transition:all .3s;pointer-events:none;z-index:300;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.ok{border-color:rgba(52,211,153,.4);color:var(--grn);}
+#toast.err{border-color:rgba(248,113,113,.4);color:var(--dan);}
+/* Empty state */
+.empty{text-align:center;padding:48px 20px;color:var(--mut);}
+.empty-icon{font-size:2.5rem;margin-bottom:12px;}
+.empty-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:600;margin-bottom:6px;color:var(--txt2);}
+/* Heatmap */
+.heatmap{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px;}
+.heatmap-cell{background:var(--sur2);border:1px solid var(--bor2);border-radius:8px;padding:12px;text-align:center;}
+.heatmap-cell-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:2px;}
+.heatmap-cell-lbl{font-size:.65rem;color:var(--mut);font-family:'JetBrains Mono',monospace;}
+/* Link input */
+.link-box{background:var(--sur2);border:1px solid var(--bor2);border-radius:8px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--txt2);word-break:break-all;}
+@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:16px;}.stats{grid-template-columns:1fr 1fr;}}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="logo"><h2>Interview<span>AI</span></h2><p>Recruiter Dashboard</p></div>
+  <div class="nav-section">Overview</div>
+  <div class="nav-item active" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>Dashboard</div>
+  <div class="nav-item" onclick="showPage('candidates')"><span class="nav-icon">👥</span>Candidates</div>
+  <div class="nav-item" onclick="showPage('analytics')"><span class="nav-icon">📈</span>Analytics</div>
+  <div class="nav-section">Management</div>
+  <div class="nav-item" onclick="showPage('templates')"><span class="nav-icon">📋</span>Templates</div>
+  <div class="nav-item" onclick="showPage('invite')"><span class="nav-icon">✉️</span>Invite</div>
+  <div class="nav-section">Settings</div>
+  <div class="nav-item" onclick="window.location='/'"><span class="nav-icon">↩️</span>Back to Interview</div>
+</div>
+
+<div class="main">
+  <!-- DASHBOARD PAGE -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div><div class="page-title">Dashboard</div><div class="page-sub">Overview of all interview sessions</div></div>
+      <button class="btn btn-p" onclick="showModal('modal-invite')">+ Invite Candidate</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="stat-total" style="color:var(--acc)">0</div><div class="stat-lbl">Total Interviews</div></div>
+      <div class="stat"><div class="stat-num" id="stat-completed" style="color:var(--grn)">0</div><div class="stat-lbl">Completed</div></div>
+      <div class="stat"><div class="stat-num" id="stat-avg" style="color:var(--acc2)">—</div><div class="stat-lbl">Avg Score</div></div>
+      <div class="stat"><div class="stat-num" id="stat-hire" style="color:var(--acc3)">0</div><div class="stat-lbl">Hire / Strong Hire</div></div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;margin-bottom:16px">Recent Sessions</h3>
+      <table class="tbl" id="recent-tbl">
+        <thead><tr><th>Candidate</th><th>Role</th><th>Score</th><th>Recommendation</th><th>Date</th><th>Actions</th></tr></thead>
+        <tbody id="recent-tbody"><tr><td colspan="6"><div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No interviews yet</div><p style="font-size:.8rem">Completed interviews will appear here.</p></div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CANDIDATES PAGE -->
+  <div class="page" id="page-candidates">
+    <div class="page-header">
+      <div><div class="page-title">Candidates</div><div class="page-sub">All interview sessions and evaluations</div></div>
+      <div style="display:flex;gap:8px">
+        <select id="filter-rec" onchange="filterCandidates()" style="background:var(--sur2);border:1px solid var(--bor2);border-radius:8px;color:var(--txt2);padding:8px 12px;font-size:.78rem;cursor:pointer">
+          <option value="">All Recommendations</option>
+          <option value="Strong Hire">Strong Hire</option>
+          <option value="Hire">Hire</option>
+          <option value="Lean Hire">Lean Hire</option>
+          <option value="Lean No Hire">Lean No Hire</option>
+          <option value="No Hire">No Hire</option>
+        </select>
+        <button class="btn btn-s" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0">
+      <table class="tbl" id="candidates-tbl">
+        <thead><tr><th>Candidate</th><th>Role</th><th>Level</th><th>Score</th><th>Rec</th><th>Role Fit</th><th>Readiness</th><th>Date</th><th></th></tr></thead>
+        <tbody id="candidates-tbody"><tr><td colspan="9"><div class="empty"><div class="empty-icon">👥</div><div class="empty-title">No candidates yet</div></div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ANALYTICS PAGE -->
+  <div class="page" id="page-analytics">
+    <div class="page-header">
+      <div><div class="page-title">Analytics</div><div class="page-sub">Performance insights across all sessions</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="card">
+        <h3 style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;margin-bottom:16px">Score Distribution</h3>
+        <div id="score-dist"></div>
+      </div>
+      <div class="card">
+        <h3 style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;margin-bottom:16px">Recommendation Breakdown</h3>
+        <div id="rec-dist"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;margin-bottom:16px">Competency Heatmap</h3>
+      <p style="font-size:.78rem;color:var(--mut);margin-bottom:12px">Average scores across all sessions by competency</p>
+      <div class="heatmap" id="competency-heatmap"></div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'Syne',sans-serif;font-size:.85rem;font-weight:600;margin-bottom:16px">Top Weak Areas</h3>
+      <div id="weak-areas-chart"></div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES PAGE -->
+  <div class="page" id="page-templates">
+    <div class="page-header">
+      <div><div class="page-title">Interview Templates</div><div class="page-sub">Configure role-specific interview parameters</div></div>
+      <button class="btn btn-p" onclick="showModal('modal-template')">+ New Template</button>
+    </div>
+    <div id="templates-list">
+      <!-- Default templates -->
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:600;margin-bottom:4px">Software Developer (General)</div>
+          <div style="font-size:.75rem;color:var(--mut)">10 questions · 2 min each · Technical + Behavioral</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <span class="badge b-h">Default</span>
+          <button class="btn btn-s" onclick="useTemplate('general')">Use</button>
+        </div>
+      </div>
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:600;margin-bottom:4px">Data Scientist</div>
+          <div style="font-size:.75rem;color:var(--mut)">12 questions · 2.5 min each · ML + Statistics focus</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="useTemplate('data_scientist')">Use</button>
+        </div>
+      </div>
+      <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:600;margin-bottom:4px">QA / Software Tester</div>
+          <div style="font-size:.75rem;color:var(--mut)">10 questions · 2 min each · Testing + Automation focus</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="useTemplate('qa')">Use</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVITE PAGE -->
+  <div class="page" id="page-invite">
+    <div class="page-header">
+      <div><div class="page-title">Invite Candidates</div><div class="page-sub">Generate interview links and manage invitations</div></div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'Syne',sans-serif;font-size:.9rem;font-weight:600;margin-bottom:16px">Generate Interview Link</h3>
+      <div class="form-field"><label>Candidate Name</label><input type="text" id="inv-name" placeholder="e.g. Sara Ahmed"></div>
+      <div class="form-field"><label>Role</label><input type="text" id="inv-role" placeholder="e.g. Backend Developer"></div>
+      <div class="form-field"><label>Interview Mode</label>
+        <select id="inv-mode"><option value="text">Text</option><option value="audio">Voice</option><option value="video">Video</option></select>
+      </div>
+      <div class="form-field"><label>Expiry (days)</label>
+        <select id="inv-expiry"><option value="3">3 days</option><option value="5">5 days</option><option value="7">7 days</option><option value="14">14 days</option></select>
+      </div>
+      <button class="btn btn-p" onclick="generateLink()">Generate Link</button>
+      <div id="inv-result" style="margin-top:16px;display:none">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--grn);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">✓ Interview Link Generated</div>
+        <div class="link-box" id="inv-link"></div>
+        <button class="btn btn-s" style="margin-top:8px" onclick="copyLink()">📋 Copy Link</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="font-family:'Syne',sans-serif;font-size:.9rem;font-weight:600;margin-bottom:16px">Active Invitations</h3>
+      <table class="tbl">
+        <thead><tr><th>Candidate</th><th>Role</th><th>Mode</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+        <tbody id="inv-tbody"><tr><td colspan="6"><div class="empty" style="padding:24px"><div class="empty-icon" style="font-size:1.5rem">✉️</div><div class="empty-title">No active invitations</div></div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CANDIDATE DETAIL PANEL -->
+<div class="detail-panel" id="detail-panel">
+  <button class="detail-close" onclick="closeDetail()">✕</button>
+  <div id="detail-content"></div>
+</div>
+
+<!-- INVITE MODAL -->
+<div class="modal-overlay" id="modal-invite">
+  <div class="modal">
+    <button style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--mut);cursor:pointer;font-size:1.1rem" onclick="closeModal('modal-invite')">✕</button>
+    <h3>Invite Candidate</h3>
+    <div class="form-field"><label>Name</label><input type="text" id="quick-name" placeholder="Candidate name"></div>
+    <div class="form-field"><label>Role</label><input type="text" id="quick-role" placeholder="Target role"></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-p" onclick="quickInvite()">Generate Link</button>
+      <button class="btn btn-s" onclick="closeModal('modal-invite')">Cancel</button>
+    </div>
+    <div id="quick-result" style="margin-top:14px;display:none">
+      <div class="link-box" id="quick-link"></div>
+      <button class="btn btn-s" style="margin-top:8px;font-size:.72rem" onclick="copyQuickLink()">📋 Copy</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATE MODAL -->
+<div class="modal-overlay" id="modal-template">
+  <div class="modal">
+    <button style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--mut);cursor:pointer;font-size:1.1rem" onclick="closeModal('modal-template')">✕</button>
+    <h3>Create Interview Template</h3>
+    <div class="form-field"><label>Template Name</label><input type="text" id="tpl-name" placeholder="e.g. Senior Backend Engineer"></div>
+    <div class="form-field"><label>Focus Areas</label><input type="text" id="tpl-focus" placeholder="e.g. APIs, databases, system design"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="form-field"><label>Max Questions</label><input type="number" id="tpl-questions" value="10" min="5" max="15"></div>
+      <div class="form-field"><label>Answer Time (min)</label><input type="number" id="tpl-time" value="2" min="1" max="5"></div>
+    </div>
+    <div class="form-field"><label>Prep Time (sec)</label>
+      <select id="tpl-prep"><option value="0">No prep time</option><option value="30">30 seconds</option><option value="60" selected>60 seconds</option><option value="90">90 seconds</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-p" onclick="saveTemplate()">Save Template</button>
+      <button class="btn btn-s" onclick="closeModal('modal-template')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-overlay" id="modal-note">
+  <div class="modal">
+    <button style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--mut);cursor:pointer;font-size:1.1rem" onclick="closeModal('modal-note')">✕</button>
+    <h3>Recruiter Notes</h3>
+    <div class="form-field"><label>Override Score (optional)</label><input type="number" id="note-score" placeholder="Leave blank to keep AI score" min="0" max="10" step="0.1"></div>
+    <div class="form-field"><label>Override Recommendation (optional)</label>
+      <select id="note-rec"><option value="">Keep AI recommendation</option><option value="Strong Hire">Strong Hire</option><option value="Hire">Hire</option><option value="Lean Hire">Lean Hire</option><option value="Lean No Hire">Lean No Hire</option><option value="No Hire">No Hire</option></select>
+    </div>
+    <div class="form-field"><label>Notes</label><textarea id="note-text" rows="4" placeholder="Add your observations..."></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-p" onclick="saveNote()">Save</button>
+      <button class="btn btn-s" onclick="closeModal('modal-note')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+let sessions = [];
+let templates = [];
+let invitations = [];
+let _currentSession = null;
+let _noteSessionId = null;
+const recBadge = r => {
+  const m={'Strong Hire':'b-sh','Hire':'b-h','Lean Hire':'b-lh','Lean No Hire':'b-lnh','No Hire':'b-nh'};
+  return `<span class="badge ${m[r]||'b-pend'}">${r||'Pending'}</span>`;
+};
+const scoreColor = s => s>=7?'var(--grn)':s>=5?'var(--acc)':'var(--dan)';
+
+// ── Load sessions from API ────────────────────────────────────────────────
+async function loadSessions(){
+  try{
+    const r=await fetch('/recruiter/sessions');
+    if(r.ok){sessions=await r.json();renderAll();}
+  }catch(e){console.log('Could not load sessions:',e);}
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='analytics') renderAnalytics();
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function renderAll(){
+  renderDashboard();
+  renderCandidates();
+  renderAnalytics();
+}
+
+function renderDashboard(){
+  const completed=sessions.filter(s=>s.completed);
+  const scores=completed.map(s=>s.overall_score).filter(Boolean);
+  const hires=completed.filter(s=>['Strong Hire','Hire'].includes(s.hiring_recommendation));
+  document.getElementById('stat-total').textContent=sessions.length;
+  document.getElementById('stat-completed').textContent=completed.length;
+  document.getElementById('stat-avg').textContent=scores.length?( scores.reduce((a,b)=>a+b,0)/scores.length).toFixed(1):'—';
+  document.getElementById('stat-hire').textContent=hires.length;
+  const recent=sessions.slice(-8).reverse();
+  document.getElementById('recent-tbody').innerHTML=recent.length?recent.map(s=>sessionRow(s)).join(''):`<tr><td colspan="6"><div class="empty"><div class="empty-icon">📭</div><div class="empty-title">No interviews yet</div></div></td></tr>`;
+}
+
+function sessionRow(s){
+  const score=s.overall_score;
+  const scoreHtml=score?`<div class="ring" style="border-color:${scoreColor(score)};color:${scoreColor(score)}">${score}</div>`:'<span style="color:var(--mut)">—</span>';
+  const date=s.timestamp?new Date(s.timestamp).toLocaleDateString():'—';
+  const recruiterNote=s.recruiter_note?'📝 ':'';
+  return `<tr>
+    <td><strong style="color:var(--txt)">${s.candidate_name||'Anonymous'}</strong></td>
+    <td>${s.role_label||'—'}</td>
+    <td>${scoreHtml}</td>
+    <td>${recBadge(s.recruiter_rec||s.hiring_recommendation)}</td>
+    <td style="color:var(--mut)">${date}</td>
+    <td><button class="btn btn-s" style="padding:5px 10px;font-size:.72rem" onclick="openDetail('${s.session_id}')">View ${recruiterNote}</button></td>
+  </tr>`;
+}
+
+function renderCandidates(filter=''){
+  const filtered=filter?sessions.filter(s=>(s.recruiter_rec||s.hiring_recommendation)===filter):sessions;
+  const sorted=[...filtered].sort((a,b)=>(b.overall_score||0)-(a.overall_score||0));
+  document.getElementById('candidates-tbody').innerHTML=sorted.length?sorted.map(s=>`<tr>
+    <td><strong style="color:var(--txt)">${s.candidate_name||'Anonymous'}</strong></td>
+    <td>${s.role_label||'—'}</td>
+    <td><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--mut)">${s.level||'—'}</span></td>
+    <td><div class="ring" style="border-color:${scoreColor(s.overall_score||0)};color:${scoreColor(s.overall_score||0)}">${s.overall_score||'—'}</div></td>
+    <td>${recBadge(s.recruiter_rec||s.hiring_recommendation)}</td>
+    <td><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem">${s.role_fit_score?s.role_fit_score+'/10':'—'}</span></td>
+    <td><span style="font-size:.72rem;color:var(--mut)">${(s.readiness||'').replace(/_/g,' ')}</span></td>
+    <td style="color:var(--mut);font-size:.72rem">${s.timestamp?new Date(s.timestamp).toLocaleDateString():'—'}</td>
+    <td><button class="btn btn-s" style="padding:5px 10px;font-size:.72rem" onclick="openDetail('${s.session_id}')">Review</button></td>
+  </tr>`).join(''):`<tr><td colspan="9"><div class="empty"><div class="empty-icon">👥</div><div class="empty-title">No candidates</div></div></td></tr>`;
+}
+
+function filterCandidates(){
+  renderCandidates(document.getElementById('filter-rec').value);
+}
+
+function renderAnalytics(){
+  const completed=sessions.filter(s=>s.completed&&s.overall_score);
+  if(!completed.length){
+    ['score-dist','rec-dist','competency-heatmap','weak-areas-chart'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.innerHTML='<div class="empty" style="padding:24px"><div class="empty-title">No data yet</div></div>';
+    });
+    return;
+  }
+  // Score distribution
+  const buckets={'0-4':0,'4-6':0,'6-7':0,'7-8':0,'8-10':0};
+  completed.forEach(s=>{const sc=s.overall_score||0;if(sc<4)buckets['0-4']++;else if(sc<6)buckets['4-6']++;else if(sc<7)buckets['6-7']++;else if(sc<8)buckets['7-8']++;else buckets['8-10']++;});
+  const maxB=Math.max(...Object.values(buckets),1);
+  document.getElementById('score-dist').innerHTML=Object.entries(buckets).map(([k,v])=>`<div class="chart-bar"><div class="chart-bar-label">${k}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${v/maxB*100}%;background:var(--acc)"></div></div><div class="chart-bar-val">${v}</div></div>`).join('');
+  // Rec breakdown
+  const recs={};
+  completed.forEach(s=>{const r=s.recruiter_rec||s.hiring_recommendation||'Unknown';recs[r]=(recs[r]||0)+1;});
+  const maxR=Math.max(...Object.values(recs),1);
+  document.getElementById('rec-dist').innerHTML=Object.entries(recs).map(([k,v])=>`<div class="chart-bar"><div class="chart-bar-label">${k}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${v/maxR*100}%;background:var(--acc2)"></div></div><div class="chart-bar-val">${v}</div></div>`).join('');
+  // Competency heatmap
+  const compMap={};
+  completed.forEach(s=>{Object.entries(s.competency_scores||{}).forEach(([c,sc])=>{if(!compMap[c])compMap[c]={sum:0,n:0};compMap[c].sum+=sc;compMap[c].n++;});});
+  const heatEntries=Object.entries(compMap).map(([c,v])=>([c,+(v.sum/v.n).toFixed(1)])).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  document.getElementById('competency-heatmap').innerHTML=heatEntries.map(([c,v])=>`<div class="heatmap-cell"><div class="heatmap-cell-val" style="color:${scoreColor(v)}">${v}</div><div class="heatmap-cell-lbl">${c.replace(/_/g,' ')}</div></div>`).join('')||'<p style="color:var(--mut);font-size:.8rem">No competency data yet.</p>';
+  // Weak areas
+  const weakMap={};
+  completed.forEach(s=>(s.weak_areas||[]).forEach(w=>{const key=w.slice(0,40);weakMap[key]=(weakMap[key]||0)+1;}));
+  const topWeak=Object.entries(weakMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxW=Math.max(...topWeak.map(x=>x[1]),1);
+  document.getElementById('weak-areas-chart').innerHTML=topWeak.map(([k,v])=>`<div class="chart-bar"><div class="chart-bar-label" style="width:180px;font-size:.7rem">${k}</div><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${v/maxW*100}%;background:var(--dan)"></div></div><div class="chart-bar-val" style="color:var(--dan)">${v}</div></div>`).join('')||'<p style="color:var(--mut);font-size:.8rem">No weak areas data yet.</p>';
+}
+
+// ── Detail Panel ───────────────────────────────────────────────────────────
+function openDetail(sessionId){
+  const s=sessions.find(x=>x.session_id===sessionId);
+  if(!s){toast('Session not found','err');return;}
+  _currentSession=s;
+  const ev=s;
+  const turns=s.all_turns||[];
+  const transcriptHtml=turns.map(t=>`
+    <div class="transcript-bubble q"><div class="tb-label q">Question ${t.turn}${t.is_followup?' · Follow-up':''}</div><div class="tb-text">${t.question||'—'}</div></div>
+    <div class="transcript-bubble a"><div class="tb-label a">Answer · Score: ${t.score??'—'}/10</div><div class="tb-text">${t.answer||'—'}</div><div class="tb-score">${t.feedback||''}</div></div>
+  `).join('');
+  const sbarHtml=(label,val)=>val!=null?`<div class="sbar"><div class="sbar-l"><span>${label}</span><span>${val}/10</span></div><div class="sbar-t"><div class="sbar-f" style="width:${val*10}%"></div></div></div>`:'';
+  const soft=s.soft_skills||{};
+  document.getElementById('detail-content').innerHTML=`
+    <div style="margin-bottom:20px">
+      <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:4px">${s.candidate_name||'Anonymous'}</div>
+      <div style="font-size:.78rem;color:var(--mut)">${s.role_label||'—'} · ${s.level||'—'} · ${s.timestamp?new Date(s.timestamp).toLocaleDateString():''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--sur2);border-radius:10px">
+      <div style="text-align:center"><div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:${scoreColor(s.overall_score||0)}">${s.recruiter_score||s.overall_score||'—'}</div><div style="font-size:.65rem;color:var(--mut);font-family:'JetBrains Mono',monospace">SCORE/10</div></div>
+      <div>${recBadge(s.recruiter_rec||s.hiring_recommendation)}</div>
+      <div style="flex:1;font-size:.78rem;color:var(--txt2);line-height:1.5">${s.summary_paragraph||''}</div>
+    </div>
+    ${s.recruiter_note?`<div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:.8rem;color:var(--war)">📝 ${s.recruiter_note}</div>`:''}
+    <div style="margin-bottom:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Technical Scores</div>
+      ${sbarHtml('Technical Average',s.technical_average)}
+      ${Object.entries(s.competency_scores||{}).slice(0,5).map(([c,v])=>sbarHtml(c.replace(/_/g,' '),v)).join('')}
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Communication</div>
+      ${sbarHtml('Communication',soft.communication)}${sbarHtml('Confidence',soft.confidence)}${sbarHtml('Problem Solving',soft.problem_solving)}
+    </div>
+    ${(s.strengths||[]).length?`<div style="margin-bottom:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--grn);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Strengths</div>${(s.strengths||[]).map(x=>`<div style="font-size:.8rem;color:var(--txt2);padding:6px 0;border-bottom:1px solid var(--bor)">✓ ${x}</div>`).join('')}</div>`:''}
+    ${(s.weak_areas||[]).length?`<div style="margin-bottom:16px"><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--dan);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Weak Areas</div>${(s.weak_areas||[]).map(x=>`<div style="font-size:.8rem;color:var(--txt2);padding:6px 0;border-bottom:1px solid var(--bor)">⚠ ${x}</div>`).join('')}</div>`:''}
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--mut);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Full Transcript</div>
+    ${transcriptHtml||'<div style="color:var(--mut);font-size:.8rem">No transcript available.</div>'}
+    <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap">
+      <button class="btn btn-p" style="font-size:.75rem" onclick="openNote('${sessionId}')">📝 Add Notes / Override</button>
+      <button class="btn btn-s" style="font-size:.75rem" onclick="printReport()">🖨 Print Report</button>
+    </div>
+  `;
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closeDetail(){document.getElementById('detail-panel').classList.remove('open');}
+
+function openNote(sessionId){
+  _noteSessionId=sessionId;
+  const s=sessions.find(x=>x.session_id===sessionId);
+  if(s&&s.recruiter_note) document.getElementById('note-text').value=s.recruiter_note;
+  if(s&&s.recruiter_score) document.getElementById('note-score').value=s.recruiter_score;
+  if(s&&s.recruiter_rec) document.getElementById('note-rec').value=s.recruiter_rec;
+  showModal('modal-note');
+}
+
+function saveNote(){
+  const s=sessions.find(x=>x.session_id===_noteSessionId);
+  if(!s) return;
+  const note=document.getElementById('note-text').value.trim();
+  const score=document.getElementById('note-score').value;
+  const rec=document.getElementById('note-rec').value;
+  if(note) s.recruiter_note=note;
+  if(score) s.recruiter_score=parseFloat(score);
+  if(rec) s.recruiter_rec=rec;
+  s.recruiter_updated=new Date().toISOString();
+  saveToStorage();
+  closeModal('modal-note');
+  renderAll();
+  if(_currentSession&&_currentSession.session_id===_noteSessionId) openDetail(_noteSessionId);
+  toast('Notes saved','ok');
+}
+
+function printReport(){
+  if(!_currentSession) return;
+  // Reuse the main app PDF export logic via postMessage
+  window.open(`/interview/?print=${_currentSession.session_id}` + window.location.search.replace('?', '&'), '_blank');
+}
+
+// ── Invitations ────────────────────────────────────────────────────────────
+function generateLink(){
+  const name=document.getElementById('inv-name').value.trim();
+  const role=document.getElementById('inv-role').value.trim();
+  const mode=document.getElementById('inv-mode').value;
+  const days=document.getElementById('inv-expiry').value;
+  if(!name||!role){toast('Please fill in name and role','err');return;}
+  const token=btoa(`${name}|${role}|${mode}|${Date.now()}|${days}`).replace(/=/g,'');
+  const link=`${window.location.origin}/?invite=${token}`;
+  document.getElementById('inv-link').textContent=link;
+  document.getElementById('inv-result').style.display='block';
+  // Add to invitations list
+  invitations.push({name,role,mode,expires:new Date(Date.now()+days*86400000).toLocaleDateString(),status:'Pending',token});
+  renderInvitations();
+  saveToStorage();
+}
+
+function quickInvite(){
+  const name=document.getElementById('quick-name').value.trim();
+  const role=document.getElementById('quick-role').value.trim();
+  if(!name||!role){toast('Please fill in name and role','err');return;}
+  const token=btoa(`${name}|${role}|text|${Date.now()}|5`).replace(/=/g,'');
+  const link=`${window.location.origin}/?invite=${token}`;
+  document.getElementById('quick-link').textContent=link;
+  document.getElementById('quick-result').style.display='block';
+}
+
+function copyLink(){navigator.clipboard.writeText(document.getElementById('inv-link').textContent);toast('Link copied!','ok');}
+function copyQuickLink(){navigator.clipboard.writeText(document.getElementById('quick-link').textContent);toast('Link copied!','ok');}
+
+function renderInvitations(){
+  document.getElementById('inv-tbody').innerHTML=invitations.length?invitations.map(inv=>`<tr>
+    <td>${inv.name}</td><td>${inv.role}</td>
+    <td><span style="font-family:'JetBrains Mono',monospace;font-size:.72rem">${inv.mode}</span></td>
+    <td style="color:var(--mut)">${inv.expires}</td>
+    <td><span class="badge b-pend">${inv.status}</span></td>
+    <td><button class="btn btn-s" style="padding:4px 8px;font-size:.68rem" onclick="navigator.clipboard.writeText('${window.location.origin}/?invite='+this.closest('tr').dataset.token||'');toast('Copied','ok')">Copy</button></td>
+  </tr>`).join(''):`<tr><td colspan="6"><div class="empty" style="padding:24px"><div class="empty-icon" style="font-size:1.5rem">✉️</div><div class="empty-title">No active invitations</div></div></td></tr>`;
+}
+
+// ── Templates ─────────────────────────────────────────────────────────────
+function saveTemplate(){
+  const name=document.getElementById('tpl-name').value.trim();
+  if(!name){toast('Please enter a template name','err');return;}
+  const tpl={name,focus:document.getElementById('tpl-focus').value,questions:document.getElementById('tpl-questions').value,time:document.getElementById('tpl-time').value,prep:document.getElementById('tpl-prep').value,id:Date.now()};
+  templates.push(tpl);
+  const card=document.createElement('div');
+  card.className='card';
+  card.style.cssText='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px';
+  card.innerHTML=`<div><div style="font-family:'Syne',sans-serif;font-weight:600;margin-bottom:4px">${name}</div><div style="font-size:.75rem;color:var(--mut)">${tpl.questions} questions · ${tpl.time} min each · Prep: ${tpl.prep}s</div></div><div style="display:flex;gap:8px"><button class="btn btn-s" onclick="useTemplate('${tpl.id}')">Use</button><button class="btn btn-d" style="padding:6px 10px;font-size:.72rem" onclick="this.closest('.card').remove()">Remove</button></div>`;
+  document.getElementById('templates-list').appendChild(card);
+  closeModal('modal-template');
+  saveToStorage();
+  toast('Template saved','ok');
+}
+
+function useTemplate(id){toast(`Template "${id}" selected. Redirecting...`,'ok');setTimeout(()=>window.location='/',1200);}
+
+// ── Storage ────────────────────────────────────────────────────────────────
+function saveToStorage(){
+  try{localStorage.setItem('recruiter_sessions',JSON.stringify(sessions));localStorage.setItem('recruiter_invitations',JSON.stringify(invitations));}catch(e){}
+}
+
+function loadFromStorage(){
+  try{
+    const s=localStorage.getItem('recruiter_sessions');
+    const inv=localStorage.getItem('recruiter_invitations');
+    if(s) sessions=JSON.parse(s);
+    if(inv) invitations=JSON.parse(inv);
+  }catch(e){}
+}
+
+// ── CSV Export ────────────────────────────────────────────────────────────
+function exportCSV(){
+  if(!sessions.length){toast('No data to export','err');return;}
+  const headers=['Name','Role','Level','Score','Recommendation','Role Fit','Readiness','Date','Recruiter Note'];
+  const rows=sessions.map(s=>[s.candidate_name||'',s.role_label||'',s.level||'',s.overall_score||'',s.recruiter_rec||s.hiring_recommendation||'',s.role_fit_score||'',s.readiness||'',s.timestamp?new Date(s.timestamp).toLocaleDateString():'',s.recruiter_note||''].map(v=>`"${v}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='candidates.csv';a.click();
+}
+
+// ── Modals ────────────────────────────────────────────────────────────────
+function showModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function toast(msg,type=''){
+  const t=document.getElementById('toast');t.textContent=msg;t.className='show '+(type||'');
+  setTimeout(()=>t.className='',2500);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+loadFromStorage();
+loadSessions();
+renderAll();
+renderInvitations();
+</script>
+</body>
+</html>

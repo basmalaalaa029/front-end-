@@ -1,0 +1,26 @@
+[
+  {
+    "competency": "behavioral",
+    "question_keywords": ["conflict", "team", "difficult", "challenge", "disagreement", "colleague"],
+    "ideal_answer": "I use the STAR method to structure my answer. I describe a specific Situation where there was a conflict with a colleague about the technical approach. I explain the Task — we needed to agree on an architecture before the deadline. I detail my Action — I scheduled a one-on-one, listened to their concerns fully before responding, then presented data and tradeoffs to support my position rather than asserting it. The Result was we reached a compromise that incorporated the best of both approaches and the project shipped on time. The key lesson was that listening first and separating the problem from the person leads to better outcomes.",
+    "key_concepts": ["STAR method", "specific situation", "active listening", "data-driven", "compromise", "outcome"]
+  },
+  {
+    "competency": "communication",
+    "question_keywords": ["explain", "technical", "non-technical", "stakeholder", "communicate"],
+    "ideal_answer": "When explaining technical concepts to non-technical stakeholders I start with the business impact, not the technology. I use analogies — comparing a database index to a book's table of contents. I avoid jargon and check for understanding with open questions. I use visuals when possible — a simple diagram communicates architecture better than a paragraph. I tailor the depth to the audience: executives need the decision and its implications, product managers need the tradeoffs, engineers need the details. I also document decisions in writing so stakeholders can refer back to them.",
+    "key_concepts": ["business impact first", "analogies", "avoid jargon", "visuals", "audience awareness", "documentation"]
+  },
+  {
+    "competency": "problem_solving",
+    "question_keywords": ["problem", "debug", "approach", "solve", "diagnose"],
+    "ideal_answer": "My debugging process is systematic. First I reproduce the issue reliably — I can't fix what I can't reproduce. Then I isolate the problem: I narrow down whether it's in the frontend, backend, database, or a third-party service using logs and monitoring. I form a hypothesis about the root cause and test it by making the smallest possible change. I use binary search — commenting out half the code or bisecting commits — to locate the exact point of failure. Once fixed I write a regression test to prevent recurrence and document the root cause so the team learns from it.",
+    "key_concepts": ["reproduce first", "isolate", "hypothesis", "binary search", "regression test", "root cause", "documentation"]
+  },
+  {
+    "competency": "leadership",
+    "question_keywords": ["lead", "team", "mentor", "project", "ownership"],
+    "ideal_answer": "When leading a project I start by breaking it into clear milestones with owners and deadlines. I hold a brief daily standup to surface blockers early. I give team members ownership of their components rather than micromanaging — my job is to remove blockers, not make all the decisions. For junior engineers I do pair programming and code reviews with detailed explanations, not just corrections. I track progress against the plan and communicate proactively to stakeholders when timelines slip. After the project I run a retrospective to capture what worked and what didn't.",
+    "key_concepts": ["milestones", "ownership", "blocker removal", "mentoring", "code review", "retrospective", "proactive communication"]
+  }
+]

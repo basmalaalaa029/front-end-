@@ -48,7 +48,7 @@ if _FASTAPI_AVAILABLE:
         from analysis.config import analysis_endpoint_configured
         from cv_agent.app.auth import register_jwt_middleware
         from cv_generator.api.router import register_cv_routes
-        from interview.api.router import register_interview_routes
+        from career_interview.integration.register import register_career_interview
         from job_matcher.api.router import register_job_match_routes
 
         _cfg = default_cfg or PipelineConfig()
@@ -157,7 +157,7 @@ if _FASTAPI_AVAILABLE:
             app, cfg=_cfg, pipeline_executor=_analysis_executor,
             check_rate_limit=_check_rate_limit,
         )
-        register_interview_routes(app, check_rate_limit=_check_rate_limit)
+        register_career_interview(app)
 
         return app
 

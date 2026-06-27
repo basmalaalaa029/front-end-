@@ -1,0 +1,32 @@
+[
+  {
+    "competency": "api_design",
+    "question_keywords": ["API", "REST", "design", "endpoint", "HTTP"],
+    "ideal_answer": "Good REST API design follows resource-oriented principles. I use nouns for endpoints, HTTP verbs correctly (GET for read, POST for create, PUT/PATCH for update, DELETE for remove), and return appropriate status codes (200, 201, 400, 401, 403, 404, 409, 500). I version APIs with a /v1/ prefix. I use pagination for list endpoints with cursor-based pagination for large datasets. Authentication uses JWT or OAuth2 with short-lived access tokens and refresh tokens. I document APIs with OpenAPI/Swagger and implement rate limiting to protect from abuse. Error responses include a machine-readable code and human-readable message.",
+    "key_concepts": ["HTTP verbs", "status codes", "versioning", "pagination", "JWT", "OAuth2", "rate limiting", "OpenAPI"]
+  },
+  {
+    "competency": "database_knowledge",
+    "question_keywords": ["database", "SQL", "index", "query", "PostgreSQL", "NoSQL"],
+    "ideal_answer": "I choose between SQL and NoSQL based on data structure and access patterns. PostgreSQL for relational data with ACID guarantees. MongoDB for document-oriented data with flexible schemas. Redis for caching and session storage. For performance I create indexes on frequently queried columns and use EXPLAIN ANALYZE to understand query plans. I avoid N+1 queries by using JOINs or eager loading. I use connection pooling with PgBouncer. For large tables I apply partitioning by range or hash. Database migrations are managed with Alembic or Flyway to keep schema changes versioned and reversible.",
+    "key_concepts": ["SQL vs NoSQL", "ACID", "indexing", "query optimization", "connection pooling", "N+1", "partitioning", "migrations"]
+  },
+  {
+    "competency": "system_design",
+    "question_keywords": ["system design", "scalability", "architecture", "distributed", "microservices"],
+    "ideal_answer": "When designing a scalable system I start with requirements: read-heavy vs write-heavy, consistency requirements, expected QPS. I use horizontal scaling behind a load balancer. For databases I separate read replicas from the write primary. I use caching (Redis) at the application layer for hot data. For async work I use a message queue (Kafka or RabbitMQ) to decouple services. Microservices communicate via REST or gRPC with service discovery. I use circuit breakers to prevent cascade failures. Data is stored in the right store for each access pattern — PostgreSQL for relational, Elasticsearch for search, S3 for blobs.",
+    "key_concepts": ["horizontal scaling", "load balancer", "read replica", "caching", "message queue", "circuit breaker", "service discovery"]
+  },
+  {
+    "competency": "authentication_security",
+    "question_keywords": ["authentication", "security", "JWT", "OAuth", "password", "XSS", "CSRF"],
+    "ideal_answer": "For authentication I implement JWT with short expiry (15 min) and a refresh token rotation strategy stored in an httpOnly cookie to prevent XSS. Passwords are hashed with bcrypt (cost factor 12+) — never stored in plain text. I protect against CSRF with SameSite cookie attributes and CSRF tokens for state-changing requests. SQL injection is prevented by always using parameterized queries. I implement rate limiting on login endpoints to prevent brute force. Secrets are stored in environment variables or a secrets manager like Vault or AWS Secrets Manager, never in source code.",
+    "key_concepts": ["JWT", "refresh token rotation", "httpOnly cookie", "bcrypt", "CSRF", "SQL injection", "parameterized queries", "secrets manager"]
+  },
+  {
+    "competency": "performance_optimization",
+    "question_keywords": ["performance", "optimize", "slow", "bottleneck", "cache", "profiling"],
+    "ideal_answer": "I start by profiling to find the actual bottleneck — is it CPU, I/O, memory, or network? For database bottlenecks I add indexes, optimize queries, and cache hot results in Redis with appropriate TTLs. For CPU bottlenecks I use async I/O or worker threads to avoid blocking. I implement response compression with gzip. For static assets I use a CDN. Connection pooling reduces the overhead of establishing DB connections. I use async processing for expensive operations — move them to background jobs. I monitor p95 and p99 latency, not just averages, to catch tail latency issues.",
+    "key_concepts": ["profiling", "indexing", "caching", "async I/O", "CDN", "connection pooling", "background jobs", "p99 latency"]
+  }
+]

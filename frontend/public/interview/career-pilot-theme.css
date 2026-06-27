@@ -1,0 +1,66 @@
+/**
+ * CareerPilot theme — standalone /interview/index.html page.
+ * Dashboard inline mode uses interview-app.css on .interview-app-host.embedded
+ */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Serif+Display:ital@0;1&display=swap");
+
+html,
+body,
+.outer-wrap {
+  background: #f9f8f6 !important;
+  color: #1a1a1a;
+}
+
+.field input,
+textarea,
+.mode-card,
+.bm-item,
+.env-row,
+.instr-block,
+.flow-step,
+.dz {
+  background: #ffffff !important;
+}
+
+.field input:focus,
+textarea:focus {
+  border-color: #534ab7 !important;
+  box-shadow: 0 0 0 3px rgba(83, 74, 183, 0.15);
+}
+
+.btn-p {
+  background: #534ab7 !important;
+}
+
+.btn-p:hover:not(:disabled) {
+  background: #453da0 !important;
+}
+
+/* Standalone page opened directly at /interview/index.html */
+html.embedded .brand-row {
+  display: none !important;
+}
+
+html.embedded .outer-wrap {
+  padding: 8px 24px 32px;
+  min-height: auto;
+}
+
+html.embedded .outer-wrap::before {
+  display: none;
+}
+
+html.embedded .card {
+  max-width: none;
+  margin-bottom: 0;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+html.embedded .step-bar {
+  max-width: none;
+  margin-bottom: 16px;
+}

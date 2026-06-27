@@ -40,7 +40,7 @@ image = (
         "json-repair>=0.30",
         "huggingface-hub>=0.20",
     )
-    .add_local_dir(_MODEL_CLIENT_DIR, remote_path="/pkg/model_client")
+    .add_local_file(_MODEL_CLIENT_DIR / "prompts.py", remote_path="/pkg/prompts.py")
     .add_local_file(_MODAL_DIR / "json_parse.py", remote_path="/pkg/json_parse.py")
 )
 
@@ -65,7 +65,7 @@ class CvAnalysisModel:
         import sys
 
         sys.path.insert(0, "/pkg")
-        from model_client.prompts import ANALYSIS_SYSTEM_PROMPT, build_analysis_user_prompt
+        from prompts import ANALYSIS_SYSTEM_PROMPT, build_analysis_user_prompt
         from json_parse import parse_json_robust
 
         import torch

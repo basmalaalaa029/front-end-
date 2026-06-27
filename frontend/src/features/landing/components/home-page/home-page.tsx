@@ -100,6 +100,14 @@ export default function Home() {
               <Target size={16} strokeWidth={2} aria-hidden />
               Analyze my CV
             </button>
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => requireAuth("/dashboard/interview")}
+            >
+              <Mic size={16} strokeWidth={2} aria-hidden />
+              Practice interview
+            </button>
           </div>
           <div className="cf-hero-trust">
             <div className="cf-avatars">
@@ -292,7 +300,7 @@ export default function Home() {
       <section className="cf-section" id="features">
         <div className="section-eyebrow">Features</div>
         <h2 className="section-h2">Everything you need to land the job</h2>
-        <p className="section-sub">Three powerful tools built into one seamless experience.</p>
+        <p className="section-sub">Four powerful tools built into one seamless experience.</p>
         <div className="cf-features-grid">
           <button type="button" className="feat-card" onClick={() => requireAuth("/dashboard/editor")}>
             <div className="cf-feat-icon p">
@@ -384,6 +392,10 @@ export default function Home() {
             <button type="button" className="btn-secondary" onClick={() => requireAuth("/dashboard/jobs")}>
               <Briefcase size={16} strokeWidth={2} aria-hidden />
               Find job matches
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => requireAuth("/dashboard/interview")}>
+              <Mic size={16} strokeWidth={2} aria-hidden />
+              Practice interview
             </button>
             <button type="button" className="btn-secondary" onClick={startUploadFlow}>
               <Upload size={16} strokeWidth={2} aria-hidden />

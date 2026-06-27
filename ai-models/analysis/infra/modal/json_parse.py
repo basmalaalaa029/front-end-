@@ -19,11 +19,24 @@ def _extract_json_string_list(text: str, key: str) -> List[str]:
         return []
     chunk = text[m.end():]
     items: List[str] = []
+    list_closed = False
+    cursor = 0
     for sm in re.finditer(r'"((?:[^"\\]|\\.)*)"', chunk):
         items.append(sm.group(1).replace('\\"', '"'))
-        rest = chunk[sm.end():].lstrip()
+        cursor = sm.end()
+        rest = chunk[cursor:].lstrip()
         if rest.startswith("]"):
+            list_closed = True
             break
+
+    if not list_closed and items:
+        # The list (or its last element) was cut off by a token limit before the
+        # closing bracket/quote appeared. The last regex match in that case is
+        # usually a half-written fragment (e.g. an unterminated quote swallowing
+        # everything up to the next stray `"` later in the raw text) rather than
+        # a real, finished item — drop it rather than surface it to the user.
+        items.pop()
+
     return items
 
 

@@ -6,11 +6,13 @@ Central configuration for the job matching system.
 
 import os
 
+from load_env import sanitize_api_key
+
 ADZUNA_APP_ID = os.getenv("ADZUNA_APP_ID", "")
 ADZUNA_APP_KEY = os.getenv("ADZUNA_APP_KEY", "")
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = "llama3-8b-8192"
+GROQ_API_KEY = sanitize_api_key(os.getenv("GROQ_API_KEY", ""))
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant")
 
 DEFAULT_TOP_N = 10
 DEFAULT_COUNTRY = "us"

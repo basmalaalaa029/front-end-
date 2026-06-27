@@ -4,7 +4,7 @@ cv_reader/parser.py
 Parses raw CV text into a structured profile dict.
 
 Three modes (in order of preference):
- 1. Groq LLM parser — structured JSON via llama3, highest quality
+ 1. Groq LLM parser — structured JSON, highest quality
  2. Local NLP parser — regex + keyword matching, works offline, no key needed
 """
 
@@ -12,6 +12,8 @@ import re
 import json
 import logging
 from typing import Optional
+
+from ..config import GROQ_MODEL
 
 log = logging.getLogger("job_matcher")
 
@@ -257,7 +259,7 @@ CV TEXT:
 {cv_text}"""
 
 
-def _call_groq(prompt: str, api_key: str, model: str = "llama3-8b-8192",
+def _call_groq(prompt: str, api_key: str, model: str = GROQ_MODEL,
                system: str = "", max_tokens: int = 1500) -> Optional[str]:
     """Call Groq chat completions. Returns text or None on failure."""
     import urllib.request

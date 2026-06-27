@@ -183,15 +183,6 @@ class PipelineConfig:
     load_in_4bit:      bool  = field(default_factory=lambda: os.getenv("LOAD_IN_4BIT", "true").lower() == "true")
     device:            str   = field(default_factory=lambda: os.getenv("DEVICE", "auto"))
 
-    # Inference backend: auto | llama_cpp | transformers.
-    # auto -> llama_cpp (quantized GGUF, fast on CPU) when no CUDA, else transformers (4-bit GPU).
-    inference_backend: str   = field(default_factory=lambda: os.getenv("INFERENCE_BACKEND", "auto").lower())
-    gguf_dir:          str   = field(default_factory=lambda: os.getenv("GGUF_DIR", "models/gguf"))
-    # GGUF filenames/paths (resolved relative to gguf_dir when not absolute).
-    phi3_gguf_path:    str   = field(default_factory=lambda: os.getenv("PHI3_GGUF_PATH",   "phi3-cv-Q4_K_M.gguf"))
-    hr_gguf_path:      str   = field(default_factory=lambda: os.getenv("HR_GGUF_PATH",     "qwen2.5-7b-instruct-Q4_K_M.gguf"))
-    writer_gguf_path:  str   = field(default_factory=lambda: os.getenv("WRITER_GGUF_PATH", "qwen2.5-7b-instruct-Q4_K_M.gguf"))
-
     db_path:           str   = field(default_factory=lambda: os.getenv("SESSION_DB",  "cv_sessions.db"))
     output_dir:        Path  = field(default_factory=lambda: Path(os.getenv("OUTPUT_DIR", "output")))
     log_dir:           Path  = field(default_factory=lambda: Path(os.getenv("LOG_DIR",    "logs")))
@@ -235,47 +226,3 @@ class PipelineConfig:
     # Per-feature preload
     cv_warmup_model: bool = field(default_factory=lambda: os.getenv("CV_WARMUP_MODEL", "true").lower() in ("1", "true", "yes"))
     model_preload_mode: str = field(default_factory=lambda: os.getenv("MODEL_PRELOAD_MODE", "full"))
-
-    # CV analysis (Modal GPU) — formerly CVAnalysisConfig / CV_ANALYSIS_* env vars
-    analysis_llama_server_url: str = field(
-        default_factory=lambda: os.getenv("CV_ANALYSIS_LLAMA_SERVER_URL", "")
-    )
-    analysis_remote_api_key: str = field(
-        default_factory=lambda: os.getenv("CV_ANALYSIS_REMOTE_API_KEY", "")
-    )
-    analysis_remote_health_timeout_s: int = field(
-        default_factory=lambda: int(os.getenv("CV_ANALYSIS_REMOTE_HEALTH_TIMEOUT_S", "300"))
-    )
-    analysis_warmup_on_startup: bool = field(
-        default_factory=lambda: os.getenv("CV_ANALYSIS_WARMUP_ON_STARTUP", "true").lower()
-        in ("1", "true", "yes")
-    )
-    analysis_job_ttl_seconds: int = field(
-        default_factory=lambda: int(os.getenv("CV_ANALYSIS_JOB_TTL_SECONDS", "3600"))
-    )
-    analysis_job_max_sessions: int = field(
-        default_factory=lambda: int(os.getenv("CV_ANALYSIS_JOB_MAX_SESSIONS", "200"))
-    )
-
-    def resolve_analysis_inference_url(self) -> str:
-        return (self.analysis_llama_server_url or "").rstrip("/")
-
-    def use_llama_cpp(self) -> bool:
-        """True when the quantized GGUF (llama.cpp) backend should be used."""
-        mode = (self.inference_backend or "auto").lower()
-        if mode == "llama_cpp":
-            return True
-        if mode == "transformers":
-            return False
-        # auto: GGUF on CPU, transformers (4-bit) on GPU.
-        try:
-            import torch
-            return not torch.cuda.is_available()
-        except ImportError:
-            return True
-
-    def resolve_gguf_path(self, path: str) -> str:
-        """Resolve a GGUF path relative to gguf_dir unless it is already absolute."""
-        if os.path.isabs(path):
-            return path
-        return os.path.join(self.gguf_dir, path)
