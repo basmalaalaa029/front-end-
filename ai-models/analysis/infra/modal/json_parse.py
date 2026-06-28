@@ -40,6 +40,35 @@ def _extract_json_string_list(text: str, key: str) -> List[str]:
     return items
 
 
+def _extract_json_issue_objects(text: str) -> List[dict]:
+    """Best-effort extraction of structured issue objects from truncated JSON."""
+    m = re.search(r'"issues"\s*:\s*\[', text, re.I)
+    if not m:
+        return []
+
+    chunk = text[m.end():]
+    issues: List[dict] = []
+
+    obj_re = re.compile(
+        r'\{\s*"issue"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*'
+        r'"whats_wrong"\s*:\s*"((?:[^"\\]|\\.)*)"'
+        r'(?:\s*,\s*"what_to_do"\s*:\s*"((?:[^"\\]|\\.)*)")?'
+        r'(?:\s*,\s*"example"\s*:\s*"((?:[^"\\]|\\.)*)")?\s*\}',
+        re.I | re.S,
+    )
+    for obj_match in obj_re.finditer(chunk):
+        issues.append(
+            {
+                "issue": obj_match.group(1).replace('\\"', '"'),
+                "whats_wrong": obj_match.group(2).replace('\\"', '"'),
+                "what_to_do": (obj_match.group(3) or "").replace('\\"', '"'),
+                "example": (obj_match.group(4) or "").replace('\\"', '"'),
+            }
+        )
+
+    return issues
+
+
 def _salvage_truncated_judge_json(text: str) -> dict:
     scores: Dict[str, int] = {}
     for m in _SCORE_FIELD_RE.finditer(text):
@@ -48,10 +77,19 @@ def _salvage_truncated_judge_json(text: str) -> dict:
         return {}
 
     result: Dict[str, Any] = dict(scores)
-    for key in ("strengths", "weaknesses", "improvement_suggestions", "rewrite_suggestions"):
-        items = _extract_json_string_list(text, key)
-        if items:
-            result[key] = items
+
+    issues = _extract_json_issue_objects(text)
+    if issues:
+        result["issues"] = issues
+    else:
+        for key in ("strengths", "weaknesses", "improvement_suggestions", "rewrite_suggestions"):
+            items = _extract_json_string_list(text, key)
+            if items:
+                result[key] = items
+
+    strengths = _extract_json_string_list(text, "strengths")
+    if strengths:
+        result["strengths"] = strengths
 
     if "overall_score" not in result and len(scores) >= 3:
         result["overall_score"] = int(sum(scores.values()) / len(scores))

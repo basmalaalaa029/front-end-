@@ -398,7 +398,7 @@ export default function CvEditorPage() {
         setAiMarkdown(start.template_cv);
         setAiEnhancedData(null);
         setPreviewTab("ai");
-        toast.info(t("cvEditor.gen.templateReady"));
+        toast(t("cvEditor.gen.templateReady"));
       }
       setGenMessage(t("cvEditor.gen.queued"));
 
@@ -431,7 +431,7 @@ export default function CvEditorPage() {
 
       const aiFailed = Boolean(result.node_errors?.length);
       if (aiFailed) {
-        toast.warning(t("cvEditor.gen.aiPartial"));
+        toast(t("cvEditor.gen.aiPartial"), { icon: "⚠️" });
       } else {
         toast.success(t("cvEditor.gen.generatedReady"));
       }
@@ -449,7 +449,7 @@ export default function CvEditorPage() {
         setPreviewTab("ai");
         setGenStage("done");
         setGenMessage("");
-        toast.warning(t("cvEditor.gen.aiPartial"));
+        toast(t("cvEditor.gen.aiPartial"), { icon: "⚠️" });
         return;
       }
       const timedOut =

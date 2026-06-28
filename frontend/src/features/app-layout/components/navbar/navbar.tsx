@@ -22,17 +22,6 @@ const IconBriefcase = () => (
   </svg>
 );
 
-const IconUser = () => (
-  <svg className="w-[20px] h-[20px]" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 14c0-3 2.7-5 6-5s6 2 6 5"
-      stroke="currentColor"
-      strokeWidth="1.3"
-      strokeLinecap="round"
-    />
-  </svg>
-);
-
 const IconCV = () => (
   <svg className="w-[15px] h-[15px]" viewBox="0 0 16 16" fill="none">
     <path

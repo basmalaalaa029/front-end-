@@ -70,6 +70,10 @@ npm run dev:backend
 
 AI models always run with Python directly (`cd ai-models && python3 main.py` or `.venv/bin/python3 main.py`).
 
+## Deployment
+
+Production deploy guide (Vercel + Render + Atlas + Modal): [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
 ## Documentation
 
 - [Architecture overview](docs/ARCHITECTURE.md)

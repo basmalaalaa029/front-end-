@@ -21,9 +21,20 @@ SAMPLE_MODEL_RESPONSE = {
         "ats_readiness_score": 78,
         "overall_score": 75,
         "strengths": ["Clear experience section", "Strong technical skills"],
-        "weaknesses": ["Missing metrics in bullets", "Summary too generic"],
-        "improvement_suggestions": ["Add quantified outcomes", "Tailor summary to role"],
-        "rewrite_suggestions": ["Led API serving 2M users", "Senior engineer with 5+ years"],
+        "issues": [
+            {
+                "issue": "Missing metrics in bullets",
+                "whats_wrong": "Experience bullets describe tasks without quantified outcomes.",
+                "what_to_do": "Add quantified outcomes where numbers already exist in the resume.",
+                "example": "Built REST APIs for the payments platform.",
+            },
+            {
+                "issue": "Summary too generic",
+                "whats_wrong": "The professional summary does not mention a target role or specialty.",
+                "what_to_do": "Tailor the summary to the target role with your strongest relevant skills.",
+                "example": "Software engineer with backend and API experience.",
+            },
+        ],
     },
 }
 
@@ -93,7 +104,7 @@ def test_analysis_upload_and_poll(client):
         result = final["result"]
         assert result["overall_score"] == 75
         assert len(result["strengths"]) >= 1
-        assert len(result["weaknesses"]) >= 2
+        assert len(result["issues"]) >= 2
         assert "ats" not in result and "hr" not in result
         assert captured.get("target_role") == "Full Stack Developer"
 

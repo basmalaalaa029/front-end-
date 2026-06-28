@@ -34,25 +34,47 @@ def _run_full_pipeline(
     target_role: str = "",
     on_stage: Optional[Callable[[str], None]] = None,
 ) -> tuple:
+    from analysis.config import MODAL_MAX_NEW_TOKENS
     from analysis.model_client.modal_client import call_analysis_model
     from analysis.validation.result_validator import validate_result
 
     if on_stage:
         on_stage("calling_model")
 
-    model_response = call_analysis_model(resume_text, target_role=target_role)
-    if model_response is None:
-        raise ValueError("Could not reach the analysis model, or it returned an error.")
+    token_budgets = [MODAL_MAX_NEW_TOKENS, min(MODAL_MAX_NEW_TOKENS + 512, 2048)]
+    last_warnings: list = []
+    last_raw: str | None = None
 
-    if on_stage:
-        on_stage("validating")
+    for attempt, max_new_tokens in enumerate(token_budgets, start=1):
+        model_response = call_analysis_model(
+            resume_text,
+            max_new_tokens=max_new_tokens,
+            target_role=target_role,
+        )
+        if model_response is None:
+            raise ValueError("Could not reach the analysis model, or it returned an error.")
 
-    analysis, warnings = validate_result(model_response["parsed"])
-    if analysis is None:
-        log.warning("Analysis result validation failed. Raw model output: %s", model_response.get("raw"))
-        raise ValueError("The analysis model returned an unexpected response format.")
+        if on_stage:
+            on_stage("validating")
 
-    return analysis, warnings
+        analysis, warnings = validate_result(model_response["parsed"])
+        if analysis is not None:
+            if attempt > 1:
+                log.info("Analysis validation succeeded on retry (attempt %d)", attempt)
+            return analysis, warnings
+
+        last_warnings = warnings
+        last_raw = model_response.get("raw")
+        log.warning(
+            "Analysis result validation failed (attempt %d/%d): %s",
+            attempt,
+            len(token_budgets),
+            warnings,
+        )
+
+    log.warning("Analysis result validation failed after retries. Raw model output: %s", last_raw)
+    detail = last_warnings[0] if last_warnings else "missing actionable recommendations"
+    raise ValueError(f"The analysis model returned an incomplete response: {detail}")
 
 
 def _run_analysis_background(

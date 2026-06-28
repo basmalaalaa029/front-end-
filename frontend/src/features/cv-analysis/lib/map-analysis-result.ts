@@ -3,6 +3,18 @@
  */
 import type { AnalysisIssue, CvAnalysisResult } from "../types";
 
+export type ApiResumeIssue = {
+  issue?: string;
+  whats_wrong?: string;
+  what_to_do?: string;
+  example?: string;
+  /** Legacy aliases from older adapters */
+  title?: string;
+  problem?: string;
+  recommendation?: string;
+  rewrite?: string;
+};
+
 type JudgeBlock = {
   clarity_score?: number;
   structure_score?: number;
@@ -11,6 +23,8 @@ type JudgeBlock = {
   ats_readiness_score?: number;
   overall_score?: number;
   strengths?: string[];
+  issues?: ApiResumeIssue[];
+  /** Legacy flat arrays — still accepted from cached / older model output */
   weaknesses?: string[];
   improvement_suggestions?: string[];
   rewrite_suggestions?: string[];
@@ -73,36 +87,76 @@ function rewriteContradictsCv(rewrite: string, suggestion: string, cvLower: stri
   return false;
 }
 
-function issuesFromJudge(block: JudgeBlock, cvLower?: string): AnalysisIssue[] {
+function apiIssueToAnalysisIssue(
+  raw: ApiResumeIssue,
+  index: number,
+  cvLower?: string,
+): AnalysisIssue | null {
+  const problem = (raw.whats_wrong ?? raw.problem ?? "").trim();
+  if (!problem || problem.toLowerCase().startsWith("judge output could not be parsed")) {
+    return null;
+  }
+  const title =
+    (raw.issue ?? raw.title ?? problem.split(".")[0]?.trim() ?? "").slice(0, 72) ||
+    `Tip ${index + 1}`;
+  const recommendation = (raw.what_to_do ?? raw.recommendation ?? "").trim();
+  const rewriteText = (raw.example ?? raw.rewrite ?? "").trim();
+
+  if (!recommendation) {
+    return null;
+  }
+
+  if (cvLower && rewriteContradictsCv(rewriteText, recommendation, cvLower)) {
+    return null;
+  }
+
+  return {
+    id: index + 1,
+    title,
+    problem,
+    detail: "",
+    recommendation,
+    evidence: "",
+    rewrite: rewriteText || undefined,
+    severity: index < 2 ? "gap" : "warn",
+  };
+}
+
+function issuesFromStructured(block: JudgeBlock, cvLower?: string): AnalysisIssue[] {
+  const issues: AnalysisIssue[] = [];
+  for (const raw of block.issues ?? []) {
+    const mapped = apiIssueToAnalysisIssue(raw, issues.length, cvLower);
+    if (mapped) issues.push(mapped);
+  }
+  return issues;
+}
+
+function issuesFromLegacyArrays(block: JudgeBlock, cvLower?: string): AnalysisIssue[] {
   const issues: AnalysisIssue[] = [];
   const weaknesses = block.weaknesses ?? [];
   const suggestions = block.improvement_suggestions ?? [];
   const rewrites = block.rewrite_suggestions ?? [];
   for (let i = 0; i < weaknesses.length; i++) {
-    const problem = (weaknesses[i] ?? "").trim();
-    if (!problem || problem.toLowerCase().startsWith("judge output could not be parsed")) continue;
-    const recommendation = (suggestions[i] ?? "").trim();
-    const rewrite = rewrites[i];
-    const rewriteText =
-      typeof rewrite === "string"
-        ? rewrite.trim()
-        : rewrite && typeof rewrite === "object" && "improved" in rewrite
-          ? String((rewrite as { improved?: string }).improved ?? "").trim()
-          : "";
-    if (cvLower && rewriteContradictsCv(rewriteText, recommendation, cvLower)) continue;
-    const title = problem.split(".")[0].trim().slice(0, 72) || `Tip ${issues.length + 1}`;
-    issues.push({
-      id: issues.length + 1,
-      title,
-      problem,
-      detail: "",
-      recommendation: recommendation || "Update that part of your CV, then run analysis again.",
-      evidence: "",
-      rewrite: rewriteText || undefined,
-      severity: issues.length < 2 ? "gap" : "warn",
-    });
+    const mapped = apiIssueToAnalysisIssue(
+      {
+        issue: weaknesses[i]?.split(".")[0]?.trim().slice(0, 72),
+        whats_wrong: weaknesses[i],
+        what_to_do: suggestions[i],
+        example: rewrites[i],
+      },
+      issues.length,
+      cvLower,
+    );
+    if (mapped) issues.push(mapped);
   }
   return issues;
+}
+
+function issuesFromJudge(block: JudgeBlock, cvLower?: string): AnalysisIssue[] {
+  if (block.issues?.length) {
+    return issuesFromStructured(block, cvLower);
+  }
+  return issuesFromLegacyArrays(block, cvLower);
 }
 
 function dedupeIssues(issues: AnalysisIssue[]): AnalysisIssue[] {

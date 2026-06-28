@@ -36,7 +36,7 @@ _modal() {
   fi
 }
 
-MODAL_PROFILE="${MODAL_PROFILE:-myhywgxtj-arch}"
+MODAL_PROFILE="${MODAL_PROFILE:-basmala123-sudo}"
 if [[ -n "$MODAL_PROFILE" ]]; then
   export MODAL_PROFILE
   echo "Using Modal profile: $MODAL_PROFILE"
@@ -98,5 +98,5 @@ fi
 
 echo ""
 echo "Done. Copy the 'analyze' web endpoint URL into .env:"
-echo "  MODAL_ENDPOINT_URL=https://myhywgxtj-arch--cv-analysis-cvanalysismodel-analyze.modal.run"
+echo "  MODAL_ENDPOINT_URL=https://basmala123-sudo--cv-analysis-cvanalysismodel-analyze.modal.run"
 echo "Then restart: .venv/bin/python main.py"

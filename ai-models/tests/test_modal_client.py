@@ -12,8 +12,7 @@ def test_modal_303_redirect_polls_result_url():
         "raw": "{}",
         "parsed": {"overall_score": 80, "clarity_score": 80, "structure_score": 80,
                    "impact_score": 80, "skills_relevance_score": 80, "ats_readiness_score": 80,
-                   "strengths": [], "weaknesses": [], "improvement_suggestions": [],
-                   "rewrite_suggestions": []},
+                   "strengths": [], "issues": []},
     }
 
     post_resp = MagicMock()
@@ -47,8 +46,7 @@ def test_modal_poll_retries_on_303_then_succeeds_via_http_fallback():
         "raw": "{}",
         "parsed": {"overall_score": 80, "clarity_score": 80, "structure_score": 80,
                    "impact_score": 80, "skills_relevance_score": 80, "ats_readiness_score": 80,
-                   "strengths": [], "weaknesses": [], "improvement_suggestions": [],
-                   "rewrite_suggestions": []},
+                   "strengths": [], "issues": []},
     }
 
     post_resp = MagicMock()

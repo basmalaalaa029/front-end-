@@ -200,22 +200,18 @@ function resolveIssues(result: CvAnalysisResult): AnalysisIssue[] {
   const triples: Array<[string, string, string]> = [];
   for (let i = 0; i < weaknesses.length; i++) {
     const problem = (weaknesses[i] ?? "").trim();
-    if (!problem || problem.toLowerCase().startsWith("judge output could not be parsed")) {
+    const recommendation = (suggestions[i] ?? "").trim();
+    if (!problem || !recommendation || problem.toLowerCase().startsWith("judge output could not be parsed")) {
       continue;
     }
-    triples.push([
-      problem,
-      (suggestions[i] ?? "").trim(),
-      (rewrites[i] ?? "").trim(),
-    ]);
+    triples.push([problem, recommendation, (rewrites[i] ?? "").trim()]);
   }
   return triples.map(([problem, recommendation, rewrite], i) => ({
     id: i + 1,
     title: problem.split(".")[0]?.trim().slice(0, 72) || "Needs improvement",
     problem,
     detail: "",
-    recommendation:
-      recommendation || "Update that part of your CV, then run the analysis again.",
+    recommendation,
     rewrite: rewrite || undefined,
     severity: i < 2 ? "gap" : "warn",
   }));
@@ -506,7 +502,7 @@ export default function AnalysisPage() {
         const data = await resumeAnalysisAsync(jobId, ac.signal, handleAnalysisStatus);
         const draft = getDraftAnalysisFile();
         const file = cvFile ?? draft?.file;
-        const source = fileSource ?? draft?.inputs.fileSource ?? "editor";
+        const source = fileSource ?? "editor";
         if (!file) {
           setResult(data);
           clearActiveAnalysisSession();
