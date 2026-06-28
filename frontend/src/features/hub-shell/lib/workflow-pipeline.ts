@@ -14,6 +14,8 @@ export type WorkflowJobPick = {
   title: string;
   company: string;
   targetRole: string;
+  jobDescription?: string;
+  url?: string;
 };
 
 export const WORKFLOW_CV_KEY = "hub:workflowCv";

@@ -23,6 +23,7 @@ export interface MatchedJob {
   tags?: string[];
   matched_skills?: string[];
   missing_skills?: string[];
+  description?: string;
 }
 
 export interface JobMatchRequest {

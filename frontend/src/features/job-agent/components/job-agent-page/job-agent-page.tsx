@@ -9,7 +9,9 @@ import {
   HubIcon,
   WorkflowPipelineBar,
   loadWorkflowCv,
+  saveWorkflowCv,
   saveWorkflowJobPick,
+  setPipelineCvFile,
   takePendingJobFile,
   type InterviewNavigationState,
   type JobNavigationState,
@@ -39,6 +41,7 @@ type JobCardData = {
   score_breakdown: ScoreBreakdown;
   matched_skills: string[];
   missing_skills: string[];
+  description: string;
 };
 
 function toCardJob(j: MatchedJob): JobCardData {
@@ -58,6 +61,7 @@ function toCardJob(j: MatchedJob): JobCardData {
     score_breakdown: j.score_breakdown ?? {},
     matched_skills: j.matched_skills ?? [],
     missing_skills: j.missing_skills ?? [],
+    description: j.description ?? "",
   };
 }
 
@@ -486,6 +490,7 @@ export default function JobAgentPage() {
       try {
         let resp;
         if (file) {
+          setPipelineCvFile(file);
           resp = await uploadMutation.mutateAsync({ file, targetRole });
         } else {
           const draft = getPipelineCvInputs();
@@ -527,11 +532,31 @@ export default function JobAgentPage() {
 
   const continueToInterview = useCallback(
     (job: JobCardData) => {
+      const wf = loadWorkflowCv();
+      const jobDescription =
+        job.description.trim() ||
+        [
+          `${job.title} at ${job.company}`,
+          job.why,
+          job.matched_skills.length
+            ? `Key matched skills: ${job.matched_skills.join(", ")}`
+            : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+
       saveWorkflowJobPick({
         title: job.title,
         company: job.company,
         targetRole: job.title,
+        jobDescription,
+        url: job.url || undefined,
       });
+
+      if (wf && jobDescription && !wf.jobDescription.trim()) {
+        saveWorkflowCv({ ...wf, jobDescription });
+      }
+
       const nav: InterviewNavigationState = {
         autoStart: true,
         targetRole: job.title,

@@ -1,4 +1,5 @@
 import { CV_AGENT_BASE } from "@/shared/lib/cv-agent-client";
+import { applyInterviewWorkflowPrefill } from "@/features/interview/lib/pipeline-interview-prefill";
 
 const STYLE_ID = "career-interview-app-styles";
 const THEME_LINK_ID = "career-interview-app-theme";
@@ -132,6 +133,10 @@ export async function mountInterviewApp(
   if (generation !== mountGeneration) return;
 
   await runScripts(doc, host, generation);
+
+  if (generation !== mountGeneration) return;
+
+  await applyInterviewWorkflowPrefill(host);
 
   if (generation === mountGeneration) {
     host.dataset.mounted = "1";

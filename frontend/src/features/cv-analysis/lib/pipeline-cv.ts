@@ -10,7 +10,7 @@ import {
   getDraftAnalysisInputs,
   type DraftAnalysisInputs,
 } from "./draft-for-analysis";
-import { setPendingJobFile } from "@/features/hub-shell/lib/pending-job-file";
+import { setPipelineCvFile } from "@/features/hub-shell/lib/pipeline-cv-file";
 
 /** Pipeline CV context: workflow handoff first, then editor draft. */
 export function getPipelineCvInputs(): DraftAnalysisInputs | null {
@@ -73,7 +73,7 @@ export function handoffCvToJobMatching(opts: {
   source: WorkflowSource;
 }): boolean {
   if (opts.cvFile) {
-    setPendingJobFile(opts.cvFile);
+    setPipelineCvFile(opts.cvFile);
   }
 
   const cvText = opts.cvText?.trim() ?? "";

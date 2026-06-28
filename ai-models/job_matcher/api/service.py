@@ -160,6 +160,7 @@ def _run_full_pipeline(
             tags=r.get("tags", []) or [],
             matched_skills=matched,
             missing_skills=missing,
+            description=(r.get("description") or "")[:3000],
         ))
 
     return results

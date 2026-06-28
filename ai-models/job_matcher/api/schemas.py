@@ -36,6 +36,7 @@ class MatchedJob(BaseModel):
     tags: List[str] = Field(default_factory=list)
     matched_skills: List[str] = Field(default_factory=list)
     missing_skills: List[str] = Field(default_factory=list)
+    description: str = ""
 
 
 class MatchRequest(BaseModel):

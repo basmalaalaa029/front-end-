@@ -15,6 +15,12 @@ export {
   type JobNavigationState,
   type InterviewNavigationState,
 } from "./lib/workflow-pipeline";
-export { setPendingJobFile, takePendingJobFile } from "./lib/pending-job-file";
+export {
+  setPendingJobFile,
+  takePendingJobFile,
+  setPipelineCvFile,
+  getPipelineCvFile,
+  clearPipelineCvFile,
+} from "./lib/pending-job-file";
 export { WorkflowPipelineBar } from "./components/workflow-pipeline-bar";
 export type { WorkflowStep } from "./components/workflow-pipeline-bar";
