@@ -20,7 +20,7 @@ env/
 
 # HuggingFace model cache (huge — never commit)
 .cache/
-models/
+/models/
 
 # Runtime outputs
 output/
