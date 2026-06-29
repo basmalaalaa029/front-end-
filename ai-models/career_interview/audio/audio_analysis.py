@@ -178,20 +178,22 @@ def interpret_audio_metrics(metrics: Dict) -> Dict:
     confidence_score = 7.0
 
     if metrics.get("error"):
-        # Return 0.0 so frontend shows "not available" instead of fake 5.0
+        # Return None scores so caller knows this wasn't measured (not a real 0)
         return {
-            "pace_score": 0.0, "fluency_score": 0.0, "confidence_score": 0.0,
-            "engagement_score": 0.0, "hesitation_level": 0,
+            "pace_score": None, "fluency_score": None, "confidence_score": None,
+            "engagement_score": None, "hesitation_level": 0,
             "observations": [f"Audio analysis unavailable: {metrics['error'][:60]}"],
             "summary": "Audio processing failed — check ffmpeg installation.",
+            "analysis_available": False,
         }
 
     duration = metrics["duration"]
     if duration < 1:
         return {
-            "pace_score": 0.0, "fluency_score": 0.0, "confidence_score": 0.0,
-            "engagement_score": 0.0, "hesitation_level": 0,
+            "pace_score": None, "fluency_score": None, "confidence_score": None,
+            "engagement_score": None, "hesitation_level": 0,
             "observations": ["Answer too short to analyse."], "summary": "",
+            "analysis_available": False,
         }
 
     # ── Speaking pace ─────────────────────────────────────────────────────

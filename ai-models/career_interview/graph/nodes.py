@@ -869,10 +869,15 @@ def evaluate(state):
         if not state.get("is_practice_turn"):
             sh.append(soft)
 
-        # Audio/video history
+        # Audio/video history — only append if analysis actually produced scores
         ah = list(state.get("audio_scores_history", []))
         aa = state.get("current_audio_analysis")
-        if aa:
+        _aa_has_scores = aa and (
+            _safe_float(aa.get("pace_score"), 0) > 0 or
+            _safe_float(aa.get("fluency_score"), 0) > 0 or
+            _safe_float(aa.get("confidence_score"), 0) > 0
+        )
+        if _aa_has_scores:
             ah.append({
                 "pace":        _safe_float(aa.get("pace_score"),       0.0),
                 "fluency":     _safe_float(aa.get("fluency_score"),    0.0),
@@ -1433,8 +1438,9 @@ def _build_mode_soft(mode, comm, conf_s, prob, hon, avg_pace=0.0, avg_flu=0.0, a
 
 def generate_final_eval(state):
     turns = state.get("turns", [])
-    # Exclude practice turns AND all turns from Q0 (main_q_index=0) — the warmup phase
-    scored_turns = [t for t in turns if not t.get("is_practice", False) and t.get("main_q_index", 0) > 0]
+    # Exclude only practice turns. Real Q1 answers have main_q_index=0 (index increments
+    # after the turn is recorded) so filtering by main_q_index > 0 wrongly drops them.
+    scored_turns = [t for t in turns if not t.get("is_practice", False) and t.get("score") is not None]
     # If session ended early, unanswered questions beyond blueprint already have score=0 via not being in turns
     # But we note the early_finish for context
     early_finished = state.get("early_finished", False)
@@ -1708,7 +1714,7 @@ def generate_final_eval(state):
 
         return {"final_evaluation": {
             "role_label": state.get("role_label", "Professional"),
-            "technical_average": _safe_float(parsed.get("technical_average") or tech_avg),
+            "technical_average": tech_avg if early_finished else _safe_float(parsed.get("technical_average") or tech_avg),
             "competency_scores": (lambda llm_scores, fallback: {
                 **fallback,  # start with computed scores
                 **{k: v for k, v in llm_scores.items() if v > 0}  # override with LLM scores where available
@@ -1717,7 +1723,10 @@ def generate_final_eval(state):
                 {c: round(_safe_float(comp_status.get(c, {}).get("score"), 0), 1) for c in plan}
             ),
             "soft_skills": soft,
-            "overall_score": _safe_float(parsed.get("overall_score") or round(tech_avg*0.6 + 5*0.4, 1)),
+            # When session ended early, always use zero-padded tech_avg so unanswered
+            # questions count as 0. Never let the LLM's overall_score (which only
+            # sees answered questions) inflate the result.
+            "overall_score": tech_avg if early_finished else _safe_float(parsed.get("overall_score") or round(tech_avg*0.6 + 5*0.4, 1)),
             "confidence_in_evaluation": _safe_float(parsed.get("confidence_in_evaluation") or 7.0),
             "interview_consistency": parsed.get("interview_consistency", consistency),
             "growth_potential": parsed.get("growth_potential", "medium"),
