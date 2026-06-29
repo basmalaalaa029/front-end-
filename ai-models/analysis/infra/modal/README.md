@@ -1,9 +1,9 @@
 # Deploy CV analysis model on Modal
 
-Serve the fine-tuned ATS model on GPU in workspace **`basmala123-sudo`**.
+Serve the fine-tuned ATS model on GPU in workspace **`essamalaa0355`**.
 
-- **Dashboard:** https://modal.com/apps/basmala123-sudo/main
-- **Secrets:** https://modal.com/secrets/basmala123-sudo/main
+- **Dashboard:** https://modal.com/apps/essamalaa0355/main
+- **Secrets:** https://modal.com/secrets/essamalaa0355/main
 
 ## What gets deployed
 
@@ -47,7 +47,7 @@ Default model IDs (override in the Modal secret if you use your own HF repos):
 ```bash
 cd ai-models
 .venv/bin/python3 -m pip install -r requirements-modal.txt
-.venv/bin/python3 -m modal token new --profile basmala123-sudo --activate
+.venv/bin/python3 -m modal token new --profile essamalaa0355 --activate
 ```
 
 ## 3. Create Modal secret (HF token + model IDs)
@@ -55,7 +55,7 @@ cd ai-models
 Secret name must be **`cv-analysis-secrets`** (see `server.py`).
 
 ```bash
-.venv/bin/python3 -m modal profile activate basmala123-sudo
+.venv/bin/python3 -m modal profile activate essamalaa0355
 
 .venv/bin/python3 -m modal secret create cv-analysis-secrets \
   HF_TOKEN=hf_xxxxxxxx \
@@ -83,13 +83,13 @@ chmod +x scripts/deploy_modal_analysis.sh
 Or manually:
 
 ```bash
-MODAL_PROFILE=basmala123-sudo .venv/bin/python3 -m modal deploy analysis/infra/modal/server.py
+MODAL_PROFILE=essamalaa0355 .venv/bin/python3 -m modal deploy analysis/infra/modal/server.py
 ```
 
 Modal prints a URL like:
 
 ```text
-https://basmala123-sudo--cv-analysis-cvanalysismodel-analyze.modal.run
+https://essamalaa0355--cv-analysis-cvanalysismodel-analyze.modal.run
 ```
 
 ## 5. Wire local FastAPI
@@ -97,7 +97,7 @@ https://basmala123-sudo--cv-analysis-cvanalysismodel-analyze.modal.run
 Edit `ai-models/.env`:
 
 ```env
-MODAL_ENDPOINT_URL=https://basmala123-sudo--cv-analysis-cvanalysismodel-analyze.modal.run
+MODAL_ENDPOINT_URL=https://essamalaa0355--cv-analysis-cvanalysismodel-analyze.modal.run
 MODAL_REQUEST_TIMEOUT=300
 ```
 
@@ -124,11 +124,11 @@ curl -X POST "$MODAL_ENDPOINT_URL" \
 
 | Issue | Fix |
 |-------|-----|
-| `workspace billing cycle spend limit reached` | Raise or reset spend limit in [Modal billing settings](https://modal.com/settings/billing) for `basmala123-sudo` |
+| `workspace billing cycle spend limit reached` | Raise or reset spend limit in [Modal billing settings](https://modal.com/settings/billing) for `essamalaa0355` |
 | `401` / model download failed | Check `HF_TOKEN` in secret; model repo must be public or token has access |
 | Cold start slow (1–3 min) | Normal on first request after idle; increase `scaledown_window` in `server.py` |
 | `parsed` is null | Model returned non-JSON; check `raw` in response |
-| Wrong workspace | `modal profile activate basmala123-sudo` then redeploy |
+| Wrong workspace | `modal profile activate essamalaa0355` then redeploy |
 
 ## Files
 

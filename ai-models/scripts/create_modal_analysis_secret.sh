@@ -6,7 +6,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 PY="${PY:-$ROOT/.venv/bin/python3}"
-MODAL_PROFILE="${MODAL_PROFILE:-basmala123-sudo}"
+MODAL_PROFILE="${MODAL_PROFILE:-essamalaa0355}"
 export MODAL_PROFILE
 
 # Load HUGGINGFACE_TOKEN from .env if present

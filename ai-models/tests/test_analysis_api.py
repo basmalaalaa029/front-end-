@@ -38,6 +38,32 @@ SAMPLE_MODEL_RESPONSE = {
     },
 }
 
+INVALID_MODEL_RESPONSE = {
+    "raw": "{}",
+    "parsed": {
+        "clarity_score": 80,
+        "structure_score": 75,
+        "impact_score": 70,
+        "skills_relevance_score": 72,
+        "ats_readiness_score": 78,
+        "overall_score": 75,
+        "strengths": ["Clear experience section"],
+        "issues": [],
+    },
+}
+
+
+def _poll_until_terminal(client, job_id: str, *, timeout_s: float = 10.0) -> dict:
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        poll = client.get(f"/cv-analysis/analyze/{job_id}")
+        assert poll.status_code == 200
+        data = poll.json()
+        if data["status"] in ("ready", "failed"):
+            return data
+        time.sleep(0.1)
+    pytest.fail("timed out waiting for terminal analysis status")
+
 
 def _minimal_pdf() -> bytes:
   """Tiny valid PDF with extractable text."""
@@ -85,21 +111,8 @@ def test_analysis_upload_and_poll(client):
         job_id = body["job_id"]
         assert job_id
 
-        deadline = time.time() + 10
-        final = None
-        while time.time() < deadline:
-            poll = client.get(f"/cv-analysis/analyze/{job_id}")
-            assert poll.status_code == 200
-            data = poll.json()
-            assert data["job_id"] == job_id
-            if data["status"] == "ready":
-                final = data
-                break
-            if data["status"] == "failed":
-                pytest.fail(data.get("error", "analysis failed"))
-            time.sleep(0.1)
-
-        assert final is not None
+        final = _poll_until_terminal(client, job_id)
+        assert final["status"] == "ready"
         assert final["stage"] == "done"
         result = final["result"]
         assert result["overall_score"] == 75
@@ -122,13 +135,22 @@ def test_analysis_model_unreachable_marks_failed(client):
         assert start.status_code == 200
         job_id = start.json()["job_id"]
 
-        deadline = time.time() + 10
-        while time.time() < deadline:
-            poll = client.get(f"/cv-analysis/analyze/{job_id}")
-            data = poll.json()
-            if data["status"] in ("ready", "failed"):
-                assert data["status"] == "failed"
-                assert data["error"]
-                return
-            time.sleep(0.1)
-        pytest.fail("timed out waiting for failed status")
+        data = _poll_until_terminal(client, job_id)
+        assert data["status"] == "failed"
+        assert data["error"]
+
+
+def test_analysis_validation_failure_marks_failed(client):
+    with patch(
+        "analysis.model_client.modal_client.call_analysis_model",
+        return_value=INVALID_MODEL_RESPONSE,
+    ):
+        text = "A" * 60
+        files = {"file": ("cv.txt", io.BytesIO(text.encode()), "text/plain")}
+        start = client.post("/cv-analysis/analyze", files=files)
+        assert start.status_code == 200
+        job_id = start.json()["job_id"]
+
+        data = _poll_until_terminal(client, job_id)
+        assert data["status"] == "failed"
+        assert "incomplete response" in data["error"].lower()

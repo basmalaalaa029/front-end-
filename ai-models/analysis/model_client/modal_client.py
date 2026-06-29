@@ -17,6 +17,17 @@ from analysis.model_client.prompts import normalize_target_role
 
 log = logging.getLogger("analysis")
 
+_last_modal_error: str = ""
+
+
+def get_last_modal_error() -> str:
+    return _last_modal_error
+
+
+def _set_modal_error(message: str) -> None:
+    global _last_modal_error
+    _last_modal_error = message
+
 
 def _call_dedicated_endpoint(
     resume_text: str,
@@ -44,23 +55,39 @@ def _call_dedicated_endpoint(
         with urllib.request.urlopen(req, timeout=MODAL_REQUEST_TIMEOUT) as resp:
             data = json.loads(resp.read())
     except urllib.error.HTTPError as exc:
+        detail = ""
+        try:
+            detail = exc.read().decode("utf-8", errors="replace")[:200]
+        except Exception:
+            pass
+        msg = f"Modal HTTP {exc.code}: {exc.reason}"
+        if detail:
+            msg += f" ({detail})"
+        if exc.code == 429:
+            msg += " — rate limited; wait a minute and retry."
+        _set_modal_error(msg)
         log.warning("Analysis endpoint returned HTTP %s: %s", exc.code, exc.reason)
         return None
     except urllib.error.URLError as exc:
+        _set_modal_error(f"Could not reach Modal endpoint: {exc.reason}")
         log.warning("Could not reach analysis endpoint: %s", exc.reason)
         return None
     except Exception as exc:
+        _set_modal_error(f"Modal call failed: {exc}")
         log.warning("Analysis endpoint call failed: %s", exc)
         return None
 
     if "error" in data:
+        _set_modal_error(f"Modal returned error: {data['error']}")
         log.warning("Analysis endpoint returned an error: %s", data["error"])
         return None
 
     if not data.get("parsed"):
+        _set_modal_error("Modal did not return parsable JSON")
         log.warning("Analysis endpoint did not return parsable JSON")
         return None
 
+    _set_modal_error("")
     return data
 
 
@@ -73,5 +100,6 @@ def call_analysis_model(
     if MODAL_ENDPOINT_URL:
         return _call_dedicated_endpoint(resume_text, max_new_tokens, target_role)
 
+    _set_modal_error("MODAL_ENDPOINT_URL not set")
     log.error("No analysis endpoint configured — set MODAL_ENDPOINT_URL in .env")
     return None

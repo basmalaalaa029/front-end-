@@ -29,13 +29,31 @@ def map_stage_for_frontend(internal_stage: str) -> str:
     return _FRONTEND_STAGE_MAP.get(internal_stage, "parsing")
 
 
+def _call_analysis_model(
+    resume_text: str,
+    max_new_tokens: int,
+    target_role: str = "",
+) -> tuple[Optional[dict], str]:
+    from analysis.model_client.modal_client import call_analysis_model, get_last_modal_error
+
+    response = call_analysis_model(
+        resume_text,
+        max_new_tokens=max_new_tokens,
+        target_role=target_role,
+    )
+    if response is not None:
+        return response, ""
+
+    modal_err = get_last_modal_error() or "Modal analysis unavailable"
+    return None, modal_err
+
+
 def _run_full_pipeline(
     resume_text: str,
     target_role: str = "",
     on_stage: Optional[Callable[[str], None]] = None,
 ) -> tuple:
     from analysis.config import MODAL_MAX_NEW_TOKENS
-    from analysis.model_client.modal_client import call_analysis_model
     from analysis.validation.result_validator import validate_result
 
     if on_stage:
@@ -46,13 +64,13 @@ def _run_full_pipeline(
     last_raw: str | None = None
 
     for attempt, max_new_tokens in enumerate(token_budgets, start=1):
-        model_response = call_analysis_model(
+        model_response, provider_error = _call_analysis_model(
             resume_text,
             max_new_tokens=max_new_tokens,
             target_role=target_role,
         )
         if model_response is None:
-            raise ValueError("Could not reach the analysis model, or it returned an error.")
+            raise ValueError(provider_error or "Could not reach the analysis model, or it returned an error.")
 
         if on_stage:
             on_stage("validating")
