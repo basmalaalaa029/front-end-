@@ -13,3 +13,10 @@ export function getPipelineCvFile(): File | null {
 export function clearPipelineCvFile(): void {
   pipelineCvFile = null;
 }
+
+/** Return and clear the CV file used for the current job-match session. */
+export function takePipelineCvFile(): File | null {
+  const file = pipelineCvFile;
+  pipelineCvFile = null;
+  return file;
+}

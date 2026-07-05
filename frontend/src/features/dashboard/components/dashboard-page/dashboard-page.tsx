@@ -5,6 +5,7 @@ import { HubHeader, HubIcon } from "@/features/hub-shell";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
 import { useI18n } from "@/features/i18n";
 import { HUB_LAST_WORKSPACE_KEY } from "@/features/hub-shell/lib/hub-session";
+import { useCvCreatorPath } from "@/features/cv-editor/lib/cv-creator-routing";
 import "./dashboard-overview.css";
 
 function dayStamp() {
@@ -68,6 +69,7 @@ function greetingKey(hour: number): "dashboard.hub.greetingMorning" | "dashboard
 export default function DashboardPage() {
   const { t, isRtl } = useI18n();
   const user = useAuthStore((s) => s.user);
+  const cvCreatorPath = useCvCreatorPath();
   const [lastWorkspace, setLastWorkspace] = useState<string | null>(null);
 
   useEffect(() => {
@@ -178,7 +180,7 @@ export default function DashboardPage() {
             return (
               <NavLink
                 key={m.to}
-                to={m.to}
+                to={m.to === "/dashboard/editor" ? cvCreatorPath : m.to}
                 className="dash-overview__card card"
                 style={{ ["--card-accent" as string]: m.accent }}
               >

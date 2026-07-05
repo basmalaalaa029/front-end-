@@ -17,11 +17,27 @@
 .cf-nav-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 18px;
-  font-weight: 500;
+  flex-shrink: 0;
   text-decoration: none;
   color: inherit;
+}
+
+.brand-logo {
+  display: block;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-logo--nav {
+  height: 52px;
+  width: auto;
+  max-height: calc(var(--header-height, 64px) - 12px);
+}
+
+.brand-logo--full {
+  height: 96px;
+  width: auto;
+  max-width: min(220px, 100%);
 }
 
 .cf-logo-box {

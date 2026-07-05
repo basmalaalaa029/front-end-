@@ -9,6 +9,7 @@
 
 import type { CvData, CvExperience, CvEducation, CvProject } from "@/features/cv-editor/data/cv-types";
 import type { TemplateId } from "@/features/cv-editor/data/cv-templates";
+import { skillsByCategoryForDisplay } from "@/features/cv-editor/lib/cv-skills";
 
 // ─── HTML escape ──────────────────────────────────────────────────────────────
 
@@ -190,6 +191,7 @@ function buildEducation(d: CvData): string {
 
 function formatSkillCategoryLabel(key: string): string {
   const labels: Record<string, string> = {
+    technical: "Technical",
     frontend: "Frontend",
     backend: "Backend",
     databases: "Databases",
@@ -204,6 +206,7 @@ function formatSkillCategoryLabel(key: string): string {
 }
 
 const SKILL_CATEGORY_ORDER = [
+  "technical",
   "frontend",
   "backend",
   "databases",
@@ -224,8 +227,7 @@ function sortSkillCategories(entries: [string, string[]][]): [string, string[]][
 }
 
 function buildSkills(d: CvData): string {
-  const categories = d.skillsByCategory;
-  const shown = new Set<string>();
+  const categories = skillsByCategoryForDisplay(d);
   const rows: string[] = [];
 
   if (categories && Object.keys(categories).length) {
@@ -238,7 +240,6 @@ function buildSkills(d: CvData): string {
     for (const [key, items] of entries) {
       const cleaned = items.map((s) => s.trim()).filter(Boolean);
       if (!cleaned.length) continue;
-      cleaned.forEach((s) => shown.add(s.toLowerCase()));
       const label = formatSkillCategoryLabel(key);
       rows.push(
         `<div class="skill-category" style="margin-bottom:6px;font-size:10pt;line-height:1.5;">
@@ -246,15 +247,6 @@ function buildSkills(d: CvData): string {
         </div>`,
       );
     }
-  }
-
-  const uncategorized = d.skills
-    .map((s) => s.trim())
-    .filter((s) => s && !shown.has(s.toLowerCase()));
-
-  if (uncategorized.length) {
-    const tags = uncategorized.map((s) => `<span class="skill-tag">${e(s)}</span>`).join("");
-    rows.push(`<div class="skills-list" style="margin-top:6px;">${tags}</div>`);
   }
 
   if (!rows.length) {

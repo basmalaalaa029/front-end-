@@ -79,8 +79,26 @@ class ResultResponse(BaseModel):
     template_cv: str = ""
     enhanced_data: Optional[Dict[str, Any]] = None
     final_scores: Optional[Dict[str, Any]] = None
-    score_trajectory: List[float] = Field(default_factory=list)
+    score_trajectory: List[int] = Field(default_factory=list)
     jd_keywords: List[str] = Field(default_factory=list)
     node_errors: List[str] = Field(default_factory=list)
     total_latency_ms: int = 0
-    error: Optional[str] = None
+
+
+class RewriteSectionRequest(BaseModel):
+    section: Literal["summary", "experience", "skills"]
+    target_role: str = ""
+    summary: str = ""
+    job_title: str = ""
+    company: str = ""
+    bullets: List[str] = Field(default_factory=list)
+    skills: List[str] = Field(default_factory=list)
+    education: List[str] = Field(default_factory=list)
+
+
+class RewriteSectionResponse(BaseModel):
+    section: str
+    summary: Optional[str] = None
+    bullets: Optional[List[str]] = None
+    skills: Optional[List[str]] = None
+    skills_by_category: Optional[Dict[str, List[str]]] = None

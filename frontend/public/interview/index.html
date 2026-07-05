@@ -844,11 +844,11 @@ window.__CV_INTERVIEW_APPLY_PREFILL__ = function(data) {
   if (!data) return;
   if (data.jobDescription) {
     const jd = _el('jd');
-    if (jd && !jd.value.trim()) jd.value = data.jobDescription;
+    if (jd) jd.value = data.jobDescription;
   }
   if (data.candidateName) {
     const nameEl = _el('candidate-name');
-    if (nameEl && !nameEl.value.trim()) nameEl.value = data.candidateName;
+    if (nameEl) nameEl.value = data.candidateName;
   }
   if (data.cvFile instanceof File) _handleFile(data.cvFile);
 };

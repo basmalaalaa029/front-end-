@@ -11,7 +11,7 @@ import {
   type CvWizardNavigationState,
 } from "@/features/cv-editor/lib/wizard-navigation";
 import { useI18n } from "@/features/i18n";
-import { getDraftAnalysisFile, cvTextToAnalysisFile, formatCvFileSize } from "@/features/cv-analysis/lib/draft-for-analysis";
+import { getDraftAnalysisFile, getDraftAnalysisInputs, cvTextToAnalysisFile, formatCvFileSize } from "@/features/cv-analysis/lib/draft-for-analysis";
 import { resolveAnalysisContextFromFile, hasDetectedCvContext } from "@/features/cv-analysis/lib/resolve-cv-context";
 import { runAnalysisUploadAsync } from "@/features/cv-analysis/lib/cv-analysis-api";
 import type { AnalysisFileSource } from "@/features/cv-analysis/lib/cv-analysis-api";
@@ -22,8 +22,10 @@ import {
   saveAnalysisCache,
   clearActiveAnalysisSession,
   loadActiveAnalysisSession,
+  migrateLegacyAnalysisCache,
   pollAnalysisJob,
   resumeAnalysisAsync,
+  type AnalysisFormInputs as CachedAnalysisInputs,
 } from "@/features/cv-analysis/lib/cv-analysis-api";
 import { logAnalysisStage } from "@/features/cv-analysis/lib/map-analysis-result";
 import { takePendingAnalysisFile } from "@/features/cv-analysis/lib/pending-upload";
@@ -49,6 +51,31 @@ const EMPTY_INPUTS: AnalysisFormInputs = {
 
 /** Offer AI CV generation when the ATS score is below this threshold. */
 const LOW_SCORE_CV_THRESHOLD = 70;
+
+async function cvTextForCache(
+  file: File,
+  source: AnalysisFileSource,
+): Promise<string | undefined> {
+  if (source === "editor") {
+    return getDraftAnalysisInputs()?.cvText;
+  }
+  if (file.type === "text/plain" || file.name.toLowerCase().endsWith(".txt")) {
+    try {
+      const text = (await file.text()).trim();
+      return text.length >= 50 ? text : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
+function fileFromCachedInputs(inputs: CachedAnalysisInputs): File | null {
+  const cvText = inputs.cvText?.trim();
+  if (!cvText || cvText.length < 50) return null;
+  const name = inputs.fileName?.trim() || "CV.txt";
+  return new File([cvText], name, { type: "text/plain" });
+}
 
 function CvFileCard({
   file,
@@ -393,7 +420,13 @@ export default function AnalysisPage() {
   }, []);
 
   const finishAnalysis = useCallback(
-    (data: CvAnalysisResult, form: AnalysisFormInputs, file: File, source: AnalysisFileSource) => {
+    (
+      data: CvAnalysisResult,
+      form: AnalysisFormInputs,
+      file: File,
+      source: AnalysisFileSource,
+      cvText?: string,
+    ) => {
       setCvFile(file);
       setFileSource(source);
       setResult(data);
@@ -408,6 +441,7 @@ export default function AnalysisPage() {
         ...form,
         fileName: file.name,
         fileSource: source,
+        cvText,
       });
       clearActiveAnalysisSession();
       toast.success(`ATS analysis complete (${data.latency_ms}ms)`);
@@ -439,7 +473,8 @@ export default function AnalysisPage() {
           undefined,
           handleAnalysisStatus,
         );
-        finishAnalysis(data, form, file, source);
+        const cvText = await cvTextForCache(file, source);
+        finishAnalysis(data, form, file, source, cvText);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         if (
@@ -504,13 +539,15 @@ export default function AnalysisPage() {
         const file = cvFile ?? draft?.file;
         const source = fileSource ?? "editor";
         if (!file) {
+          const cvText = getDraftAnalysisInputs()?.cvText;
           setResult(data);
           clearActiveAnalysisSession();
-          saveAnalysisCache(data, inputs);
+          saveAnalysisCache(data, { ...inputs, cvText, fileSource: "editor" });
           toast.success(`ATS analysis complete (${data.latency_ms}ms)`);
           return;
         }
-        finishAnalysis(data, inputs, file, source);
+        const cvText = await cvTextForCache(file, source);
+        finishAnalysis(data, inputs, file, source, cvText);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         clearActiveAnalysisSession();
@@ -534,6 +571,7 @@ export default function AnalysisPage() {
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
+    migrateLegacyAnalysisCache();
 
     const nav = location.state as AnalysisNavigationState | null | undefined;
 
@@ -579,22 +617,17 @@ export default function AnalysisPage() {
       return;
     }
 
-    const draft = getDraftAnalysisFile();
-    if (draft) {
-      void attachCvFile(draft.file, "editor").then((resolved) => {
-        applyInputs({ ...draft.inputs, ...resolved });
-      });
-      return;
-    }
-
     const cached = loadAnalysisCache();
-    if (cached) {
+    if (cached?.result) {
       setResult(cached.result);
       applyInputs(cached.inputs);
       setShowInputs(false);
-      const restoredDraft = getDraftAnalysisFile();
-      if (restoredDraft && cached.inputs.fileSource === "editor") {
-        void attachCvFile(restoredDraft.file, "editor");
+      const cachedFile = fileFromCachedInputs(cached.inputs);
+      if (cachedFile && cached.inputs.fileSource) {
+        void attachCvFile(cachedFile, cached.inputs.fileSource);
+      } else if (cached.inputs.fileSource === "editor") {
+        const draft = getDraftAnalysisFile();
+        if (draft) void attachCvFile(draft.file, "editor");
       }
       return;
     }
@@ -614,8 +647,15 @@ export default function AnalysisPage() {
             const { mapApiResultToCvAnalysis } = await import(
               "@/features/cv-analysis/lib/map-analysis-result"
             );
-            setResult(mapApiResultToCvAnalysis(peek.result, inputs));
+            const mapped = mapApiResultToCvAnalysis(peek.result, inputs);
+            setResult(mapped);
             setShowInputs(false);
+            saveAnalysisCache(mapped, {
+              ...inputs,
+              targetRole: mapped.target_role || inputs.targetRole,
+              company: mapped.company || inputs.company,
+              jobDescription: mapped.job_description || inputs.jobDescription,
+            });
             return;
           }
           void resumeInFlightAnalysis(activeJob);
@@ -629,6 +669,14 @@ export default function AnalysisPage() {
           }
         }
       })();
+      return;
+    }
+
+    const draft = getDraftAnalysisFile();
+    if (draft) {
+      void attachCvFile(draft.file, "editor").then((resolved) => {
+        applyInputs({ ...draft.inputs, ...resolved });
+      });
     }
   }, [
     applyInputs,

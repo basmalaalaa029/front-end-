@@ -9,6 +9,7 @@ export {
   loadWorkflowCv,
   saveWorkflowJobPick,
   loadWorkflowJobPick,
+  clearWorkflowJobPick,
   type WorkflowCvContext,
   type WorkflowJobPick,
   type WorkflowSource,
@@ -18,6 +19,7 @@ export {
 export {
   setPendingJobFile,
   takePendingJobFile,
+  takePipelineCvFile,
   setPipelineCvFile,
   getPipelineCvFile,
   clearPipelineCvFile,

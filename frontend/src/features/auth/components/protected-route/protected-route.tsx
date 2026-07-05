@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import api from "@/lib/api";
 import { useAuthHydrated, useAuthStore } from "@/features/auth/stores/auth-store";
+import { rehydrateUserScopedStores } from "@/features/cv-editor/stores/rehydrate-user-stores";
 
 /**
  * Wraps any route that requires authentication.
@@ -36,6 +37,7 @@ export default function ProtectedRoute({ children }: { children?: React.ReactNod
             { _id: authData._id, name: authData.name, email: authData.email },
             authData.token,
           );
+          rehydrateUserScopedStores();
           setSessionValid(true);
         } else if (!cancelled) {
           logout();

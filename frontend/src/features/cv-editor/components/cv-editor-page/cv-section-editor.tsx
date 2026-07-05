@@ -1,43 +1,90 @@
-import { useState, type Dispatch, type SetStateAction, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useState, type Dispatch, type SetStateAction, type KeyboardEvent } from "react";
 import type { CvData, CvProject } from "@/features/cv-editor/data/cv-types";
 import { useI18n } from "@/features/i18n";
+import { HubIcon } from "@/features/hub-shell";
+import { useAtsSectionRewrite } from "@/features/cv-editor/hooks/use-ats-section-rewrite";
+import { addSkillToCvData, removeSkillFromCvData } from "@/features/cv-editor/lib/cv-skills";
 
 type Props = {
   active: string;
   data: CvData;
   setData: Dispatch<SetStateAction<CvData>>;
+  targetRole?: string;
 };
 
-function SkillsEditor({ data, setData }: { data: CvData; setData: Dispatch<SetStateAction<CvData>> }) {
+function AtsRewriteBar({
+  sectionKey,
+  rewritingKey,
+  onRewriteNow,
+}: {
+  sectionKey: string;
+  rewritingKey: string | null;
+  onRewriteNow: () => void;
+}) {
+  const { t } = useI18n();
+  const busy = rewritingKey === sectionKey;
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 8,
+        marginTop: 8,
+        fontSize: 11,
+        color: "var(--fg-tertiary, #94a3b8)",
+      }}
+    >
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+        {busy ? (
+          <>
+            <HubIcon name="loader-2" size={13} stroke={2} />
+            {t("cvEditor.atsRewrite.optimizing")}
+          </>
+        ) : (
+          <>
+            <HubIcon name="sparkles" size={13} stroke={2} />
+            {t("cvEditor.atsRewrite.hint")}
+          </>
+        )}
+      </span>
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm"
+        onClick={onRewriteNow}
+        disabled={busy}
+      >
+        {t("cvEditor.atsRewrite.improveNow")}
+      </button>
+    </div>
+  );
+}
+
+function SkillsEditor({
+  data,
+  setData,
+  targetRole,
+  rewriteNow,
+  rewritingKey,
+}: {
+  data: CvData;
+  setData: Dispatch<SetStateAction<CvData>>;
+  targetRole: string;
+  rewriteNow: ReturnType<typeof useAtsSectionRewrite>["rewriteNow"];
+  rewritingKey: string | null;
+}) {
   const { t } = useI18n();
   const [draft, setDraft] = useState("");
 
   const addSkill = (raw: string) => {
     const trimmed = raw.trim();
     if (!trimmed) return;
-    setData((d) => ({
-      ...d,
-      skills: d.skills.includes(trimmed) ? d.skills : [...d.skills, trimmed],
-    }));
+    setData((d) => addSkillToCvData(d, trimmed));
     setDraft("");
   };
 
-  const removeSkill = (idx: number) =>
-    setData((d) => {
-      const removed = d.skills[idx];
-      const skills = d.skills.filter((_, i) => i !== idx);
-      let skillsByCategory = d.skillsByCategory;
-      if (skillsByCategory && removed) {
-        const needle = removed.toLowerCase();
-        const next: Record<string, string[]> = {};
-        for (const [key, items] of Object.entries(skillsByCategory)) {
-          const filtered = items.filter((s) => s.toLowerCase() !== needle);
-          if (filtered.length) next[key] = filtered;
-        }
-        skillsByCategory = Object.keys(next).length ? next : undefined;
-      }
-      return { ...d, skills, skillsByCategory };
-    });
+  const removeSkill = (idx: number) => setData((d) => removeSkillFromCvData(d, idx));
 
   const handleKey = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
@@ -124,13 +171,101 @@ function SkillsEditor({ data, setData }: { data: CvData; setData: Dispatch<SetSt
         <p style={{ margin: "5px 0 0", fontSize: 11, color: "var(--fg-tertiary, #94a3b8)" }}>
           {t("cvEditor.skillHint")}
         </p>
+        <AtsRewriteBar
+          sectionKey="skills"
+          rewritingKey={rewritingKey}
+          onRewriteNow={() =>
+            rewriteNow({
+              section: "skills",
+              key: "skills",
+              targetRole,
+              skills: data.skills,
+              education: data.education.map((e) => e.degree).filter(Boolean),
+            })
+          }
+        />
       </div>
     </div>
   );
 }
 
-export function CvSectionEditor({ active, data, setData }: Props) {
+export function CvSectionEditor({ active, data, setData, targetRole = "" }: Props) {
   const { t } = useI18n();
+  const role = targetRole.trim() || data.role.trim();
+
+  const handleApply = useCallback(
+    (result: {
+      section: "summary" | "experience" | "skills";
+      key: string;
+      summary?: string;
+      bullets?: string[];
+      skills?: string[];
+      skillsByCategory?: Record<string, string[]>;
+    }) => {
+      if (result.section === "summary" && result.summary) {
+        setData((d) => ({ ...d, summary: result.summary! }));
+        return;
+      }
+      if (result.section === "experience" && result.bullets) {
+        const idx = Number.parseInt(result.key.split(":")[1] ?? "", 10);
+        if (Number.isNaN(idx)) return;
+        setData((d) => {
+          const experience = [...d.experience];
+          if (!experience[idx]) return d;
+          experience[idx] = { ...experience[idx], bullets: result.bullets! };
+          return { ...d, experience };
+        });
+        return;
+      }
+      if (result.section === "skills" && result.skills?.length) {
+        setData((d) => ({
+          ...d,
+          skills: result.skills!,
+          skillsByCategory: result.skillsByCategory ?? d.skillsByCategory,
+        }));
+      }
+    },
+    [setData],
+  );
+
+  const { scheduleRewrite, rewriteNow, rewritingKey } = useAtsSectionRewrite(handleApply);
+
+  useEffect(() => {
+    if (active !== "summary") return;
+    scheduleRewrite({
+      section: "summary",
+      key: "summary",
+      targetRole: role,
+      summary: data.summary,
+    });
+  }, [active, data.summary, role, scheduleRewrite]);
+
+  useEffect(() => {
+    if (active !== "skills") return;
+    scheduleRewrite({
+      section: "skills",
+      key: "skills",
+      targetRole: role,
+      skills: data.skills,
+      education: data.education.map((e) => e.degree).filter(Boolean),
+    });
+  }, [active, data.skills, data.education, role, scheduleRewrite]);
+
+  useEffect(() => {
+    if (active !== "experience") return;
+    data.experience.forEach((ex, i) => {
+      const bullets = ex.bullets.map((b) => b.trim()).filter(Boolean);
+      if (!bullets.length) return;
+      scheduleRewrite({
+        section: "experience",
+        key: `experience:${i}`,
+        targetRole: role,
+        jobTitle: ex.title,
+        company: ex.company,
+        bullets,
+      });
+    });
+  }, [active, data.experience, role, scheduleRewrite]);
 
   if (active === "contact") {
     return (
@@ -340,13 +475,33 @@ export function CvSectionEditor({ active, data, setData }: Props) {
             placeholder={t("cvEditor.placeholders.summary")}
             rows={6}
           />
+          <AtsRewriteBar
+            sectionKey="summary"
+            rewritingKey={rewritingKey}
+            onRewriteNow={() =>
+              rewriteNow({
+                section: "summary",
+                key: "summary",
+                targetRole: role,
+                summary: data.summary,
+              })
+            }
+          />
         </div>
       </div>
     );
   }
 
   if (active === "skills") {
-    return <SkillsEditor data={data} setData={setData} />;
+    return (
+      <SkillsEditor
+        data={data}
+        setData={setData}
+        targetRole={role}
+        rewriteNow={rewriteNow}
+        rewritingKey={rewritingKey}
+      />
+    );
   }
 
   if (active === "education") {
@@ -549,6 +704,20 @@ export function CvSectionEditor({ active, data, setData }: Props) {
                 }
                 placeholder={t("cvEditor.placeholders.bullets")}
                 rows={5}
+              />
+              <AtsRewriteBar
+                sectionKey={`experience:${i}`}
+                rewritingKey={rewritingKey}
+                onRewriteNow={() =>
+                  rewriteNow({
+                    section: "experience",
+                    key: `experience:${i}`,
+                    targetRole: role,
+                    jobTitle: ex.title,
+                    company: ex.company,
+                    bullets: ex.bullets.map((b) => b.trim()).filter(Boolean),
+                  })
+                }
               />
             </div>
           </div>

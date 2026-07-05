@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from "@/features/auth/stores/auth-store";
+import { rehydrateUserScopedStores } from "@/features/cv-editor/stores/rehydrate-user-stores";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -41,6 +42,7 @@ api.interceptors.response.use(
       if (window.location.pathname !== '/login') {
         const { logout } = useAuthStore.getState();
         logout();
+        rehydrateUserScopedStores();
         
         // روح للـ login page
         window.location.href = '/login';

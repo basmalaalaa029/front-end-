@@ -1,6 +1,12 @@
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 import { useI18n } from "@/features/i18n";
 import { HubIcon } from "@/features/hub-shell";
+import { useAuthStore } from "@/features/auth/stores/auth-store";
+import {
+  fetchWizardProfile,
+  saveWizardProfile,
+} from "@/features/cv-editor/lib/wizard-profile-api";
+import { resolveWizardStep1InitialData } from "@/features/cv-editor/lib/wizard-profile-merge";
 import {
   createEmptyWizardStep1,
   type WizardStep1Data,
@@ -13,9 +19,56 @@ type Props = {
 
 export function Step1BasicInfo({ onNext, initialData }: Props) {
   const { t } = useI18n();
+  const user = useAuthStore((s) => s.user);
   const [data, setData] = useState<WizardStep1Data>(
-    initialData ?? createEmptyWizardStep1,
+    initialData ?? createEmptyWizardStep1(),
   );
+  const [profileLoaded, setProfileLoaded] = useState(!user);
+  const skipAutoSaveRef = useRef(true);
+
+  useEffect(() => {
+    if (!user) {
+      setProfileLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const saved = await fetchWizardProfile();
+        if (cancelled) return;
+        setData(resolveWizardStep1InitialData(saved, user, initialData));
+      } catch {
+        if (!cancelled) {
+          setData(resolveWizardStep1InitialData(null, user, initialData));
+        }
+      } finally {
+        if (!cancelled) {
+          setProfileLoaded(true);
+          skipAutoSaveRef.current = false;
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?._id, initialData, user]);
+
+  useEffect(() => {
+    if (!user || !profileLoaded || skipAutoSaveRef.current) return;
+    const timer = window.setTimeout(() => {
+      void saveWizardProfile(data).catch(() => {});
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [data, user?._id, profileLoaded, user]);
+
+  const handleContinue = () => {
+    if (user) {
+      void saveWizardProfile(data).catch(() => {});
+    }
+    onNext(data);
+  };
 
   const updatePersonal =
     (field: keyof Pick<WizardStep1Data, "full_name" | "target_job" | "email" | "phone" | "location" | "linkedin" | "github">) =>
@@ -412,8 +465,8 @@ export function Step1BasicInfo({ onNext, initialData }: Props) {
         <button
           type="button"
           className="btn btn-primary"
-          disabled={!canContinue}
-          onClick={() => onNext(data)}
+          disabled={!canContinue || !profileLoaded}
+          onClick={handleContinue}
         >
           {t("cvEditor.wizard.continue")}
           <HubIcon name="arrow-right" size={14} stroke={2} />

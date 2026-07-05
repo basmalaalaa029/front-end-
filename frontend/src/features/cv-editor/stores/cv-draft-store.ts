@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist, type StateStorage } from "zustand/middleware";
+import { useAuthStore } from "@/features/auth/stores/auth-store";
 import type { CvData } from "@/features/cv-editor/data/cv-types";
 import { migrateCvData } from "@/features/cv-editor/data/cv-data-migrate";
 import { createStarterCvData } from "@/features/cv-editor/data/cv-templates";
@@ -33,6 +34,23 @@ const initialDraft = {
   lastTemplateId: null as TemplateId | null,
 };
 
+const CV_DRAFT_STORAGE_BASE = "cv-draft-storage";
+
+function cvDraftStorageKey(): string {
+  const userId = useAuthStore.getState().user?._id ?? "guest";
+  return `${CV_DRAFT_STORAGE_BASE}:${userId}`;
+}
+
+const userScopedCvDraftStorage: StateStorage = {
+  getItem: () => localStorage.getItem(cvDraftStorageKey()),
+  setItem: (_name, value) => {
+    localStorage.setItem(cvDraftStorageKey(), value);
+  },
+  removeItem: () => {
+    localStorage.removeItem(cvDraftStorageKey());
+  },
+};
+
 export const useCvDraftStore = create<CvDraftState>()(
   persist(
     (set) => ({
@@ -56,7 +74,8 @@ export const useCvDraftStore = create<CvDraftState>()(
       resetDraft: () => set({ ...initialDraft }),
     }),
     {
-      name: "cv-draft-storage",
+      name: CV_DRAFT_STORAGE_BASE,
+      storage: createJSONStorage(() => userScopedCvDraftStorage),
       version: 1,
       partialize: (state) => ({
         data: state.data,

@@ -4,9 +4,9 @@ import {
   loadWorkflowCv,
   loadWorkflowJobPick,
   type WorkflowCvContext,
-  type WorkflowJobPick,
 } from "@/features/hub-shell/lib/workflow-pipeline";
 import { getPipelineCvFile } from "@/features/hub-shell/lib/pipeline-cv-file";
+import { buildInterviewPrefillFromWorkflow } from "@/features/interview/lib/build-interview-job-description";
 
 export type InterviewPrefillPayload = {
   jobDescription: string;
@@ -14,19 +14,9 @@ export type InterviewPrefillPayload = {
   cvFile: File | null;
 };
 
-function buildJobDescription(
-  job: WorkflowJobPick | null,
-  wf: WorkflowCvContext | null,
-): string {
-  if (job?.jobDescription?.trim()) return job.jobDescription.trim();
-  if (wf?.jobDescription?.trim()) return wf.jobDescription.trim();
-  if (job) {
-    return [`Role: ${job.title}`, job.company ? `Company: ${job.company}` : ""]
-      .filter(Boolean)
-      .join("\n\n");
-  }
-  return wf?.targetRole ? `Target role: ${wf.targetRole}` : "";
-}
+export type InterviewPrefillOptions = {
+  jobDescription?: string;
+};
 
 function safePdfStem(label: string): string {
   const stem = label.replace(/[^\w.-]+/g, "_").replace(/^_|_$/g, "");
@@ -53,8 +43,9 @@ async function resolveInterviewCvFile(
 ): Promise<File | null> {
   const stored = getPipelineCvFile();
   if (stored) {
-    if (stored.name.toLowerCase().endsWith(".pdf")) return stored;
-    if (stored.type === "application/pdf") return stored;
+    if (stored.name.toLowerCase().endsWith(".pdf") || stored.type === "application/pdf") {
+      return stored;
+    }
   }
 
   const cvText = wf?.cvText?.trim() ?? "";
@@ -69,14 +60,18 @@ async function resolveInterviewCvFile(
   return null;
 }
 
-export async function buildInterviewPrefill(): Promise<InterviewPrefillPayload | null> {
+export async function buildInterviewPrefill(
+  options?: InterviewPrefillOptions,
+): Promise<InterviewPrefillPayload | null> {
   const wf = loadWorkflowCv();
   const job = loadWorkflowJobPick();
   if (!wf && !job && !getPipelineCvFile()) return null;
 
-  const jobDescription = buildJobDescription(job, wf);
   const authName = useAuthStore.getState().user?.name?.trim() ?? "";
-  const candidateName = authName || wf?.targetRole?.trim() || job?.title?.trim() || "";
+  const fromWorkflow = buildInterviewPrefillFromWorkflow(job, wf, authName);
+  const jobDescription =
+    options?.jobDescription?.trim() || fromWorkflow.jobDescription;
+  const candidateName = fromWorkflow.candidateName;
   const label = candidateName || job?.title || wf?.targetRole || "CV";
   const cvFile = await resolveInterviewCvFile(wf, label);
 
@@ -85,10 +80,7 @@ export async function buildInterviewPrefill(): Promise<InterviewPrefillPayload |
   return { jobDescription, candidateName, cvFile };
 }
 
-export async function applyInterviewWorkflowPrefill(host: HTMLElement): Promise<boolean> {
-  const prefill = await buildInterviewPrefill();
-  if (!prefill) return false;
-
+function applyPrefillToDom(host: HTMLElement, prefill: InterviewPrefillPayload): void {
   const apply = (
     window as Window & {
       __CV_INTERVIEW_APPLY_PREFILL__?: (data: InterviewPrefillPayload) => void;
@@ -97,16 +89,16 @@ export async function applyInterviewWorkflowPrefill(host: HTMLElement): Promise<
 
   if (typeof apply === "function") {
     apply(prefill);
-    return true;
+    return;
   }
 
   const jd = host.querySelector<HTMLTextAreaElement>("#jd");
-  if (jd && prefill.jobDescription && !jd.value.trim()) {
+  if (jd && prefill.jobDescription) {
     jd.value = prefill.jobDescription;
   }
 
   const nameInput = host.querySelector<HTMLInputElement>("#candidate-name");
-  if (nameInput && prefill.candidateName && !nameInput.value.trim()) {
+  if (nameInput && prefill.candidateName) {
     nameInput.value = prefill.candidateName;
   }
 
@@ -126,6 +118,24 @@ export async function applyInterviewWorkflowPrefill(host: HTMLElement): Promise<
     if (dzLbl) dzLbl.textContent = `✓ ${prefill.cvFile.name}`;
     dz?.classList.add("active");
   }
+}
 
+export async function applyInterviewWorkflowPrefill(
+  host: HTMLElement,
+  options?: InterviewPrefillOptions,
+): Promise<boolean> {
+  const prefill = await buildInterviewPrefill(options);
+  if (!prefill) return false;
+  applyPrefillToDom(host, prefill);
+  return Boolean(prefill.cvFile || prefill.jobDescription);
+}
+
+export async function applyInterviewWorkflowPrefillForce(
+  host: HTMLElement,
+  options?: InterviewPrefillOptions,
+): Promise<boolean> {
+  const prefill = await buildInterviewPrefill(options);
+  if (!prefill) return false;
+  applyPrefillToDom(host, prefill);
   return Boolean(prefill.cvFile || prefill.jobDescription);
 }

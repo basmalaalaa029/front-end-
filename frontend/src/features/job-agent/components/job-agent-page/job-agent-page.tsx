@@ -8,6 +8,8 @@ import {
   HubHeader,
   HubIcon,
   WorkflowPipelineBar,
+  clearPipelineCvFile,
+  clearWorkflowJobPick,
   loadWorkflowCv,
   saveWorkflowCv,
   saveWorkflowJobPick,
@@ -16,6 +18,7 @@ import {
   type InterviewNavigationState,
   type JobNavigationState,
 } from "@/features/hub-shell";
+import { buildInterviewJobDescription } from "@/features/interview/lib/build-interview-job-description";
 import {
   useJobMatch,
   useJobMatchUpload,
@@ -519,6 +522,8 @@ export default function JobAgentPage() {
   const handleStart = useCallback(
     async (file: File | null, targetRole: string) => {
       clearJobCache();
+      clearPipelineCvFile();
+      clearWorkflowJobPick();
       setJobs([]);
       setSelected(null);
       setStarted(true);
@@ -569,19 +574,20 @@ export default function JobAgentPage() {
   const continueToInterview = useCallback(
     (job: JobCardData) => {
       const wf = loadWorkflowCv();
-      const jobDescription =
-        job.description.trim() ||
-        [
-          `${job.title} at ${job.company}`,
-          job.why,
-          job.matched_skills.length
-            ? `Key matched skills: ${job.matched_skills.join(", ")}`
-            : "",
-        ]
-          .filter(Boolean)
-          .join("\n\n");
+      const jobDescription = buildInterviewJobDescription({
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        salary: job.salary,
+        url: job.url,
+        description: job.description,
+        why: job.why,
+        matched_skills: job.matched_skills,
+        missing_skills: job.missing_skills,
+      });
 
       saveWorkflowJobPick({
+        id: job.id,
         title: job.title,
         company: job.company,
         targetRole: job.title,
@@ -589,13 +595,30 @@ export default function JobAgentPage() {
         url: job.url || undefined,
       });
 
-      if (wf && jobDescription && !wf.jobDescription.trim()) {
-        saveWorkflowCv({ ...wf, jobDescription });
+      if (wf) {
+        saveWorkflowCv({
+          ...wf,
+          targetRole: job.title,
+          company: job.company,
+          jobDescription,
+        });
+      } else {
+        saveWorkflowCv({
+          cvText: "",
+          targetRole: job.title,
+          company: job.company,
+          jobDescription,
+          source: "analyze",
+        });
       }
 
       const nav: InterviewNavigationState = {
         autoStart: true,
         targetRole: job.title,
+        jobTitle: job.title,
+        company: job.company,
+        jobId: job.id,
+        jobDescription,
       };
       navigate("/dashboard/interview", { state: nav });
     },

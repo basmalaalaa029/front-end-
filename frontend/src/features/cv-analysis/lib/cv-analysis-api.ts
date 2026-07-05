@@ -7,6 +7,10 @@ import {
   cvAgentFetch,
 } from "@/shared/lib/cv-agent-client";
 import { mapApiResultToCvAnalysis } from "./map-analysis-result";
+import {
+  clearActiveAnalysisSession,
+  saveActiveAnalysisSession,
+} from "./analysis-cache";
 import type {
   AnalysisJobResponse,
   AnalysisStartResponse,
@@ -37,32 +41,6 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
       { once: true },
     );
   });
-}
-
-export const ACTIVE_ANALYSIS_SESSION_KEY = "hub:activeAnalysisJob";
-
-export function saveActiveAnalysisSession(jobId: string): void {
-  try {
-    sessionStorage.setItem(ACTIVE_ANALYSIS_SESSION_KEY, jobId);
-  } catch {
-    /* ignore */
-  }
-}
-
-export function clearActiveAnalysisSession(): void {
-  try {
-    sessionStorage.removeItem(ACTIVE_ANALYSIS_SESSION_KEY);
-  } catch {
-    /* ignore */
-  }
-}
-
-export function loadActiveAnalysisSession(): string | null {
-  try {
-    return sessionStorage.getItem(ACTIVE_ANALYSIS_SESSION_KEY);
-  } catch {
-    return null;
-  }
 }
 
 export async function startAnalysisJob(
@@ -173,52 +151,15 @@ export async function resumeAnalysisAsync(
   return pollUntilComplete(jobId, { signal }, onStatus);
 }
 
-
-export const ANALYSIS_CACHE_KEY = "hub:lastAnalysis";
-
-export type AnalysisFileSource = "upload" | "editor";
-
-export type AnalysisFormInputs = {
-  jobDescription: string;
-  targetRole: string;
-  company: string;
-  fileName?: string;
-  fileSource?: AnalysisFileSource;
-};
-
-export function saveAnalysisCache(
-  result: CvAnalysisResult,
-  inputs: AnalysisFormInputs,
-): void {
-  try {
-    sessionStorage.setItem(
-      ANALYSIS_CACHE_KEY,
-      JSON.stringify({ result, inputs, savedAt: Date.now() }),
-    );
-  } catch {
-    /* ignore */
-  }
-}
-
-export function loadAnalysisCache(): {
-  result: CvAnalysisResult;
-  inputs: AnalysisFormInputs;
-} | null {
-  try {
-    const raw = sessionStorage.getItem(ANALYSIS_CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as {
-      result: CvAnalysisResult;
-      inputs: AnalysisFormInputs & { cvText?: string };
-    };
-    if (!parsed.inputs.fileName && parsed.inputs.cvText) {
-      parsed.inputs.fileName = "CV.txt";
-      parsed.inputs.fileSource = "editor";
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
+export {
+  saveAnalysisCache,
+  loadAnalysisCache,
+  clearAnalysisCache,
+  saveActiveAnalysisSession,
+  clearActiveAnalysisSession,
+  loadActiveAnalysisSession,
+  migrateLegacyAnalysisCache,
+} from "./analysis-cache";
+export type { AnalysisFormInputs, AnalysisFileSource } from "./analysis-cache";
 
 export { CV_AGENT_BASE };

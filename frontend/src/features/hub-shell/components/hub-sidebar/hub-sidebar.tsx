@@ -1,17 +1,23 @@
-import { Link, NavLink } from "react-router-dom";
-import { FileText } from "lucide-react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
 import { HubIcon } from "@/features/hub-shell/components/hub-icon";
+import { BrandLogo } from "@/shared/components/brand-logo";
+import {
+  isCvCreatorRoute,
+  useCvCreatorPath,
+} from "@/features/cv-editor/lib/cv-creator-routing";
 
 const NAV = [
-  { label: "CV Creator", icon: "file-text", to: "/dashboard/editor" },
+  { label: "CV Creator", icon: "file-text", key: "cv-creator" as const },
   { label: "Analysis", icon: "target", to: "/dashboard/analyzer" },
   { label: "Job Matching", icon: "briefcase", to: "/dashboard/jobs" },
   { label: "Interview Coach", icon: "mic", to: "/dashboard/interview" },
 ] as const;
 
-export function HubSidebar({ brand = "CareerPilot" }: { brand?: string }) {
+export function HubSidebar({ brand: _brand = "CareerPilot" }: { brand?: string }) {
   const user = useAuthStore((s) => s.user);
+  const { pathname } = useLocation();
+  const cvCreatorPath = useCvCreatorPath();
 
   const initials =
     user?.name
@@ -24,22 +30,26 @@ export function HubSidebar({ brand = "CareerPilot" }: { brand?: string }) {
   return (
     <aside className="app-sidebar">
       <Link to="/" className="brand" style={{ textDecoration: "none", color: "inherit" }}>
-        <span className="brand-mark" aria-hidden>
-          <FileText size={18} strokeWidth={2} color="#fff" />
-        </span>
-        <span className="brand-name">{brand}</span>
+        <BrandLogo variant="nav" />
       </Link>
       <nav>
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) => "nav-item " + (isActive ? "is-active" : "")}
-          >
-            <HubIcon name={item.icon} size={18} />
-            <span>{item.label}</span>
-          </NavLink>
-        ))}
+        {NAV.map((item) => {
+          const to = "key" in item ? cvCreatorPath : item.to;
+          const isCvCreator = "key" in item;
+          return (
+            <NavLink
+              key={"key" in item ? item.key : item.to}
+              to={to}
+              className={({ isActive }) =>
+                "nav-item " +
+                ((isCvCreator ? isCvCreatorRoute(pathname) : isActive) ? "is-active" : "")
+              }
+            >
+              <HubIcon name={item.icon} size={18} />
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        })}
         <NavLink
           to="/dashboard"
           end

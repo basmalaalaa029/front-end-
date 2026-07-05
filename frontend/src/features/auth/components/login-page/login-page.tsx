@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ArrowLeft, ArrowRight, Eye, FileText, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Eye, Sparkles } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
 import { LandingNav } from "@/features/landing/components/landing-nav";
+import { BrandLogo } from "@/shared/components/brand-logo";
 import { LandingFooter } from "@/features/landing/components/landing-footer";
 import { validateEmail, validateLoginPassword } from "@/features/auth/lib/validation";
 import { getAuthReturnTarget } from "@/features/auth/lib/use-require-auth-navigate";
+import { rehydrateUserScopedStores } from "@/features/cv-editor/stores/rehydrate-user-stores";
 
 
 type FieldErrors = { email?: string; password?: string };
@@ -89,6 +91,7 @@ export default function Login() {
       };
 
       login(user, authData.token);
+      rehydrateUserScopedStores();
       toast.success("Signed in successfully");
       navigate(returnTo.pathname, { replace: true, state: returnTo.state });
     } catch (err: unknown) {
@@ -115,10 +118,7 @@ export default function Login() {
         <div className="left">
           <div className="left-head">
             <Link to="/" className="brand">
-              <span className="brand-mark" aria-hidden>
-                <FileText size={14} strokeWidth={1.75} />
-              </span>
-              <strong>CareerPilot</strong>
+              <BrandLogo variant="full" />
             </Link>
             <Link to="/" className="back">
               <ArrowLeft size={14} strokeWidth={1.75} aria-hidden />

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/features/auth/stores/auth-store";
 import { OAUTH_RETURN_PATH_KEY } from "@/features/auth/lib/oauth";
+import { rehydrateUserScopedStores } from "@/features/cv-editor/stores/rehydrate-user-stores";
 
 function readReturnPath(): string {
   try {
@@ -56,6 +57,7 @@ export default function OAuthCallbackPage() {
     }
 
     login(user, token);
+    rehydrateUserScopedStores();
     toast.success("Signed in successfully");
     navigate(readReturnPath(), { replace: true });
   }, [login, navigate, params]);

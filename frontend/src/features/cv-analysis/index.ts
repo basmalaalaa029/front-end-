@@ -5,7 +5,8 @@ export {
   runAnalysisUploadAsync,
   saveAnalysisCache,
   loadAnalysisCache,
-  ANALYSIS_CACHE_KEY,
+  clearAnalysisCache,
+  migrateLegacyAnalysisCache,
   CV_AGENT_BASE,
   CvAnalysisApiError,
 } from "./lib/cv-analysis-api";

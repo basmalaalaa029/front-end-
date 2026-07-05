@@ -11,6 +11,7 @@ export type WorkflowCvContext = {
 };
 
 export type WorkflowJobPick = {
+  id?: string;
   title: string;
   company: string;
   targetRole: string;
@@ -29,6 +30,10 @@ export type JobNavigationState = {
 export type InterviewNavigationState = {
   autoStart?: boolean;
   targetRole?: string;
+  jobTitle?: string;
+  company?: string;
+  jobId?: string;
+  jobDescription?: string;
 };
 
 function readJson<T>(key: string): T | null {

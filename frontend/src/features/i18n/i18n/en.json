@@ -193,6 +193,12 @@
     "comingSoon": "This section will be available in a future update.",
     "pickSectionHint": "Choose a section from the list.",
     "skillHint": "Press Enter or , to add · Backspace to remove the last one",
+    "atsRewrite": {
+      "hint": "AI will optimize this for ATS after you stop typing",
+      "optimizing": "Optimizing for ATS…",
+      "improveNow": "Improve now",
+      "failed": "ATS optimization failed — try again"
+    },
     "addRole": "Add another role",
     "addEducation": "Add education",
     "addProject": "Add project",

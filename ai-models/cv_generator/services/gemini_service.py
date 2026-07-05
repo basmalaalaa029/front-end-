@@ -229,3 +229,152 @@ async def enhance_cv_with_gemini(
         logger.warning("Non-critical validation warnings (using enhanced CV): %s", issues)
 
     return {"status": "success", "data": merged.model_dump(), "cv": enhanced_partial}
+
+
+def _get_section_model(cfg: PipelineConfig, model_name: str) -> Any:
+    """Gemini model for section rewrite (separate system instruction)."""
+    from cv_generator.prompts.section_rewrite_prompt import SECTION_REWRITE_SYSTEM
+
+    api_key = (cfg.gemini_api_key or "").strip()
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is not configured")
+
+    try:
+        import google.generativeai as genai
+    except ImportError as exc:
+        raise RuntimeError(
+            "google-generativeai is not installed: pip install google-generativeai",
+        ) from exc
+
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel(
+        model_name=model_name,
+        system_instruction=SECTION_REWRITE_SYSTEM,
+        generation_config={
+            "temperature": cfg.gemini_temperature,
+            "max_output_tokens": min(cfg.gemini_max_output_tokens, 4096),
+            "response_mime_type": "application/json",
+        },
+    )
+
+
+def _build_section_user_message(section: str, payload: dict) -> str:
+    target_role = (payload.get("target_role") or "").strip() or "general professional role"
+
+    if section == "summary":
+        return f"""
+Rewrite this professional summary for ATS optimization.
+
+Target role: {target_role}
+
+Current summary:
+{payload.get("summary", "").strip()}
+
+Return JSON:
+{{"summary": "rewritten 2-3 line summary"}}
+""".strip()
+
+    if section == "experience":
+        bullets = payload.get("bullets") or []
+        return f"""
+Rewrite these experience bullets for ATS optimization.
+
+Target role: {target_role}
+Job title: {payload.get("job_title", "").strip()}
+Company: {payload.get("company", "").strip()}
+
+Current bullets:
+{json.dumps(bullets, indent=2)}
+
+Return JSON:
+{{"bullets": ["rewritten bullet 1", "rewritten bullet 2"]}}
+""".strip()
+
+    if section == "skills":
+        return f"""
+Optimize this skills list for ATS keyword matching.
+
+Target role: {target_role}
+Education context: {json.dumps(payload.get("education") or [], indent=2)}
+
+Current skills:
+{json.dumps(payload.get("skills") or [], indent=2)}
+
+Return JSON:
+{{
+  "skills": ["flat list of all skills"],
+  "skills_by_category": {{
+    "technical": ["..."],
+    "soft_skills": ["Communication", "Teamwork"]
+  }}
+}}
+""".strip()
+
+    raise ValueError(f"Unsupported section: {section}")
+
+
+async def rewrite_section_with_gemini(
+    section: str,
+    payload: dict,
+    cfg: Optional[PipelineConfig] = None,
+) -> dict:
+    """Rewrite a single CV section (summary, experience bullets, or skills)."""
+    cfg = cfg or PipelineConfig()
+    user_message = _build_section_user_message(section, payload)
+
+    last_error: Optional[Exception] = None
+    last_json_error: Optional[json.JSONDecodeError] = None
+    for model_name in _model_candidates(cfg):
+        for attempt in range(2):
+            try:
+                model = _get_section_model(cfg, model_name)
+                raw_text = _run_gemini(model, user_message)
+                parsed = _parse_json_response(raw_text)
+                if section == "summary":
+                    summary = str(parsed.get("summary", "")).strip()
+                    if not summary:
+                        raise ValueError("Empty summary in response")
+                    return {"status": "success", "section": section, "summary": summary}
+                if section == "experience":
+                    bullets = parsed.get("bullets")
+                    if not isinstance(bullets, list) or not bullets:
+                        raise ValueError("Invalid bullets in response")
+                    cleaned = [str(b).strip() for b in bullets if str(b).strip()]
+                    if not cleaned:
+                        raise ValueError("Empty bullets in response")
+                    return {"status": "success", "section": section, "bullets": cleaned}
+                if section == "skills":
+                    skills = parsed.get("skills")
+                    if not isinstance(skills, list) or not skills:
+                        raise ValueError("Invalid skills in response")
+                    flat = [str(s).strip() for s in skills if str(s).strip()]
+                    by_cat = parsed.get("skills_by_category")
+                    if not isinstance(by_cat, dict):
+                        by_cat = {}
+                    return {
+                        "status": "success",
+                        "section": section,
+                        "skills": flat,
+                        "skills_by_category": by_cat,
+                    }
+                raise ValueError(f"Unsupported section: {section}")
+
+            except json.JSONDecodeError as exc:
+                last_json_error = exc
+                logger.warning(
+                    "Section rewrite invalid JSON (model=%s attempt=%d): %s",
+                    model_name, attempt + 1, exc,
+                )
+                continue
+            except Exception as exc:
+                last_error = exc
+                if _is_model_not_found_error(exc):
+                    logger.warning("Gemini model %s unavailable: %s", model_name, exc)
+                    break
+                logger.error("Section rewrite error: %s", exc)
+                return {"status": "error", "message": str(exc)}
+
+    if last_json_error:
+        return {"status": "error", "message": "Rewrite failed — invalid JSON"}
+    message = str(last_error) if last_error else "No Gemini models available"
+    return {"status": "error", "message": message}

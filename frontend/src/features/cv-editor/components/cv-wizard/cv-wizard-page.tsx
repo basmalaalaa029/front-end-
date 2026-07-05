@@ -4,6 +4,7 @@ import { HubIcon } from "@/features/hub-shell";
 import { isTemplateId, type TemplateId } from "@/features/cv-editor/data/cv-templates";
 import { mergeWizardWithGeneratedCv } from "@/features/cv-editor/lib/generated-cv-to-cv-data";
 import { parseWizardNavigationState } from "@/features/cv-editor/lib/wizard-navigation";
+import { useCvDraftStore } from "@/features/cv-editor/stores";
 import type { CvData } from "@/features/cv-editor/data/cv-types";
 import { Step1BasicInfo } from "./step1-basic-info";
 import { Step2Generating } from "./step2-generating";
@@ -53,6 +54,9 @@ export default function CvWizardPage() {
     const mapped = mergeWizardWithGeneratedCv(basicInfo, cv);
     setGeneratedCv(cv);
     setCvData(mapped);
+    const store = useCvDraftStore.getState();
+    store.setData(mapped);
+    store.setLastTemplateId(tpl);
     setStep(3);
   };
 
@@ -96,7 +100,10 @@ export default function CvWizardPage() {
           cvData={cvData}
           templateId={tpl}
           onRestart={handleRestart}
-          onCvChange={setCvData}
+          onCvChange={(next) => {
+            setCvData(next);
+            useCvDraftStore.getState().setData(next);
+          }}
         />
       ) : null}
     </div>

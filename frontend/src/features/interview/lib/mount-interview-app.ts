@@ -1,5 +1,6 @@
 import { CV_AGENT_BASE } from "@/shared/lib/cv-agent-client";
 import { applyInterviewWorkflowPrefill } from "@/features/interview/lib/pipeline-interview-prefill";
+import type { InterviewPrefillOptions } from "@/features/interview/lib/pipeline-interview-prefill";
 
 const STYLE_ID = "career-interview-app-styles";
 const THEME_LINK_ID = "career-interview-app-theme";
@@ -69,7 +70,7 @@ function mountBodyHtml(doc: Document): string {
     .join("");
 }
 
-async function runScripts(doc: Document, host: HTMLElement, generation: number): Promise<void> {
+async function runScripts(doc: Document, generation: number): Promise<void> {
   for (const script of Array.from(doc.querySelectorAll("script"))) {
     if (generation !== mountGeneration) return;
 
@@ -87,9 +88,15 @@ async function runScripts(doc: Document, host: HTMLElement, generation: number):
     if (!code) continue;
     if (code.includes("embedded") && code.length < 220) continue;
 
-    const inline = document.createElement("script");
-    inline.textContent = code;
-    host.appendChild(inline);
+    // Run in an isolated scope so remounting does not redeclare globals (e.g. const STAGE).
+    try {
+      new Function(code)();
+    } catch (err) {
+      console.error("[Interview] failed to boot embedded script:", err);
+      throw err instanceof Error
+        ? err
+        : new Error("Interview script failed to load");
+    }
   }
 }
 
@@ -107,6 +114,7 @@ function installAuthBridge(token: string): void {
 export async function mountInterviewApp(
   host: HTMLElement,
   token: string,
+  prefillOptions?: InterviewPrefillOptions,
 ): Promise<void> {
   const generation = ++mountGeneration;
   host.classList.add("interview-app-host", "embedded");
@@ -132,11 +140,11 @@ export async function mountInterviewApp(
 
   if (generation !== mountGeneration) return;
 
-  await runScripts(doc, host, generation);
+  await runScripts(doc, generation);
 
   if (generation !== mountGeneration) return;
 
-  await applyInterviewWorkflowPrefill(host);
+  await applyInterviewWorkflowPrefill(host, prefillOptions);
 
   if (generation === mountGeneration) {
     host.dataset.mounted = "1";

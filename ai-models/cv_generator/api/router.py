@@ -7,12 +7,19 @@ import uuid
 from typing import TYPE_CHECKING, Callable
 
 from cv_agent.app.config import PipelineConfig, logger
-from cv_generator.api.schemas import GenerateRequest, GenerateResponse, ResultResponse, StatusResponse
+from cv_generator.api.schemas import (
+    GenerateRequest,
+    GenerateResponse,
+    ResultResponse,
+    RewriteSectionRequest,
+    RewriteSectionResponse,
+    StatusResponse,
+)
 from cv_generator.api.session import SessionStatus, get_session_manager
 from cv_generator.models.cv_schema import CVData, WizardStep1Request
 from cv_generator.pdf_export import export_pdf_bytes
 from cv_generator.services.cv_generator import build_template_result, run_enhancement_sync
-from cv_generator.services.gemini_service import generate_cv_from_info
+from cv_generator.services.gemini_service import generate_cv_from_info, rewrite_section_with_gemini
 from cv_generator.services.template_service import fill_template
 from cv_generator.validation import merge_enhancement
 from starlette.requests import Request
@@ -133,6 +140,53 @@ def register_cv_routes(
             )
         merged = merge_enhancement(cv_data, result.get("cv") or {})
         return {"status": "success", "cv": merged.to_generated_cv_json()}
+
+    @app.post("/rewrite-section", response_model=RewriteSectionResponse, tags=["cv"])
+    async def rewrite_section(req: RewriteSectionRequest, request: Request) -> RewriteSectionResponse:
+        await check_rate_limit(request)
+        if req.section == "summary":
+            if len(req.summary.strip()) < 10:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Summary must be at least 10 characters.",
+                )
+        elif req.section == "experience":
+            bullets = [b.strip() for b in req.bullets if b.strip()]
+            if not bullets:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="At least one experience bullet is required.",
+                )
+        elif req.section == "skills":
+            skills = [s.strip() for s in req.skills if s.strip()]
+            if not skills:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="At least one skill is required.",
+                )
+
+        req_cfg = PipelineConfig()
+        req_cfg.db_path = cfg.db_path
+        req_cfg.output_dir = cfg.output_dir
+        req_cfg.gemini_api_key = cfg.gemini_api_key
+        req_cfg.gemini_model = cfg.gemini_model
+        req_cfg.gemini_temperature = cfg.gemini_temperature
+        req_cfg.gemini_max_output_tokens = cfg.gemini_max_output_tokens
+
+        payload = req.model_dump()
+        result = await rewrite_section_with_gemini(req.section, payload, req_cfg)
+        if result.get("status") != "success":
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=result.get("message", "Section rewrite failed"),
+            )
+        return RewriteSectionResponse(
+            section=result["section"],
+            summary=result.get("summary"),
+            bullets=result.get("bullets"),
+            skills=result.get("skills"),
+            skills_by_category=result.get("skills_by_category"),
+        )
 
     @app.get("/status/{session_id}", response_model=StatusResponse, tags=["cv"])
     async def get_status(session_id: str) -> StatusResponse:

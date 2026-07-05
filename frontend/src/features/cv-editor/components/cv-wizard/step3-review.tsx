@@ -181,6 +181,7 @@ export function Step3Review({
             <CvSectionEditor
               active={activeSection}
               data={cvData}
+              targetRole={cvData.role}
               setData={(updater) => {
                 if (typeof updater === "function") {
                   onCvChange(updater(cvData));

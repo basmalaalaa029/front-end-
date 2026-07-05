@@ -1,5 +1,53 @@
 import mongoose from "mongoose";
 
+const wizardEducationSchema = new mongoose.Schema(
+  {
+    degree: { type: String, default: "" },
+    university: { type: String, default: "" },
+    year: { type: String, default: "" },
+    gpa: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
+const wizardExperienceSchema = new mongoose.Schema(
+  {
+    job_title: { type: String, default: "" },
+    company: { type: String, default: "" },
+    start_date: { type: String, default: "" },
+    end_date: { type: String, default: "" },
+    description: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
+const wizardProjectSchema = new mongoose.Schema(
+  {
+    name: { type: String, default: "" },
+    tech_used: { type: String, default: "" },
+    description: { type: String, default: "" },
+  },
+  { _id: false },
+);
+
+const wizardProfileSchema = new mongoose.Schema(
+  {
+    full_name: { type: String, default: "" },
+    target_job: { type: String, default: "" },
+    email: { type: String, default: "" },
+    phone: { type: String, default: "" },
+    location: { type: String, default: "" },
+    linkedin: { type: String, default: "" },
+    github: { type: String, default: "" },
+    education: { type: [wizardEducationSchema], default: [] },
+    experience: { type: [wizardExperienceSchema], default: [] },
+    has_experience: { type: Boolean, default: true },
+    projects: { type: [wizardProjectSchema], default: [] },
+    certifications: { type: [String], default: [] },
+  },
+  { _id: false },
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -15,6 +63,7 @@ const userSchema = new mongoose.Schema(
     skills: { type: [String], default: [] },
     linkedIn: { type: String, default: "" },
     portfolio: { type: String, default: "" },
+    wizardProfile: { type: wizardProfileSchema, default: null },
   },
   { timestamps: true }
 );

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { FileText, LayoutDashboard, Plus } from "lucide-react";
+import { LayoutDashboard, Plus } from "lucide-react";
 import { useAuthHydrated, useAuthStore } from "@/features/auth/stores/auth-store";
 import { useRequireAuthNavigate } from "@/features/auth/lib/use-require-auth-navigate";
+import { BrandLogo } from "@/shared/components/brand-logo";
 
 function userInitials(name: string | undefined): string {
   return (
@@ -23,10 +24,7 @@ export function LandingNav() {
   return (
     <nav className="cf-nav">
       <Link to="/" className="cf-nav-logo">
-        <span className="cf-logo-box" aria-hidden>
-          <FileText size={18} strokeWidth={2} color="#fff" />
-        </span>
-        CareerPilot
+        <BrandLogo variant="nav" />
       </Link>
       <div className="cf-nav-links">
         <button
