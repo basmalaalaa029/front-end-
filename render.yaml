@@ -54,7 +54,7 @@ services:
       - key: MODAL_ENDPOINT_URL
         sync: false
       - key: MODAL_PROFILE
-        value: basmala123-sudo
+        value: essamalaa0355
       - key: GEMINI_API_KEY
         sync: false
       - key: GROQ_API_KEY

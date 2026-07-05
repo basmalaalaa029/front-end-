@@ -8,7 +8,7 @@ import { LandingNav } from "@/features/landing/components/landing-nav";
 import { LandingFooter } from "@/features/landing/components/landing-footer";
 import { validateEmail, validateLoginPassword } from "@/features/auth/lib/validation";
 import { getAuthReturnTarget } from "@/features/auth/lib/use-require-auth-navigate";
-import { OAuthButtons } from "@/features/auth/components/oauth-buttons/oauth-buttons";
+
 
 type FieldErrors = { email?: string; password?: string };
 
@@ -133,8 +133,6 @@ export default function Login() {
                 Sign in to pick up where you left off — your drafts, applications, and interview practice
                 are saved.
               </p>
-
-              <OAuthButtons />
 
               <div className={`field${errors.email && touched.email ? " field--error" : ""}`}>
                 <label htmlFor="email">Email</label>

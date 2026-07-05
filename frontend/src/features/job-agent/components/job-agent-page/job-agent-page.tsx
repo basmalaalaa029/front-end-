@@ -65,6 +65,33 @@ function toCardJob(j: MatchedJob): JobCardData {
   };
 }
 
+// ─── job match cache (sessionStorage) ────────────────────────────────────────
+
+const JOB_CACHE_KEY = "hub:jobMatchCache";
+
+type JobMatchCache = {
+  sessionId: string;
+  jobs: JobCardData[] | null;
+};
+
+function saveJobCache(data: Partial<JobMatchCache> & { sessionId: string }): void {
+  try {
+    const prev = loadJobCache();
+    sessionStorage.setItem(JOB_CACHE_KEY, JSON.stringify({ ...prev, ...data }));
+  } catch { /* ignore */ }
+}
+
+function loadJobCache(): JobMatchCache | null {
+  try {
+    const raw = sessionStorage.getItem(JOB_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as JobMatchCache) : null;
+  } catch { return null; }
+}
+
+function clearJobCache(): void {
+  try { sessionStorage.removeItem(JOB_CACHE_KEY); } catch { /* ignore */ }
+}
+
 // ─── small shared components ─────────────────────────────────────────────────
 
 function SourceBadge({ source }: { source: string }) {
@@ -470,10 +497,15 @@ export default function JobAgentPage() {
   const navigate = useNavigate();
   const autoStartedRef = useRef(false);
 
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [jobs, setJobs] = useState<JobCardData[]>([]);
-  const [selected, setSelected] = useState<JobCardData | null>(null);
-  const [started, setStarted] = useState(false);
+  const initialCache = useRef(loadJobCache());
+
+  const [sessionId, setSessionId] = useState<string | null>(() => {
+    const c = initialCache.current;
+    return c?.jobs?.length ? null : (c?.sessionId ?? null);
+  });
+  const [jobs, setJobs] = useState<JobCardData[]>(() => initialCache.current?.jobs ?? []);
+  const [selected, setSelected] = useState<JobCardData | null>(() => initialCache.current?.jobs?.[0] ?? null);
+  const [started, setStarted] = useState(() => Boolean(initialCache.current));
   const [matchStage, setMatchStage] = useState<string | null>(null);
 
   const handleMatchStatus = useCallback((status: JobMatchStatus) => {
@@ -486,6 +518,9 @@ export default function JobAgentPage() {
 
   const handleStart = useCallback(
     async (file: File | null, targetRole: string) => {
+      clearJobCache();
+      setJobs([]);
+      setSelected(null);
       setStarted(true);
       try {
         let resp;
@@ -506,6 +541,7 @@ export default function JobAgentPage() {
         }
         setSessionId(resp.session_id);
         setMatchStage("parsing");
+        saveJobCache({ sessionId: resp.session_id, jobs: null });
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : "Job match failed";
         toast.error(msg);

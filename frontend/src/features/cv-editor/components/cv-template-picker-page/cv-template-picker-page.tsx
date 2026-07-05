@@ -26,20 +26,11 @@ export default function CvTemplatePickerPage() {
     navigate(`/dashboard/editor/create/${id}`);
   };
 
-  const scrollToTemplates = () => {
-    gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   return (
     <div className="template-gallery">
       <section className="template-gallery__hero">
         <h1 className="template-gallery__title">{t("cvEditor.gallery.title")}</h1>
         <p className="template-gallery__lead">{t("cvEditor.gallery.lead")}</p>
-        <div className="template-gallery__hero-actions">
-          <button type="button" className="btn btn-primary btn-lg" onClick={scrollToTemplates}>
-            {t("cvEditor.gallery.createResume")}
-          </button>
-        </div>
       </section>
 
       <div className="template-gallery__toolbar" ref={gridRef} id="templates">

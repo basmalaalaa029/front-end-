@@ -218,7 +218,7 @@ export default function Home() {
                 key={id}
                 type="button"
                 className={`cf-tmpl-card${meta.featured ? " featured" : ""}`}
-                onClick={() => requireAuth(`/dashboard/editor/create/${id}`)}
+                onClick={() => requireAuth("/dashboard/editor")}
               >
                 <div className="cf-tmpl-preview">
                   <TemplateLivePreview

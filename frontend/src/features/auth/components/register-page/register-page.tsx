@@ -13,7 +13,7 @@ import {
   validateRegisterPassword,
 } from "@/features/auth/lib/validation";
 import { getAuthReturnTarget } from "@/features/auth/lib/use-require-auth-navigate";
-import { OAuthButtons } from "@/features/auth/components/oauth-buttons/oauth-buttons";
+
 
 type RegisterField = "name" | "email" | "password" | "confirmPassword";
 type FieldErrors = Partial<Record<RegisterField, string>>;
@@ -177,8 +177,6 @@ export default function Register() {
               <p className="lead">
                 Start your journey with CareerPilot — one workspace for your CV, analysis, and jobs.
               </p>
-
-              <OAuthButtons dividerLabel="or sign up with email" />
 
               <div className={`field${errors.name && touched.name ? " field--error" : ""}`}>
                 <label htmlFor="reg-name">Full name</label>
