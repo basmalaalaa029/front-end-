@@ -1732,7 +1732,18 @@ def generate_final_eval(state):
             "growth_potential": parsed.get("growth_potential", "medium"),
             "mentorship_need": parsed.get("mentorship_need", ""),
             "strengths": llm_strengths,
-            "weak_areas": llm_weak,
+            "weak_areas": [
+                # Normalize to plain strings so any renderer (PDF, UI) works without type-checking
+                (
+                    w if isinstance(w, str)
+                    else "{area} — {fb}{score}".format(
+                        area=(w.get("area") or w.get("competency") or w.get("topic") or "General").replace("_", " "),
+                        fb=(w.get("feedback") or w.get("reason") or w.get("description") or w.get("issue") or ""),
+                        score=f' ({w["score"]}/10)' if w.get("score") is not None else "",
+                    )
+                )
+                for w in llm_weak if w
+            ],
             "bluff_assessment": parsed.get("bluff_assessment", bluff_incidents),
             "soft_skill_summary": parsed.get("soft_skill_summary", ""),
             "delivery_summary": parsed.get("delivery_summary", ""),
@@ -1780,7 +1791,14 @@ def generate_final_eval(state):
                 for s in profile.get("strengths", [])
                 if isinstance(s, str)
             ],
-            "weak_areas": actual_weak, "bluff_assessment": bluff_incidents,
+            "weak_areas": [
+                "{area} — {fb}{score}".format(
+                    area=(w.get("area") or "General").replace("_", " "),
+                    fb=(w.get("feedback") or w.get("reason") or ""),
+                    score=f' ({w["score"]}/10)' if w.get("score") is not None else "",
+                )
+                for w in actual_weak if w
+            ], "bluff_assessment": bluff_incidents,
             "soft_skill_summary": (
                 f"Communication averaged {comm}/10 across {len(scored_turns)} answered question(s)"
                 + (" — answers were well-structured, clear, and detailed." if comm >= 7
